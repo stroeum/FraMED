@@ -1,0 +1,5 @@
+Xing = Crossing
+Bnd  = Boundary
+Gnd  = Ground
+BC   = Boundary Conditions
+Rs	 = Return stroke

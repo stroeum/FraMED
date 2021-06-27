@@ -1,0 +1,5 @@
+1 = Normal exit;
+2 = Neutral atmosphere scaling impossible (out of range 0-150 km altitude);
+3 = Procedure for initiation of the discharge unknown;
+4 = Incorrect type of boundary conditions;
+5 = Cannot proceed to inclusion of all images in the ``Tin Can Model"; 
