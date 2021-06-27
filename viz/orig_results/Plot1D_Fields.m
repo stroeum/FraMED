@@ -5,7 +5,6 @@ clc
 
 %% Compile and Run C++ code
 % cd ..
-% !rm -rf results/*.dat results/*.avi results/*.mat
 % !make
 % !./main
 % cd results
@@ -119,4 +118,11 @@ box on
 grid on
 
 fprintf('Average field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
+
+% figure;
+% load('DiP.dat')
+% load('MonoP.dat')
+% load('MultiP.dat')
+% plot(phiNumBF*1e-6,z*1e-3,'k', DiP*1e-6,z*1e-3,'r--', MonoP*1e-6,z*1e-3,'g-.',MultiP*1e-6,z*1e-3,'b:')
+
 end

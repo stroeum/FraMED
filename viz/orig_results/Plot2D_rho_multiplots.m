@@ -1,4 +1,4 @@
-close all
+Try close all
 clear all
 clc
 choice = 0;

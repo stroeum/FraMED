@@ -47,7 +47,7 @@ ChargeLayers.Line.Style = '--';
 ChargeLayers.Line.Width = 1;
 ChargeLayers.FontSize   = 8;
 ChargeLayers.Pos.x      = 10;
-ChargeLayers.Circles    = 10;
+ChargeLayers.Circles    = 12;
 % ChargeLayers.Edge.Color = [[.75 .75 .75];[.75 .75 .75];[.75 .75 .75];[.75 .75 .75]];
 ChargeLayers.Edge.Color = ['none';'none';'none';'none'];
 ChargeLayers.Density    = 'on';
@@ -111,7 +111,7 @@ if strcmp(ChargeLayers.Density,'on')
     colormap([.25 0 1; 1 0 .25]);
     caxis([-max(max(abs(rhoAmb_xz))) max(max(abs(rhoAmb_xz)))])
     set(gca,'XTick',[min(x), (max(x)-min(x))*1/3, (max(x)-min(x))*2/3, max(x)])
-    set(gca,'YTick',[min(z), min(z)+(max(z)-min(z))*1/4, min(z)+(max(z)-min(z))*2/4, min(z)+(max(z)-min(z))*3/4, max(z)])
+    set(gca,'YTick',[0 3 6 9 12 15 18 21])
     % set(gca,'XTick',[min(x), (max(x)-min(x))*1/4, (max(x)-min(x))*1/2, (max(x)-min(x))*3/4, max(x)])
     % label.c = colorbar('Location','SouthOutside');
     % set(label.c,'PlotBoxAspectRatio',[1 .1 1])
@@ -194,7 +194,7 @@ axis([FocusArea.x(1) FocusArea.x(2) FocusArea.z(1) FocusArea.z(2)]);
 % title('\rho_{amb} (nC/m^3)','FontName',Font.Name,'Fontsize',Font.Size.Labels)
 set(gca,'Units','Points')
 P=get(gca,'Position');
-set(gca,'Position',[P(1) P(2) 72 198]) 
+set(gca,'Position',[P(1) P(2) 72*1.5 72*21/12]) 
 
 %% Subplot yz %%
 subplot(122);
@@ -208,11 +208,11 @@ set(gca,'LineWidth',.25)
 
 hold on
 if strcmp(ChargeLayers.Density,'on')
-    contour(x,z,rhoAmb_yz',ChargeLayers.Circles,'LineWidth',.1);
+    contour(y,z,rhoAmb_yz',ChargeLayers.Circles,'LineWidth',.1);
     colormap([0 0 1; 1 0 0]);
     caxis([-max(max(abs(rhoAmb_yz))) max(max(abs(rhoAmb_yz)))])
-    set(gca,'XTick',[min(x), (max(x)-min(x))*1/3, (max(x)-min(x))*2/3, max(x)])
-    set(gca,'YTick',[min(z), min(z)+(max(z)-min(z))*1/4, min(z)+(max(z)-min(z))*2/4, min(z)+(max(z)-min(z))*3/4, max(z)])
+    set(gca,'XTick',[min(y), (max(y)-min(y))*1/3, (max(y)-min(y))*2/3, max(y)])
+    set(gca,'YTick',[0 3 6 9 12 15 18 21])
     %     label.c = colorbar('Location','SouthOutside'); 
     %     set(label.c,'PlotBoxAspectRatio',[1 .1 1])
 end
@@ -291,7 +291,7 @@ axis([FocusArea.y(1) FocusArea.y(2) FocusArea.z(1) FocusArea.z(2)]);
 % title('\rho_{amb} (nC/m^3)','FontName',Font.Name,'Fontsize',Font.Size.Labels)
 set(gca,'Units','Points')
 P=get(gca,'Position');
-set(gca,'Position',[P(1) P(2) 72 198]) 
+set(gca,'Position',[P(1) P(2) 72*1.5 72*21/12]) 
 
 %% Ambient charge density and tree
 cd Figures

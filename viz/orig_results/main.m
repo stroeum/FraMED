@@ -5,7 +5,7 @@
 %% Clear Folder
 cd Figures
 !rm -rf *.eps
-cd ../results
+cd ..
 
 %% Charge Transfer
 Plot1D_ChannelCharge;
