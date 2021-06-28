@@ -3,17 +3,11 @@
 #ifndef SORSOLUTION_H
 #define SORSOLUTION_H
 
-#include <string>
-#include <time.h>
-#include "Matrix.h"
-#include "SimParameters.h"
-#include "Constants.h"
 #include "Sources.h"
 
 /**************************************************************************************/
 enum SourceType {ChargeDistribution, PotentialDistribution};
-													// Allowed type of sources to use
-													//  SOR solver
+													// Allowed type of sources to use SOR solver
 /**************************************************************************************/
 
 /**************************************************************************************/
@@ -27,16 +21,16 @@ private:
 	SourceType type;								// Type of source
 	double eErrDen;									// Normalisation of the error
 
-public:	
+public:
 	SorSolution(){};								// Default constructor
-	SorSolution(CMatrix3D&, double,int,StepsSizes,BoxSteps, Charge&, const CMatrix3D&);
+	SorSolution(CMatrix3D&, double,int,ResGrid,SizeGrid, Charge&, const CMatrix3D&);
 													// Constructor surcharge
-	SorSolution(CMatrix3D&, double,int,StepsSizes,BoxSteps, Potential&, CMatrix3D&);
+	SorSolution(CMatrix3D&, double,int,ResGrid,SizeGrid, Potential&, CMatrix3D&);
 													// Constructor surcharge
 	~SorSolution(){};								// Destructor
-	void init(CMatrix3D&, double,int,StepsSizes,BoxSteps, Charge&, const CMatrix3D&);
-	void init(CMatrix3D&, double,int,StepsSizes,BoxSteps, Potential&, CMatrix3D&);
-	void Solve(StepsSizes dd, BoxSteps NN, const CMatrix3D& UUUn, CMatrix3D& ppphi);
+	void init(CMatrix3D&, double,int,ResGrid,SizeGrid, Charge&, const CMatrix3D&);
+	void init(CMatrix3D&, double,int,ResGrid,SizeGrid, Potential&, CMatrix3D&);
+	void Solve(ResGrid dd, SizeGrid NN, const CMatrix3D& UUUn, CMatrix3D& ppphi);
 													// Solve solution using SOR method
 };
 /**************************************************************************************/

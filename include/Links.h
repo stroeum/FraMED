@@ -3,38 +3,14 @@
 #ifndef LINKS_H
 #define LINKS_H
 
-#include <iostream>
 #include <list>
-#include <time.h>
-
+#include "Point.h"
 #include "Matrix.h"
-#include "SimParameters.h"
+#include "ResGrid.h"
 using namespace std;
 
 /**************************************************************************************/
 enum LinkType {x, y, z, xy, yz, xz, xyz};
-/**************************************************************************************/
-
-/**************************************************************************************/
-/* Point																			  */
-/**************************************************************************************/
-class Point
-{
-public:
-	int i,j,k;										// Coordinates of the point
-	Point(int ii=0, int jj=0, int kk=0)
-	{
-		i = ii;
-		j = jj;
-		k = kk;
-	}												// Default constructor
-	bool operator==(const Point&) const;			// Compare two points, return true if identical
-	bool operator!=(const Point&) const;			// Compare two points, return false if identical
-	Point& operator=(const Point& Pt);				// Overloading affectation operator
-	void init(int ii, int jj, int kk) {i = ii; j = jj; k = kk;};
-													// Set point coordinates
-	~Point(){};										// Destructor
-};
 /**************************************************************************************/
 
 /**************************************************************************************/
@@ -49,35 +25,33 @@ public:
 													//  * planar in xy, yz or xz
 													//  * tridimensional in xyz
 	double	l;										// Length of the link
-	
-	
-	Point	start;									// Starting point declared public to
-													//		simplify access
-	Point	end;									// Ending point declared public to
-													//		simplify access
+
+
+	Point	start;									// Starting point declared public to simplify access
+	Point	end;									// Ending point declared public to simplify access
 	double	efield;									// Electric field along the link
 	double	deltaV;									// Potential drop along the channel
 	double	proba;									// Probability of establishment of the link (bounding)
-	
+
 	Link(){};										// default constructor
 	Link(const Link& LL);							// Constructor surcharge
-	Link(Point sstart, Point eend, double ddeltaV, StepsSizes dd, double pphiStart, double pphiEnd);
+	Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
 													// Constructor surcharge
-	Link(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, StepsSizes dd, double pphiStart, double pphiEnd);
-													// Constructor surcharge	
-	Link(Point sstart, Point eend, double ddeltaV, StepsSizes dd, CMatrix3D pphi);
-													// Constructor surcharge	
-	Link(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, StepsSizes dd, CMatrix3D pphi);
+	Link(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
 													// Constructor surcharge
-	
+	Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+													// Constructor surcharge
+	Link(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+													// Constructor surcharge
+
 	void init(const Link& LL);						// Define a link after its declaration
-	void init(Point sstart, Point eend, double ddeltaV, StepsSizes dd, double pphiStart, double pphiEnd);
+	void init(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
 													// Define a link after its declaration
-	void init(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, StepsSizes dd, double pphiStart, double pphiEnd);
+	void init(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
 													// Define a link after its declaration
-	void init(Point sstart, Point eend, double ddeltaV, StepsSizes dd, CMatrix3D pphi);	
+	void init(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi);
 													// Define a link after its declaration
-	void init(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, StepsSizes dd, CMatrix3D pphi);
+	void init(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, ResGrid dd, CMatrix3D pphi);
 													// Define a link after its declaration
 
 	void set_deltaV(double ddeltaV){deltaV = ddeltaV;};

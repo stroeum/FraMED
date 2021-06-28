@@ -2,72 +2,17 @@
 #include "Trees.h"
 
 /**************************************************************************************/
-/* List of links																	  */
-/**************************************************************************************/
-void write(ListLink& LL, string ss)
-{
-	char *fname = &ss[0];
-	
-	ListLink::iterator	it;
-	FILE *file;
-	char *relativePath;
-	
-	/**********************************************************************************/
-	/* Open the file to be writen.													  */
-	/**********************************************************************************/
-#ifdef __MWERKS__
-	char *flags  = "w";
-	int hierarchy;
-	char MacPath[256],*Mname,*Uname;
-	/* Parse the file name for the Macintosh */
-	hierarchy=0;
-	MacPath[0]=':';
-	Mname=MacPath+1;
-	for(Uname=fname;*Uname!='\0';Uname++){
-		if(*Uname=='/'){
-			*(Mname++) =':';
-			hierarchy++;
-		}else if(*Uname==':')
-			nrerror("Sorry, ':' is not allowed in filenames");
-		else
-			*(Mname++)=*Uname;
-	}
-	*Mname='\0';
-	if(hierarchy==0)
-		relativePath=MacPath+1;
-	else
-		relativePath=MacPath;
-#else /* UNIX */
-	relativePath=fname;
-#endif
-	/* printf("Opening file '%s'\n",relativePath); */
-	if(!(file=fopen(relativePath,"w")))
-		cout<<"cannot open file";
-	//nrerror("cannot open file"); 
-	
-	/**********************************************************************************/
-	/* Write datas.																	  */
-	/**********************************************************************************/
-	for (it=LL.begin() ; it!=LL.end() ; it++)
-	{
-		fprintf(file,"%d %d %d %d %d %d %f %f %f %f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
-	}
-	fclose(file);
-}
-/**************************************************************************************/
-
-/**************************************************************************************/
-bool AddNewLink(StepsSizes dd, BoxSteps NN, 
-				CMatrix3D& UUn, CMatrix3D& pphi, 
+bool Tree::AddNewLink(ResGrid dd, SizeGrid NN,
+				CMatrix3D& UUn, CMatrix3D& pphi,
 				CriticalFields& EEc, VoltageDrops& VVd,
-				const Point& IInitiationPoint, ListLink& EEstablishedLinks, 
-				bool iisBndXingPossible,  bool iisRsDeveloped, 
+				const Point& IInitiationPoint, ListLink& EEstablishedLinks,
+				bool iisBndXingPossible,  bool iisRsDeveloped,
 				bool iisLinkXingPossible, bool iisChannelEquipotential)
 {
 	clock_t		startTime = clock();
 	clock_t		endTime;
 	clock_t		runTime;
-	
+
 	Point				sstart;
 	Point				eend;
 	Link				CCandidate;
@@ -78,24 +23,39 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 	double				CCounterOfCandidates;
 	double				SSumProba;
 	double				rr;							// random number in [0,1]
+
+	double				linkAlt;					// Altitude (in meters) of endpoint of current link.
 	bool				flag = false;				// is given the value "true" if the
 													// candidate is crossing an establ-
 													// ished link. Assume no crossing
 													// link at start.
 	bool				isFlash3D = true;			// equal true for  a 3-D flash
-													// equal false for a 1-D flash used for testing purposes 
+													// equal false for a 1-D flash used for testing purposes
 	int cpt=0;
+
+	/* SAM variables. */
+	double overreach;								// The amound by which a candidate exceeds the electric field
+													//  propagation threshold.
+	double max_overreach(0);						// max_overreach = max(overreach), over all candidates.
 	ListLink::iterator it=EEstablishedLinks.begin();
-	
+
+	printf("..: Attempting to add new link...\n");
+
+	/* Seed the random number generator. */
+	srand(time(NULL) * 101);
+
 	sstart = IInitiationPoint;
-	
+
 	if(isFlash3D == true) do{
 	/**********************************************************************************/
 	/* At this point we are sure the starting point is available for linking		  */
 	/**********************************************************************************/
 	for(eend.i = sstart.i-1 ; eend.i <= sstart.i+1 ; eend.i++)
+	{
 		for(eend.j = sstart.j-1 ; eend.j <= sstart.j+1 ; eend.j++)
+		{
 			for(eend.k = sstart.k-1 ; eend.k <= sstart.k+1 ; eend.k++)
+			{
 				if( eend.i >= 0 && eend.i <= NN.x-1 &&
 					eend.j >= 0 && eend.j <= NN.y-1 &&
 					eend.k >= 0 && eend.k <= NN.z-1 )
@@ -116,43 +76,56 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 								flag = false;
 								if(CCandidate.type == x || CCandidate.type == y || CCandidate.type == z)
 									flag = false;
-							
+
 								if(CCandidate.type == xy)
 									for(it1 = EEstablishedLinks.begin() ; it1 != EEstablishedLinks.end() ; it1++)
-										if(CCandidate.start.k == (*it1).start.k && CCandidate.start.k == (*it1).end.k &&	
+										if(CCandidate.start.k == (*it1).start.k && CCandidate.start.k == (*it1).end.k &&
 										   (CCandidate.start.i + CCandidate.end.i) == ((*it1).start.i + (*it1).end.i) &&
 										   (CCandidate.start.j + CCandidate.end.j) == ((*it1).start.j + (*it1).end.j) )
 											flag = true;
-							
+
 								if(CCandidate.type == yz)
 									for(it1 = EEstablishedLinks.begin() ; it1 != EEstablishedLinks.end() ; it1++)
 										if(CCandidate.start.i == (*it1).start.i && CCandidate.start.i == (*it1).end.i &&
 										   (CCandidate.start.j + CCandidate.end.j) == ((*it1).start.j + (*it1).end.j) &&
 										   (CCandidate.start.k + CCandidate.end.k) == ((*it1).start.k + (*it1).end.k) )
-											flag = true;				
-							
+											flag = true;
+
 								if(CCandidate.type == xz)
 									for(it1 = EEstablishedLinks.begin() ; it1 != EEstablishedLinks.end() ; it1++)
 										if(CCandidate.start.j == (*it1).start.j && CCandidate.start.j == (*it1).end.j &&
 										   (CCandidate.start.i + CCandidate.end.i) == ((*it1).start.i + (*it1).end.i) &&
 										   (CCandidate.start.k +CCandidate. end.k) == ((*it1).start.k + (*it1).end.k) )
 											flag = true;
-							
+
 								if(CCandidate.type == xyz)
 									for(it1 = EEstablishedLinks.begin() ; it1 != EEstablishedLinks.end() ; it1++)
 										if( (CCandidate.start.i + CCandidate.end.i) == ((*it1).start.i + (*it1).end.i) &&
 											(CCandidate.start.j + CCandidate.end.j) == ((*it1).start.j + (*it1).end.j) &&
 											(CCandidate.start.k + CCandidate.end.k) == ((*it1).start.k + (*it1).end.k) )
 											flag = true;
-							
+
 								if(flag == false)
 								{
 								/**********************************************************************************/
 								/* At this stage CCandidate contains a viable candidate for further propagation	  */
 								/**********************************************************************************/
+
+								/* SAM procedure.  Used to determine the greatest amount by which a
+								 * candidate exceeds the propagation threshold.
+								 */
+									if(CCandidate.efield >= EEc.positive[CCandidate.end.k])
+										overreach = 100 * (CCandidate.efield - EEc.positive[CCandidate.end.k])/EEc.positive[CCandidate.end.k];
+									else
+										overreach = 100 * (CCandidate.efield - EEc.negative[CCandidate.end.k])/EEc.negative[CCandidate.end.k];
+
+									if(overreach > max_overreach)
+										max_overreach = overreach;
+
+
 									// This sets the voltage drop wrt. the initiation point //
 									if(CCandidate.start == IInitiationPoint)
-										CCandidate.deltaV = 
+										CCandidate.deltaV =
 											(CCandidate.efield>=0)*VVd.positive[CCandidate.end.k]*CCandidate.l+
 											(CCandidate.efield<=0)*VVd.negative[CCandidate.end.k]*CCandidate.l;
 									else
@@ -161,7 +134,7 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 											(CCandidate.efield<=0)*VVd.negative[CCandidate.end.k]*CCandidate.l;
 							/*		// This section has only been designed for testing purposes //
 									if(CCandidate.start == IInitiationPoint)
-										CCandidate.deltaV = 
+										CCandidate.deltaV =
 										(CCandidate.efield>=0)*1+
 										(CCandidate.efield<=0)*-1;
 									else
@@ -169,18 +142,21 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 										(CCandidate.efield>=0)*1+
 										(CCandidate.efield<=0)*-1;
 							*/		// Add the Link to the list of candidates //
-									LListOfCandidates.push_back(CCandidate); 
+									LListOfCandidates.push_back(CCandidate);
 									// Increment counter of candidates //
 									cpt++;
 								}
 							}
-							else	
+							else
 							{
-								LListOfCandidates.push_back(CCandidate); 
+								LListOfCandidates.push_back(CCandidate);
 								cpt++;
 							}
 						}
-					};
+					}
+				}
+			}
+		}
 
 		if(sstart==IInitiationPoint)
 		{
@@ -193,7 +169,7 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 			sstart = it->end;
 		}
 	}while(it!=EEstablishedLinks.end());
-	
+
 	if(isFlash3D == false) do{
 	/**********************************************************************************/
 	/* At this point we are sure the starting point is available for linking		  */
@@ -224,7 +200,7 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 								/**********************************************************************************/
 									// This sets the voltage drop wrt. the initiation point //
 									if(CCandidate.start == IInitiationPoint)
-										CCandidate.deltaV = 
+										CCandidate.deltaV =
 											(CCandidate.efield>=0)*VVd.positive[CCandidate.end.k]*CCandidate.l+
 											(CCandidate.efield<=0)*VVd.negative[CCandidate.end.k]*CCandidate.l;
 									else
@@ -232,14 +208,14 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 											(CCandidate.efield>=0)*VVd.positive[CCandidate.end.k]*CCandidate.l+
 											(CCandidate.efield<=0)*VVd.negative[CCandidate.end.k]*CCandidate.l;
 									// Add the Link to the list of candidates //
-									LListOfCandidates.push_back(CCandidate); 
+									LListOfCandidates.push_back(CCandidate);
 									// Increment counter of candidates //
 									cpt++;
 								}
 							}
-							else	
+							else
 							{
-								LListOfCandidates.push_back(CCandidate); 
+								LListOfCandidates.push_back(CCandidate);
 								cpt++;
 							}
 						}
@@ -256,20 +232,35 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 			sstart = it->end;
 		}
 	}while(it!=EEstablishedLinks.end());
-	
+
+	if(max_overreach > ANOMALOUS_OVERREACH)
+	{
+		printf("AA: Anomalous maximum candidate overreach encountered.\n");
+		Var::pSum = IO::openFile("summary.txt", "a");
+		fprintf(Var::pSum, "AA: Anomalous maximum candidate overreach of %lf%% encountered.\n", max_overreach);
+		fprintf(Var::pSum, "ii:\t Number of links added so far: %d.\n", Var::NumLinks);
+		fclose(Var::pSum);
+
+	}
+
 	/**********************************************************************************/
-	/* Derive probability of probagation for each candidate.						  */
-	/**********************************************************************************/		
+	/* Derive probability of propagation for each candidate.						  */
+	/**********************************************************************************/
 	SSumProba = 0;
 	CCounterOfCandidates = 0;
 	for (it1 = LListOfCandidates.begin() ; it1 != LListOfCandidates.end() ; it1++)
 	{
 		if( (*it1).efield >= EEc.positive[(*it1).end.k] )
-			(*it1).proba = pow(fabs((*it1).efield -EEc.positive[(*it1).end.k]),PMC.eta);	
+			(*it1).proba = pow(fabs((*it1).efield -EEc.positive[(*it1).end.k]),eta);
 		else if ( (*it1).efield <= EEc.negative[(*it1).end.k] )
-			(*it1).proba = pow(fabs((*it1).efield -EEc.negative[(*it1).end.k]),PMC.eta);
+			(*it1).proba = pow(fabs((*it1).efield -EEc.negative[(*it1).end.k]),eta);
 		else{
-			cout<<"!!! This link should not exist. There is an error in the code !!!\n";
+			cout<<"ee:\t This link should not exist. There is an error in the code!!!\n";
+			Var::pSum = IO::openFile("summary.txt", "a");
+			fprintf(Var::pSum, "ee:\t Bad link encountered.\n");
+			fprintf(Var::pSum, "ii:\t\t Number of links added so far: %d.\n", Var::NumLinks);
+			fprintf(Var::pSum, "xx:\t Program exiting after fatal error.\n");
+			fclose(Var::pSum);
 			exit(1);
 		}
 		SSumProba	+= (*it1).proba;
@@ -280,14 +271,42 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 	{
 		endTime = clock();
 		runTime = endTime-startTime;
-		cout<<"------> No more candidate"<<endl;
-		cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+		printf("ii:\t No more candidates.\n");
+		cout<<"ii:\t Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<" s."<<endl;
+		Var::pSum = IO::openFile("summary.txt", "a");
+		fprintf(Var::pSum, "ii:\t Simulation has run out of candidates.\n");
+		fprintf(Var::pSum, "ii:\t\t Number of links added so far: %d.\n", Var::NumLinks);
+
+		if(Var::maxAlt > ANOMALOUS_HEIGHT)
+		{
+			Var::curType = JET;
+			printf("ii:\t Discharge exceeded anomalous height of %lf km.\n", ANOMALOUS_HEIGHT/1e3);
+			printf("..:\t\t Classifying discharge as a jet.\n");
+			fprintf(Var::pSum, "ii:\t Discharge exceeded anomalous height of %lf km.\n", ANOMALOUS_HEIGHT/1e3);
+			fprintf(Var::pSum, "..:\t\t Classifying discharge as a jet.\n");
+		}
+		else
+		{
+			Var::curType = INTRA_CLOUD;
+			printf("ii:\t Classifying discharge as intracloud.\n");
+			fprintf(Var::pSum, "ii:\t Classifying discharge as intracloud.\n");
+		}
+		fclose(Var::pSum);
+
 		return false;
 	}
-	cout<<"------> Number of candidates      : "<<CCounterOfCandidates<<endl;
-		
+
+	/* Keep track of the number of candidates and maximum candidate overreach.
+	 * Keeping track of the number of candidates was the motivation to define the
+	 * 'ListInt' data type.
+	 */
+	cout<<"ii:\t Number of candidates: "<<CCounterOfCandidates<<"."<<endl;
+	Var::NumberOfCandidates.push_back(CCounterOfCandidates);
+	printf("ii:\t Maximum candidate overreach: %lf%%.\n", max_overreach);
+	Var::MaximumCandidateOverreach.push_back(max_overreach);
+
 	/**********************************************************************************/
-	/* Convert probabilite to a	segment of length between 0 and 1, using the proba as */
+	/* Convert probability to a	segment of length between 0 and 1, using the proba as */
 	/* defined till now would increase the difficulty to choose a weightered by the   */
 	/* probas. Hence we convert the proba to ease the choice of a link. Link i is	  */
 	/* given the proba sum(p(j), j=1..i), consequently each proba is still between 0  */
@@ -304,13 +323,13 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		(*it2).proba /= SSumProba;
 		(*it2).proba += (*it1).proba;
 	}
-	
+
 	rr = random()/(double)RAND_MAX;
 	it1 = LListOfCandidates.begin();
 	while(it1 != LListOfCandidates.end() && (*it1).proba <= rr) {it1++;};
 	CChosenLink = *it1;
 	LListOfCandidates.clear();
-		
+
 	/**********************************************************************************/
 	/* The chosen link is always the one propagating in the highest electric field,   */
 	/* (i.e., the one with the highest propability to propagate). This way, the		  */
@@ -321,19 +340,19 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		it1 = LListOfCandidates.begin();
 		for(it1 = LListOfCandidates.begin() ; it1 != LListOfCandidates.end() ; it1++)
 		{
-			if( it1->proba >= rr) 
+			if( it1->proba >= rr)
 			{
 				rr			= it1->proba;
 				CChosenLink = *it1;
 			};
 		}
 		LListOfCandidates.clear();
-*/		
+*/
 	/**********************************************************************************/
 	/* We finally fix the link in Un and add it to the list of established links and  */
 	/* update phi.																	  */
 	/**********************************************************************************/
-	UUn[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] = 
+	UUn[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] =
 		UUn[CChosenLink.start.i][CChosenLink.start.j][CChosenLink.start.k];
 	if (iisChannelEquipotential == true)
 	{
@@ -341,18 +360,18 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		// afterwards to account for potential drop and overall neutrality in command
 		// pphi0 = fMinSearch(pphi0, QQchannelPlus, VVmin,VVmax , eepsilon,MMaxStep, pphi_cha,pphi_amb ,UUn, IInitiationPoint,EEstablishedLinks, dd,NN);
 		// in main.cpp
-//		pphi[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] = 
+//		pphi[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] =
 //		pphi[CChosenLink.start.i][CChosenLink.start.j][CChosenLink.start.k];
 	}
 	else if (iisChannelEquipotential == false)
 	{
-		pphi[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] = 
+		pphi[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k] =
 		pphi[CChosenLink.start.i][CChosenLink.start.j][CChosenLink.start.k] -
 		( (CChosenLink.efield<0) * (EEc.negative[CChosenLink.end.k]) +
 		  (CChosenLink.efield>0) * (EEc.positive[CChosenLink.end.k]) ) * CChosenLink.l;
 	}
 	EEstablishedLinks.push_back(CChosenLink);
-	
+
 	/**********************************************************************************/
 	/* Send authorization of propagation if a link has been established and that it   */
 	/* does not reach the upper/lower boundary.										  */
@@ -365,134 +384,124 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 	/**********************************************************************************/
 	/* Check boundary crossing														  */
 	/**********************************************************************************/
-	if( CChosenLink.end.i == 0 || CChosenLink.end.i == NN.x-1 ||
-		CChosenLink.end.j == 0 || CChosenLink.end.j == NN.y-1 ||
-		CChosenLink.end.k == 0 || CChosenLink.end.k == NN.z-1)
+	if(NN.IsOnBoundary(CChosenLink.end))
 		if(iisBndXingPossible == false)
 		{
-			cout<<"Channel reached a boundary"<<endl;
-			cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+			printf("ii:\t Channel reached a boundary at [%d, %d, %d].\n", CChosenLink.end.i, CChosenLink.end.j, CChosenLink.end.k);
+			cout<<"ii:\t Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<" s"<<endl;
+
+			Var::pSum = IO::openFile("summary.txt", "a");
+			fprintf(Var::pSum, "ii:\t Channel reached a boundary at [%d, %d, %d].\n", CChosenLink.end.i, CChosenLink.end.j, CChosenLink.end.k);
+			fprintf(Var::pSum, "ii:\t\t Number of links added so far: %d.\n", Var::NumLinks);
+
+			if(CChosenLink.end.k == (Var::N.z - 1))
+			{
+				Var::curType = JET;
+				printf("ii:\t Discharge reached top of domain.\n");
+				printf("..:\t\t Classifying discharge as a jet.\n");
+				fprintf(Var::pSum, "ii:\t Discharge reached top of domain.\n");
+				fprintf(Var::pSum, "..:\t\t Classifying discharge as a jet.\n");
+			}
+			else if(CChosenLink.end.k == 0)
+			{
+				Var::curType = CLOUD_TO_GROUND;
+				printf("ii:\t Discharge reached bottom of domain.\n");
+				printf("..:\t\t Classifying discharge as a cloud-to-ground strike.\n");
+				fprintf(Var::pSum, "ii:\t Discharge reached bottom of domain.\n");
+				fprintf(Var::pSum, "..:\t\t Classifying discharge as a cloud-to-ground strike.\n");
+			}
+			else
+			{
+				Var::curType = HORIZONTAL;
+				printf("ii:\t Discharge reached a side of the domain.\n");
+				printf(".,:\t\t Classifying discharge as \"horizontal\".\n");
+				fprintf(Var::pSum, "ii:\t Discharge reached a side of the domain.\n");
+				fprintf(Var::pSum, ".,:\t\t Classifying discharge as \"horizontal\".\n");
+			}
+
+			fclose(Var::pSum);
+
 			return false;
 		};
-	
+
 	/**********************************************************************************/
 	/* Allow/Prevent Return Stroke DeVeloPmenT										  */
 	/**********************************************************************************/
-	cout<<"------> Link termination position : ["<<CChosenLink.end.i*dd.x*1e-3<<" "<<CChosenLink.end.j*dd.y*1e-3<<" "<<CChosenLink.end.k*dd.z*1e-3<<"]"<<endl;
+	linkAlt = CChosenLink.end.GetZ();
+	printf("ii:\t Link termination position: [%3.1f %3.1f %3.1f] km\n",(CChosenLink.end.i*Var::d.x)/1e3, (CChosenLink.end.j*Var::d.y)/1e3,(CChosenLink.end.k*Var::d.z+Var::z_gnd)/1e3);
+	if(linkAlt > Var::maxAlt)
+		Var::maxAlt = linkAlt;
+
+	if(linkAlt > ANOMALOUS_HEIGHT)
+	{
+		printf("AA:\t\t Altitude of link indicates possibility of jet development.\n");
+		Var::pSum = IO::openFile("summary.txt", "a");
+		fprintf(Var::pSum, "AA:\t\t Altitude of link indicates possibility of jet development.\n");
+		fclose(Var::pSum);
+	}
+
 	if(CChosenLink.end.k == 0 || CChosenLink.end.k == NN.z-1)
-	{	
+	{
 		if(iisRsDeveloped == true)
-		{			
-			for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) 
+		{
+			for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++)
 			{
 				// Turn channel potential to 0 //
-				for(int kk=0 ; kk<NN.z ; kk++)	
+				for(int kk=0 ; kk<NN.z ; kk++)
 					if(UUn[ii][jj][kk] == UUn[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k])
 						pphi[ii][jj][kk] = 0;
 				// Prevent changes in ground/ionospheric potential //
 				UUn[ii][jj][CChosenLink.end.k] = UUn[CChosenLink.end.i][CChosenLink.end.j][CChosenLink.end.k];
 				pphi[ii][jj][CChosenLink.end.k] = 0;
 			};
-			cout<<"! Return Stroke Developped !\n";
+			cout<<"ii:\t Return Stroke Developed!\n";
+			Var::pSum = IO::openFile("summary.txt", "a");
+			fprintf(Var::pSum, "ii:\t Return stroke developed!\n");
+			fprintf(Var::pSum, "ii:\t\t Number of links added so far: %d.\n", Var::NumLinks);
+			fclose(Var::pSum);
 		};
 	}
-	
-	cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+
+	cout<<"ii:\t Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<" s."<<endl;
 	return true;
 }
 
 /**************************************************************************************/
 /* Adjust potential in the channel													  */
 /**************************************************************************************/
-double Qchannel(const double VV,
-				const double eepsilon, const int MMaxStep,
-				CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
-				const Point& IInitiationPoint, ListLink& EEstablishedLinks,
-				StepsSizes dd, const BoxSteps& NN)
+double Tree::Qchannel(const double VV,
+					  const double eepsilon, const int MMaxStep,
+					  CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
+					  const Point& IInitiationPoint, ListLink& EEstablishedLinks,
+					  ResGrid dd, const SizeGrid& NN)
 {
-	bool phiStorage = false;
 	ListLink::iterator it;
-	
-	if(phiStorage==false)
-	{
-		Potential	P1;//(pphi_cha,UUn);
-		SorSolution	SSOR;//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
 
-		pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= VV - pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
-		for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
-			pphi_cha[it->end.i][it->end.j][it->end.k]	= VV - it->deltaV - pphi_amb[it->end.i][it->end.j][it->end.k];
-		
-		P1.init(pphi_cha,UUn);
-		SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		SSOR.Solve(dd,NN,UUn,pphi_cha);
-		
-		double QQ = ChannelCharge(Globalrho(pphi_cha,dd,NN),UUn,dd,NN);
-		// double QQ = TotalCharge(Globalrho(pphi_cha,dd,NN),dd,NN);
-		// cout<<"QQ tot = "<<QQ<<endl;
-		return QQ;
-	}
-	
-	else if(phiStorage==true)
-	{
-		CMatrix1D	pphi_Ca(NN.z);
-		CMatrix1D	pphi_Cb(NN.z);
-		CMatrix2D	pphi_C2D(NN.y,NN.z);
-		CMatrix2D	pphi_A2D(NN.y,NN.z);
-		CMatrix1D	pphi_A(NN.z);
-		Potential	P1;//(pphi_cha,UUn);
-		SorSolution	SSOR;//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		
-		pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= VV - pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
-		for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
-			pphi_cha[it->end.i][it->end.j][it->end.k]	= VV - it->deltaV - pphi_amb[it->end.i][it->end.j][it->end.k];
-		
-/*		
-		for(int ii= 1 ; ii<NN.x-1 ; ii++) for(int jj=1 ; jj<NN.y-1 ; jj++) for(int kk=1 ; kk<NN.z-1 ; kk++)
-		{	
-			if(UUn[ii][jj][kk]!=0) 
-			{pphi_cha[ii][jj][kk]		= VV - pphi_amb[ii][jj][kk];}
-		};
-*/		
-		for(int kk=0; kk<NN.z ; kk++){
-			pphi_Ca[kk]	= pphi_cha((NN.x-1)/2,(NN.y-1)/2,kk);
-			pphi_A[kk]	= pphi_amb((NN.x-1)/2,(NN.y-1)/2,kk);
-		}
-		
-		P1.init(pphi_cha,UUn);
-		SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		SSOR.Solve(dd,NN,UUn,pphi_cha);
-		
-		for(int kk=0; kk<NN.z ; kk++){
-			pphi_Cb[kk]	= pphi_cha((NN.x-1)/2,(NN.y-1)/2,kk);
-			for(int jj=0 ; jj<NN.y-1 ; jj++)
-			{
-				pphi_C2D[jj][kk] = pphi_cha((NN.x-1)/2,jj,kk);
-				pphi_A2D[jj][kk] = pphi_amb((NN.x-1)/2,jj,kk);
-			}
-		}	
-		pphi_Ca.fwrite("results/phiC1Da.dat");
-		pphi_Cb.fwrite("results/phiC1Db.dat");
-		pphi_A.fwrite("results/phiA1D.dat");
-		pphi_C2D.fwrite("results/phiC2D.dat");
-		pphi_A2D.fwrite("results/phiA2D.dat");
-		
-		double QQ = ChannelCharge(Globalrho(pphi_cha,dd,NN),UUn,dd,NN);
-//		double QQ = TotalCharge(Globalrho(pphi_cha,dd,NN), dd,NN);
-		return QQ;
-	}
-	return 0;
+	Potential	P1;//(pphi_cha,UUn);
+	SorSolution	SSOR;//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
+
+	pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= VV - pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
+	for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
+		pphi_cha[it->end.i][it->end.j][it->end.k]	= VV - it->deltaV - pphi_amb[it->end.i][it->end.j][it->end.k];
+
+	P1.init(pphi_cha,UUn);
+	SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
+	SSOR.Solve(dd,NN,UUn,pphi_cha);
+
+	double QQ = foo::ChannelCharge(foo::Globalrho(pphi_cha,dd,NN),UUn,dd,NN);
+	return QQ;
 }
 /**************************************************************************************/
 
 /**************************************************************************************/
 /* Derive Channel Potential to minimize total Charge - Dichotomy vs. Nelder-Mead	  */
 /**************************************************************************************/
-double fMinSearch(const double VV, const double QQchannelPlus,
-				  const double VVmin, const double VVmax, 
-				  const double eepsilon, const int MMaxStep,
-				  CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
-				  const Point& IInitiationPoint, ListLink& EEstablishedLinks,
-				  StepsSizes dd, const BoxSteps& NN)
+double Tree::fMinSearch(const double VV, const double QQchannelPlus,
+						const double VVmin, const double VVmax,
+						const double eepsilon, const int MMaxStep,
+						CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
+						const Point& IInitiationPoint, ListLink& EEstablishedLinks,
+						ResGrid dd, const SizeGrid& NN)
 {
 	double choice = 0;
 	if (choice == 0) // Bisection Method //
@@ -509,13 +518,13 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 
 		if(CCl > CCr)
 		{
-			SwitchValues(CCl,CCr);
-			SwitchValues(QQl,QQr);
+			Swap::DBL(CCl,CCr);
+			Swap::DBL(QQl,QQr);
 		}
-		
+
 //		while(fabs(2*(CCr-CCl)/(CCr+CCl))>eepsilon)
 		while(fabs(QQav/QQchannelPlus)>eepsilon && fabs(2*(CCr-CCl)/(CCr+CCl))>eepsilon)
-		{			
+		{
 			kk++;
 			CCav = (CCr+CCl)/2;
 			QQav = Qchannel( CCav, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN);
@@ -546,8 +555,8 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 //		cout<<"QQcha_cha = "<<QQcha_cha<<endl;
 //		cout<<"QQcha_tot = "<<QQcha_tot<<endl;
 //		cout<<"Qdiff     = " << QQcha_tot-QQcha_cha<<endl;
-		
-		cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
+
+		cout<<"ii:\t Run time for Qminimization: "<<(double)runTime/CLOCKS_PER_SEC<<"s\n";
 //		cout<<"Vc = "<<setw(12)<<CC<<" ; Qc/Qc+ = "<<setw(12)<<QQav<<" ; Nb of iterations = "<<kk<<endl;
 		return CC;
 	}
@@ -564,7 +573,7 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 		double	xc(0)		, fc(0);
 		double	xcc(0)		, fcc(0);
 		int		kk = 0;
-		
+
 
 		while(fabs(2*(x1-x2)/(x1+x2))>eepsilon /*&& kk<25*/)
 //		while(fabs(Qchannel((x1+x2)/2, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN))>=1e-6)
@@ -575,7 +584,7 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 			else if	(kk != 1 && x1 == xc )	{f1 = fc ;}
 			else if	(kk != 1 && x1 == xcc)	{f1 = fcc;}
 			else							{f1 = fabs(Qchannel(x1, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN));}
-			
+
 			if		(kk != 1 && x2 == xr )	{f2 = fr ;}
 			else if	(kk != 1 && x2 == xe )	{f2 = fe ;}
 			else if	(kk != 1 && x2 == xc )	{f2 = fc ;}
@@ -584,15 +593,15 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 			// Step 1: Order //
 			if(f1 > f2)
 			{
-				SwitchValues(x1,x2);
-				SwitchValues(f1,f2);
+				Swap::DBL(x1,x2);
+				Swap::DBL(f1,f2);
 			}
 			// Step 2: Reflect //
 			xr = 2.*x1-x2;
 			if		(kk != 1 && xr == x1 )	{fr = f1 ;}
 			else if	(kk != 1 && xr == x2 )	{fr = f2 ;}
-			else if	(kk != 1 && xr == xe )	{fr = fe ;}		
-			else if	(kk != 1 && xr == xc )	{fr = fc ;}		
+			else if	(kk != 1 && xr == xe )	{fr = fe ;}
+			else if	(kk != 1 && xr == xc )	{fr = fc ;}
 			else if	(kk != 1 && xr == xcc)	{fr = fcc;}
 			else							{fr = fabs(Qchannel(xr, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN));}
 			// Step 3: Expand //
@@ -601,11 +610,11 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 				xe = 3.*x1-2.*x2;
 				if		(kk != 1 && xe == x1 )	{fe = f1 ;}
 				else if	(kk != 1 && xe == x2 )	{fe = f2 ;}
-				else if	(kk != 1 && xe == xr )	{fe = fr ;}		
-				else if	(kk != 1 && xe == xc )	{fe = fc ;}		
+				else if	(kk != 1 && xe == xr )	{fe = fr ;}
+				else if	(kk != 1 && xe == xc )	{fe = fc ;}
 				else if	(kk != 1 && xe == xcc)	{fe = fcc;}
 				else							{fe = fabs(Qchannel(xe, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN));}
-				
+
 				if(fe<fr) {x2 = xe;}
 				else {x2 = xr;} // (fe>=fr)
 			}
@@ -618,11 +627,11 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 					xc = 3/2.*x1-1/2.*x2;
 					if		(kk != 1 && xc == x1 )	{fc = f1 ;}
 					else if	(kk != 1 && xc == x2 )	{fc = f2 ;}
-					else if	(kk != 1 && xc == xr )	{fc = fr ;}		
-					else if	(kk != 1 && xc == xe )	{fc = fe ;}		
+					else if	(kk != 1 && xc == xr )	{fc = fr ;}
+					else if	(kk != 1 && xc == xe )	{fc = fe ;}
 					else if	(kk != 1 && xc == xcc)	{fc = fcc;}
 					else							{fc = fabs(Qchannel(xc, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN));}
-					
+
 					if(fc<=fr) {x2=xc;}
 					// Step 5: Shrink Step //
 					else {x2 = x1 + 1/2.*(x2-x1);}
@@ -633,11 +642,11 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 					xcc = 1/2.*x1+1/2.*x2;
 					if		(kk != 1 && xcc == x1)	{fcc = f1 ;}
 					else if	(kk != 1 && xcc == x2)	{fcc = f2 ;}
-					else if	(kk != 1 && xcc == xr)	{fcc = fr ;}		
-					else if	(kk != 1 && xcc == xe)	{fcc = fe ;}		
+					else if	(kk != 1 && xcc == xr)	{fcc = fr ;}
+					else if	(kk != 1 && xcc == xe)	{fcc = fe ;}
 					else if	(kk != 1 && xcc == xc)	{fcc = fc;}
 					else							{fcc = fabs(Qchannel(xcc, eepsilon,MMaxStep, pphi_cha,pphi_amb,UUn, IInitiationPoint,EEstablishedLinks, dd,NN));}
-					
+
 					if(fcc<f2) {x2=xcc;}
 					// Step 5: Shrink Step //
 					else {x2 = x1 + 1/2*(x2-x1);}
@@ -649,8 +658,8 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 //		cout<<"Qt = "<<setw(12)<<TotalCharge(Globalrho(pphi_cha+pphi_amb,dd,NN), dd,NN)<<endl;
 		clock_t endTime = clock();
 		clock_t runTime = endTime - startTime;
-		
-		cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
+
+		cout<<"ii:\t Run time for Qminimization: "<<(double)runTime/CLOCKS_PER_SEC<<" s\n";
 		cout<<"Vc = "<<setw(12)<<x1<<" ; Qc = "<<setw(12)<<f1<<" ; Nb of iterations = "<<kk<<endl;
 		return CC=x1;
 	}
@@ -658,73 +667,21 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 /**************************************************************************************/
 
 /**************************************************************************************/
-double EqualizeAtGroundPotential(const double eepsilon, const int MMaxStep,
-								 CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
-								 const Point& IInitiationPoint, ListLink& EEstablishedLinks,
-								 StepsSizes dd, const BoxSteps& NN)
+double Tree::EqualizeAtGroundPotential(const double eepsilon, const int MMaxStep,
+									   CMatrix3D& pphi_cha, CMatrix3D& pphi_amb, CMatrix3D& UUn,
+									   const Point& IInitiationPoint, ListLink& EEstablishedLinks,
+									   ResGrid dd, const SizeGrid& NN)
 {
-	bool phiStorage = false;
-	ListLink::iterator it;
-	
-	if(phiStorage==false)
-	{
-		Potential	P1;//(pphi_cha,UUn);
-		SorSolution	SSOR;//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		
-		pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= -pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
-		for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
-			pphi_cha[it->end.i][it->end.j][it->end.k]	= -pphi_amb[it->end.i][it->end.j][it->end.k];	
-		P1.init(pphi_cha,UUn);
-		SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		SSOR.Solve(dd,NN,UUn,pphi_cha);
-		return 0; // Total potential of the channel phi = phi_amb + phi_cha = phi_amb + (-phi_amb) = 0;
-	}
-	
-	else if(phiStorage==true)
-	{
-		CMatrix1D	pphi_Ca(NN.z);
-		CMatrix1D	pphi_Cb(NN.z);
-		CMatrix2D	pphi_C2D(NN.y,NN.z);
-		CMatrix2D	pphi_A2D(NN.y,NN.z);
-		CMatrix1D	pphi_A(NN.z);
-		Potential	P1;//(pphi_cha,UUn);
-		SorSolution	SSOR;//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		
-		pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= -pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
-		for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
-			pphi_cha[it->end.i][it->end.j][it->end.k]	= -pphi_amb[it->end.i][it->end.j][it->end.k];
-		
-		/*		
-			for(int ii= 1 ; ii<NN.x-1 ; ii++) for(int jj=1 ; jj<NN.y-1 ; jj++) for(int kk=1 ; kk<NN.z-1 ; kk++)
-		{	
-				if(UUn[ii][jj][kk]!=0) 
-				{pphi_cha[ii][jj][kk]		= VV - pphi_amb[ii][jj][kk];}
-		};
-		*/		
-		for(int kk=0; kk<NN.z ; kk++){
-			pphi_Ca[kk]	= pphi_cha((NN.x-1)/2,(NN.y-1)/2,kk);
-			pphi_A[kk]	= pphi_amb((NN.x-1)/2,(NN.y-1)/2,kk);
-		}
-		
-		P1.init(pphi_cha,UUn);
-		SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
-		SSOR.Solve(dd,NN,UUn,pphi_cha);
-		
-		for(int kk=0; kk<NN.z ; kk++){
-			pphi_Cb[kk]	= pphi_cha((NN.x-1)/2,(NN.y-1)/2,kk);
-			for(int jj=0 ; jj<NN.y-1 ; jj++)
-			{
-				pphi_C2D[jj][kk] = pphi_cha((NN.x-1)/2,jj,kk);
-				pphi_A2D[jj][kk] = pphi_amb((NN.x-1)/2,jj,kk);
-			}
-		}	
-		pphi_Ca.fwrite("results/phiC1Da.dat");
-		pphi_Cb.fwrite("results/phiC1Db.dat");
-		pphi_A.fwrite("results/phiA1D.dat");
-		pphi_C2D.fwrite("results/phiC2D.dat");
-		pphi_A2D.fwrite("results/phiA2D.dat");
-		return 0;
-	}
-	return 0;	
+	ListLink::iterator	it;
+	Potential			P1;		//(pphi_cha,UUn);
+	SorSolution			SSOR;	//(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
+
+	pphi_cha[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k]	= -pphi_amb[IInitiationPoint.i][IInitiationPoint.j][IInitiationPoint.k];
+	for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
+		pphi_cha[it->end.i][it->end.j][it->end.k]	= -pphi_amb[it->end.i][it->end.j][it->end.k];
+	P1.init(pphi_cha,UUn);
+	SSOR.init(pphi_cha, eepsilon,MMaxStep, dd, NN, P1, UUn);
+	SSOR.Solve(dd,NN,UUn,pphi_cha);
+	return 0; // Total potential of the channel phi = phi_amb + phi_cha = phi_amb + (-phi_amb) = 0;
 }
 /**************************************************************************************/

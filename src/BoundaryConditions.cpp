@@ -2,7 +2,7 @@
 
 #include "BoundaryConditions.h"
 /**************************************************************************************/
-void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd, const BoxSteps& NN)
+void BC::Apply(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const ResGrid& dd, const SizeGrid& NN)
 {
 	clock_t startTime = clock();
 	/**********************************************************************************/
@@ -17,7 +17,8 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 
 	if(BBCtype!=0 && BBCtype!=1 && BBCtype!=2 && BBCtype!=3)
 	{
-		cout<<"Incorrect Type of Boundary Conditions"<<endl;
+		printf("ee: Incorrect type of boundary conditions.\n");
+		printf("xx: Program terminating.\n");
 		exit(4);
 	}
 	if(BBCtype == 0) // PEC boundaries //
@@ -33,7 +34,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		double rhoMax = 0;
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			if(fabs(rrho[ii][jj][kk]) > rhoMax) rhoMax = fabs(rrho[ii][jj][kk]);
-		
+
 		/******************************************************************************/
 		/* We neglect the ambient Laplacian field on Earth (100 V/m = 1e-3kV/cm)	  */
 		/* The potential due to the ambient Laplacian field VL = 0.					  */
@@ -44,12 +45,12 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		/******************************************************************************/
 		double	Eambient = 0;
 		double	VL;
-		
+
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			/**************************************************************************/
 			/* Check if point belongs to a boundary									  */
-			/**************************************************************************/					
-			if( 
+			/**************************************************************************/
+			if(
 				(kk == NN.z-1													) || // Up    //
 				(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
 				(ii == NN.x-1	&& kk > 0 && kk<NN.z-1							) || // Front //
@@ -62,14 +63,14 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 				for(int is=0 ; is<NN.x ; is++) for(int js=0 ; js<NN.y ; js++) for(int ks=0 ; ks<NN.z ; ks++)
 					if(!(is == ii && js == jj && ks == kk))
 						if(fabs(rrho[is][js][ks]) > .01*rhoMax)
-							pphi[ii][jj][kk] += 
-								dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+							pphi[ii][jj][kk] +=
+								dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 								(rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk-ks)*dd.z,2 )) -
 								 rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk+ks)*dd.z,2 )) );
 			};
 	}
 	else if(BBCtype == 2) // PEC ground and electrosphere, side boundaries open.//
-	{		
+	{
 		/******************************************************************************/
 		/* To reduce the time of computation, only the source points exceeding xx% of */
 		/* the maximal charge density -in absolute value- will be considered.		  */
@@ -77,7 +78,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		double rhoMax = 0;
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			if(fabs(rrho[ii][jj][kk]) > rhoMax) rhoMax = fabs(rrho[ii][jj][kk]);
-		
+
 		/******************************************************************************/
 		/* We neglect the ambient Laplacian field on Earth (100 V/m = 1e-3kV/cm)	  */
 		/* The potential due to the ambient Laplacian field VL = 0.					  */
@@ -88,7 +89,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		/******************************************************************************/
 		double	Eambient = 0;
 		double	VL;
-		
+
 		/******************************************************************************/
 		/* Define number of images and store their positions						  */
 		/******************************************************************************/
@@ -96,15 +97,15 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		int k_GndImg = 0;		// Altitude of ground images
 		int k_IonImg = 0;		// Altitude of iono/electrosphere images
 		int	k_Ion    = NN.z-1;	// Altitude coordinate of the iono/electrosphere
-	
+
 		/******************************************************************************/
 		/* Derive potential at the boundaries										  */
 		/******************************************************************************/
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			/**************************************************************************/
 			/* Check if point belongs to a side boundary							  */
-			/**************************************************************************/					
-			if( 
+			/**************************************************************************/
+			if(
 				(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
 				(ii == NN.x-1	&& kk > 0 && kk<NN.z-1							) || // Front //
 				(jj == 0		&& kk > 0 && kk<NN.z-1  && ii > 0 && ii<NN.x-1	) || // Left  //
@@ -119,14 +120,14 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 						{
 							k_GndImg = ks; // Altitude of ground images			   //
 							k_IonImg = ks; // Altitude of iono/electrosphere images //
-							
-							pphi[ii][jj][kk] += dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+
+							pphi[ii][jj][kk] += dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 								( rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- ks)*dd.z,2 ))); // Charge
 							for(int mm=1; mm<=M; mm++)
 							{
 								k_GndImg = k_GndImg - ( mm%2*2*ks + (mm-1)%2*2*(k_Ion-ks) );
 								k_IonImg = k_IonImg + ( (mm-1)%2*2*ks + mm%2*2*(k_Ion-ks) );
-								pphi[ii][jj][kk] += dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * pow(-1.0,mm)*
+								pphi[ii][jj][kk] += dd.x*dd.y*dd.z/(4*M_PI*eps0) * pow(-1.0,mm)*
 									(rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- k_GndImg)*dd.z,2 )) +	// Ground Images
 									 rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- k_IonImg)*dd.z,2 )) ); // Ionosphere Images
 							}
@@ -134,7 +135,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 			};
 	}
 	else if(BBCtype == 3) // Free space, side, upper, and lower boundaries open. //
-	{		
+	{
 		/******************************************************************************/
 		/* To reduce the time of computation, only the source points exceeding xx% of */
 		/* the maximal charge density -in absolute value- will be considered.		  */
@@ -142,7 +143,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		double rhoMax = 0;
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			if(fabs(rrho[ii][jj][kk]) > rhoMax) rhoMax = fabs(rrho[ii][jj][kk]);
-		
+
 		/******************************************************************************/
 		/* We neglect the ambient Laplacian field on Earth (100 V/m = 1e-3kV/cm)	  */
 		/* The potential due to the ambient Laplacian field VL = 0.					  */
@@ -153,12 +154,12 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 		/******************************************************************************/
 		double	Eambient = 0;
 		double	VL;
-		
+
 		for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			/**************************************************************************/
 			/* Check if point belongs to a boundary									  */
-			/**************************************************************************/					
-			if( 
+			/**************************************************************************/
+			if(
 				(kk == 0														) || // Down  //
 				(kk == NN.z-1													) || // Up    //
 				(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
@@ -172,8 +173,8 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 				for(int is=0 ; is<NN.x ; is++) for(int js=0 ; js<NN.y ; js++) for(int ks=0 ; ks<NN.z ; ks++)
 					if(!(is == ii && js == jj && ks == kk))
 						if(fabs(rrho[is][js][ks]) > .01*rhoMax)
-							pphi[ii][jj][kk] += 
-								dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+							pphi[ii][jj][kk] +=
+								dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 								rrho[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk-ks)*dd.z,2 ));
 			};
 	}
@@ -184,7 +185,7 @@ void ApplyBC(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const StepsSizes& dd,
 }
 
 /**************************************************************************************/
-void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, const double rrhoAmbMin, const double rrhoAmbMax, const StepsSizes& dd, const BoxSteps& NN)
+void BC::Update(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, const double rrhoAmbMin, const double rrhoAmbMax, const ResGrid& dd, const SizeGrid& NN)
 {
 	clock_t startTime	= clock();
 	clock_t endTime		= clock();
@@ -202,11 +203,11 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 		/*         boundaries														  */
 		/*      3. ``Free Space Model": open side, bottom and top boundaries		  */
 		/******************************************************************************/
-		
+
 		if(BBCtype == 0) // PEC boundaries //
 		{
-			cout<<"\nCannot proceed to inclusion of all images in the Tin Can Model yet..."<<endl; 
-			cout<<"Exiting simulation...\n"<<endl;
+			cout<<"ii: Cannot proceed to inclusion of all images in the Tin Can Model yet..."<<endl;
+			cout<<"xx: Program terminating.\n"<<endl;
 			exit(5);
 		}
 		else if(BBCtype == 1) // PEC ground, side and upper boundaries open. //
@@ -216,8 +217,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 			double		AAbsRhoChaMax = 0;
 			for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			{
-				rrho_cha[ii][jj][kk] = rhoijk(ii,jj,kk,pphi_cha,dd,NN);
-				if(fabs(rrho_cha[ii][jj][kk])>= AAbsRhoChaMax) 
+				rrho_cha[ii][jj][kk] = foo::rhoijk(ii,jj,kk,pphi_cha,dd,NN);
+				if(fabs(rrho_cha[ii][jj][kk])>= AAbsRhoChaMax)
 					AAbsRhoChaMax = fabs(rrho_cha[ii][jj][kk]);
 			};
 			if(AAbsRhoChaMax>.01*AAbsRhoAmbMax)
@@ -225,8 +226,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 				for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 					/**********************************************************************/
 					/* Check if point belongs to a boundary								  */
-					/**********************************************************************/					
-					if( 
+					/**********************************************************************/
+					if(
 						(kk == NN.z-1													) || // Up    //
 						(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
 						(ii == NN.x-1	&& kk > 0 && kk<NN.z-1							) || // Front //
@@ -238,16 +239,16 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 						for(int is=0 ; is<NN.x ; is++) for(int js=0 ; js<NN.y ; js++) for(int ks=0 ; ks<NN.z ; ks++)
 							if(!(is == ii && js == jj && ks == kk))
 								if(fabs(rrho_cha[is][js][ks]) > .01*AAbsRhoAmbMax)
-									pphi_cha[ii][jj][kk] += 
-										dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+									pphi_cha[ii][jj][kk] +=
+										dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 										(rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk-ks)*dd.z,2 )) -
 										 rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk+ks)*dd.z,2 )) );
-					};						
+					};
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"ii:\t Run time for BC update: "<<(double)runTime/CLOCKS_PER_SEC<<" s."<<endl;
 			}
-			else {cout<<"No need for BC update.\n";};
+			else {cout<<"ii:\t No need for BC update.\n";};
 		}
 		else if(BBCtype == 2) // PEC ground and electrosphere, side boundaries open.//
 		{
@@ -265,10 +266,10 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 			int k_GndImg = 0;		// Altitude of ground images
 			int k_IonImg = 0;		// Altitude of iono/electrosphere images
 			int	k_Ion    = NN.z-1;	// Altitude coordinate of the iono/electrosphere
-			
+
 			for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			{
-				rrho_cha[ii][jj][kk] = rhoijk(ii,jj,kk,pphi_cha,dd,NN);
+				rrho_cha[ii][jj][kk] = foo::rhoijk(ii,jj,kk,pphi_cha,dd,NN);
 				if(fabs(rrho_cha[ii][jj][kk])>= AAbsRhoChaMax)
 					AAbsRhoChaMax = fabs(rrho_cha[ii][jj][kk]);
 			};
@@ -277,8 +278,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 				for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 					/******************************************************************/
 					/* Check if point belongs to a boundary							  */
-					/******************************************************************/					
-					if( 
+					/******************************************************************/
+					if(
 						(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
 						(ii == NN.x-1	&& kk > 0 && kk<NN.z-1							) || // Front //
 						(jj == 0		&& kk > 0 && kk<NN.z-1  && ii > 0 && ii<NN.x-1	) || // Left  //
@@ -293,25 +294,25 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 								{
 									k_GndImg = ks; // Altitude of ground images			   //
 									k_IonImg = ks; // Altitude of iono/electrosphere images //
-									
-									pphi_cha[ii][jj][kk] += dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+
+									pphi_cha[ii][jj][kk] += dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 										( rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- ks)*dd.z,2 ))); // Charge
 									for(int mm=1; mm<=M; mm++)
 									{
 										k_GndImg = k_GndImg - ( mm%2*2*ks + (mm-1)%2*2*(k_Ion-ks) );
 										k_IonImg = k_IonImg + ( (mm-1)%2*2*ks + mm%2*2*(k_Ion-ks) );
-										pphi_cha[ii][jj][kk] += dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * pow(-1.0,mm)*
+										pphi_cha[ii][jj][kk] += dd.x*dd.y*dd.z/(4*M_PI*eps0) * pow(-1.0,mm)*
 											(rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- k_GndImg)*dd.z,2 )) +	// Ground Images
 											 rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk- k_IonImg)*dd.z,2 )) ); // Ionosphere Images
 									};
 								};
 						};
-					};					
+					};
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"ii:\t Run time for BC update: "<<(double)runTime/CLOCKS_PER_SEC<<" s."<<endl;
 			}
-			else cout<<"No need for BC update.\n";
+			else cout<<"ii:\t No need for BC update.\n";
 		}
 		else if(BBCtype == 3) // Free Space, side, lower, and upper boundaries open. //
 		{
@@ -320,8 +321,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 			double		AAbsRhoChaMax = 0;
 			for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 			{
-				rrho_cha[ii][jj][kk] = rhoijk(ii,jj,kk,pphi_cha,dd,NN);
-				if(fabs(rrho_cha[ii][jj][kk])>= AAbsRhoChaMax) 
+				rrho_cha[ii][jj][kk] = foo::rhoijk(ii,jj,kk,pphi_cha,dd,NN);
+				if(fabs(rrho_cha[ii][jj][kk])>= AAbsRhoChaMax)
 					AAbsRhoChaMax = fabs(rrho_cha[ii][jj][kk]);
 			};
 			if(AAbsRhoChaMax>.01*AAbsRhoAmbMax)
@@ -329,8 +330,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 				for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 					/**********************************************************************/
 					/* Check if point belongs to a boundary								  */
-					/**********************************************************************/					
-					if( 
+					/**********************************************************************/
+					if(
 						(kk == 0														) || // Down  //
 						(kk == NN.z-1													) || // Up    //
 						(ii == 0		&& kk > 0 && kk<NN.z-1							) || // Back  //
@@ -343,24 +344,24 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 						for(int is=0 ; is<NN.x ; is++) for(int js=0 ; js<NN.y ; js++) for(int ks=0 ; ks<NN.z ; ks++)
 							if(!(is == ii && js == jj && ks == kk))
 								if(fabs(rrho_cha[is][js][ks]) > .01*AAbsRhoAmbMax)
-									pphi_cha[ii][jj][kk] += 
-										dd.x*dd.y*dd.z/(4*PMC.pi*PMC.eps0) * 
+									pphi_cha[ii][jj][kk] +=
+										dd.x*dd.y*dd.z/(4*M_PI*eps0) *
 										rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*dd.x,2 ) + pow( (jj-js)*dd.y,2 ) + pow( (kk-ks)*dd.z,2 ));
 					};
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"ii:\t Run time for BC update: "<<(double)runTime/CLOCKS_PER_SEC<<" s."<<endl;
 			}
-			else {cout<<"No need for BC update.\n";};
-		};		
+			else {cout<<"ii:\t No need for BC update.\n";};
+		};
 	}
-	else cout<<"No update done."<<endl;
+	else cout<<"ii:\t No update done."<<endl;
 }
 
 
 
 /**************************************************************************************/
-void AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& UUn, const BoxLengths& LL, const StepsSizes& dd, const BoxSteps& NN)
+void BC::AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& UUn, const SizeDomain& LL, const ResGrid& dd, const SizeGrid& NN)
 {
 	clock_t startTime = clock();
 	if(uuniformE == true)
@@ -377,7 +378,7 @@ void AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& 
 				UUn(ii,jj,NN.z-1)	= 1;
 				pphi(ii,jj,NN.z-1)	+= -EEo*(dd.z*(NN.z-1));
 			}
-		
+
 		/******************************************************************************/
 		/* Front and Back boundaries												  */
 		/******************************************************************************/
@@ -389,7 +390,7 @@ void AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& 
 				UUn(NN.x-1,jj,kk)	= 1;
 				pphi(NN.x-1,jj,kk)	+= -EEo*(kk*dd.z);
 			}
-		
+
 		/******************************************************************************/
 		/* Left and Right boundaries												  */
 		/******************************************************************************/
@@ -403,9 +404,9 @@ void AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& 
 			}
 	}
 	else cout<<"No Uniform E-field Applied.\n";
-		
+
 	clock_t endTime = clock();
 	clock_t runTime = endTime - startTime;
-	printf("Run time for application of BC             : %fs\n",(double)runTime/100);
+	printf("Run time for application of BC: %lf s.\n",(double)runTime/CLOCKS_PER_SEC);
 }
 /**************************************************************************************/
