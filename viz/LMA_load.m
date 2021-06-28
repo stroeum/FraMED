@@ -1,6 +1,7 @@
 % LMA data loading
 % global d Init Links N Nb z_gnd
 
+cd ../bin/results/
 dxyz              = load('dxyz.dat')*1e-3;                                 %_km
 Nxyz              = load('Nxyz.dat');                                      %_dimensionless
 InitPoint         = load('InitPoint.dat')*1e-3;                            %_km
@@ -34,3 +35,5 @@ clear Nxyz dxyz InitPoint
 x                    = (0:N.x-1)*d.x;
 y                    = (0:N.y-1)*d.y;
 z                    = (0:N.z-1)*d.z+z_gnd;
+
+cd ../../viz

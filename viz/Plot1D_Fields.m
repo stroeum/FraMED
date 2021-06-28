@@ -1,13 +1,9 @@
-function []=Plot1D_Fields()
 clear all
 close all
 clc
 
 %% Compile and Run C++ code
-% cd ..
-% !make
-% !./main
-% cd results
+cd ../bin/results
 
 %% Plot results
 
@@ -125,4 +121,5 @@ fprintf('Average field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
 % load('MultiP.dat')
 % plot(phiNumBF*1e-6,z*1e-3,'k', DiP*1e-6,z*1e-3,'r--', MonoP*1e-6,z*1e-3,'g-.',MultiP*1e-6,z*1e-3,'b:')
 
-end
+
+cd ../../viz

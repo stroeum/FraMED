@@ -12,7 +12,7 @@ class BoxSteps
 public:
 	int x,y,z;
 	BoxSteps();
-	BoxSteps(int xx, int yy, int zz);	
+	BoxSteps(int , int , int );	
 	double max();
 	bool init(int xx, int yy, int zz);
 	~BoxSteps();
@@ -43,4 +43,4 @@ public:
 };
 /**************************************************************************************/
 
-#endif SIMPARAMETERS_H
+#endif //SIMPARAMETERS_H

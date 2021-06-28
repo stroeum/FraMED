@@ -4,8 +4,8 @@
 
 /**************************************************************************************/
 ScaledFields::ScaledFields(double ppositive0, double nnegative0,
-						   double zz_gnd, StepsSizes dd, BoxSteps NN)
-{ScaledFields(ppositive0,nnegative0, zz_gnd, dd,NN);}
+						   double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent)
+{ScaledFields(ppositive0,nnegative0, zz_gnd, dd,NN, sscaling_exponent);}
 
 CMatrix1D ScaledFields::getParams()
 {
@@ -17,19 +17,21 @@ CMatrix1D ScaledFields::getParams()
 }
 
 bool ScaledFields::init(double ppositive0, double nnegative0,
-						double zz_gnd, StepsSizes dd, BoxSteps NN)
+						double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent)
 {
 	z_gnd		= zz_gnd;
 	positive0 = ppositive0;
 	negative0 = nnegative0;
 	positive.init(NN.z);
-	negative.init(NN.z);
+    negative.init(NN.z);
+    
+    int alpha = sscaling_exponent;
 	
 	int kk_gnd = (int)round(z_gnd/dd.z);
 	for (int kk=0 ; kk<NN.z ; kk++)
 	{
-		positive[kk] = positive0*StdAtmosphere((kk+kk_gnd)*dd.z);
-		negative[kk] = negative0*StdAtmosphere((kk+kk_gnd)*dd.z);
+		positive[kk] = positive0*pow(StdAtmosphere((kk+kk_gnd)*dd.z),alpha);
+		negative[kk] = negative0*pow(StdAtmosphere((kk+kk_gnd)*dd.z),alpha);
 	}
 	return true;
 }
@@ -38,8 +40,8 @@ bool ScaledFields::init(double ppositive0, double nnegative0,
 /**************************************************************************************/
 CriticalFields::CriticalFields(double iinitiation0, 
 							   double ppositive0, double nnegative0,
-							   double zz_gnd, StepsSizes dd, BoxSteps NN)
-{CriticalFields::init(iinitiation0,ppositive0,nnegative0, zz_gnd, dd,NN);}
+							   double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent)
+{CriticalFields::init(iinitiation0,ppositive0,nnegative0, zz_gnd, dd,NN, sscaling_exponent);}
 
 CMatrix1D CriticalFields::getParams()
 {
@@ -52,7 +54,7 @@ CMatrix1D CriticalFields::getParams()
 }
 
 bool CriticalFields::init(double iinitiation0, double ppositive0, double nnegative0,
-		  double zz_gnd, StepsSizes dd, BoxSteps NN)
+		  double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent)
 {
 	z_gnd		= zz_gnd;
 	initiation0 = iinitiation0;
@@ -61,13 +63,15 @@ bool CriticalFields::init(double iinitiation0, double ppositive0, double nnegati
 	initiation.init(NN.z);
 	positive.init(NN.z);
 	negative.init(NN.z);
+    
+    int alpha = sscaling_exponent;
 	
 	int kk_gnd = (int)round(z_gnd/dd.z);
 	for (int kk=0 ; kk<NN.z ; kk++)
 	{
-		initiation[kk] = initiation0*StdAtmosphere((kk+kk_gnd)*dd.z);
-		positive[kk] = positive0*StdAtmosphere((kk+kk_gnd)*dd.z);
-		negative[kk] = negative0*StdAtmosphere((kk+kk_gnd)*dd.z);
+		initiation[kk] = initiation0*pow(StdAtmosphere((kk+kk_gnd)*dd.z), alpha);
+		positive[kk] = positive0*pow(StdAtmosphere((kk+kk_gnd)*dd.z), alpha);
+		negative[kk] = negative0*pow(StdAtmosphere((kk+kk_gnd)*dd.z), alpha);
 	}
 	return true;
 }

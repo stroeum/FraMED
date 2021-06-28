@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <memory>
 #include <iostream>
-#include <string>
+#include <string.h>
+#include <cstdio>
 #include "Matrix.h"
 using namespace std;
 
@@ -409,9 +410,9 @@ void CMatrix2D::fwrite(string s)
 {
 	char * c = &s[0];
 	FILE * ffile = Open (c, "w");
-	for (int ii=0 ; ii<xSize ; ii++)
+	for (int jj=0 ; jj<ySize ; jj++)
 	{
-		for (int jj=0 ; jj<ySize ; jj++) fprintf(ffile,"%f ", pMatrix2d[ii][jj]);
+		for (int ii=0 ; ii<xSize ; ii++) fprintf(ffile,"%f ", pMatrix2d[ii][jj]);
 		fprintf(ffile,"\n");
 	};
 	fclose(ffile);

@@ -60,14 +60,14 @@ for ii=1:Nb.Links
         LMA_axes(h,'nz')
         text(alt_hist.max,FocusArea.z(2),h.nz.note.string,'FontName',Font.Name,'Fontsize',Font.Size.Labels,'VerticalAlignment','Top','HorizontalAlignment','Right')
 
-        subplot(h.xz.fig);
-        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],'Color',tmp.color);
+        sf1 = subplot(h.xz.fig);
+        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],'Color',tmp.color,'LineWidth',Links.Line.Width);   
+        
+        sf2 = subplot(h.yz.fig);
+        plot([Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color,'LineWidth',Links.Line.Width);
 
-        subplot(h.yz.fig);
-        plot([Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color);
-
-        subplot(h.xy.fig);
-        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color);
+        sf3 = subplot(h.xy.fig);
+        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color,'LineWidth',Links.Line.Width);
     end
     clear tmp
 

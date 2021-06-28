@@ -20,11 +20,11 @@ public:
 	
 	ScaledFields(){};								// Default constructor
 	ScaledFields(double ppositive0, double nnegative0,
-				   double zz_gnd, StepsSizes dd, BoxSteps NN);
+                 double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent);
 													// Constructor surcharge
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
 	bool init(double ppositive0, double nnegative0,
-			  double zz_gnd, StepsSizes dd, BoxSteps NN);
+			  double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent);
 													// Initiate after declaration
 	~ScaledFields(){};								// Destructor
 };
@@ -35,8 +35,8 @@ class VoltageDrops : public ScaledFields
 {
 public:
 	VoltageDrops(){};
-	VoltageDrops(double ppositive0, double nnegative0, double zz_gnd, StepsSizes dd, BoxSteps NN) :
-		ScaledFields(ppositive0,nnegative0,zz_gnd,dd,NN){};
+	VoltageDrops(double ppositive0, double nnegative0, double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent) :
+		ScaledFields(ppositive0,nnegative0,zz_gnd,dd,NN,sscaling_exponent){};
 													// Constructor
 	~VoltageDrops(){};								// Destructor
 };
@@ -53,11 +53,11 @@ public:
 
 	CriticalFields(){};
 	CriticalFields(double iinitiation0, double ppositive0, double nnegative0,
-				   double zz_gnd, StepsSizes dd, BoxSteps NN);
+				   double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent);
 													// Constructor
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
 	bool init(double iinitiation0, double ppositive0, double nnegative0,
-			  double zz_gnd, StepsSizes dd, BoxSteps NN);
+			  double zz_gnd, StepsSizes dd, BoxSteps NN, int sscaling_exponent);
 													// Initiate after declaration
 	~CriticalFields(){};							// Destructor
 };
@@ -66,4 +66,4 @@ public:
 /**************************************************************************************/
 double StdAtmosphere(double);
 /**************************************************************************************/
-#endif CRITICALFIELDS_H
+#endif //CRITICALFIELDS_H

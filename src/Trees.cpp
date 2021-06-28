@@ -50,7 +50,7 @@ void write(ListLink& LL, string ss)
 	/**********************************************************************************/
 	for (it=LL.begin() ; it!=LL.end() ; it++)
 	{
-		fprintf(file,"%d %d %d %d %d %d %f %f %f %f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
+		fprintf(file,"%d %d %d %d %d %d %f %f %f %f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba ); 
 	}
 	fclose(file);
 }
@@ -281,7 +281,8 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		endTime = clock();
 		runTime = endTime-startTime;
 		cout<<"------> No more candidate"<<endl;
-		cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+		cout<<"------> Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//        cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
 		return false;
 	}
 	cout<<"------> Number of candidates      : "<<CCounterOfCandidates<<endl;
@@ -305,7 +306,7 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		(*it2).proba += (*it1).proba;
 	}
 	
-	rr = random()/(double)RAND_MAX;
+	rr = rand()/(double)RAND_MAX;
 	it1 = LListOfCandidates.begin();
 	while(it1 != LListOfCandidates.end() && (*it1).proba <= rr) {it1++;};
 	CChosenLink = *it1;
@@ -367,11 +368,12 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 	/**********************************************************************************/
 	if( CChosenLink.end.i == 0 || CChosenLink.end.i == NN.x-1 ||
 		CChosenLink.end.j == 0 || CChosenLink.end.j == NN.y-1 ||
-		CChosenLink.end.k == 0 || CChosenLink.end.k == NN.z-1)
+		CChosenLink.end.k == 0 || CChosenLink.end.k == NN.z-2)
 		if(iisBndXingPossible == false)
 		{
-			cout<<"Channel reached a boundary"<<endl;
-			cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+			cout<<"Channel reached a boundary (near a boundary if Nz)"<<endl;
+			cout<<"------> Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//            cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
 			return false;
 		};
 	
@@ -397,7 +399,8 @@ bool AddNewLink(StepsSizes dd, BoxSteps NN,
 		};
 	}
 	
-	cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
+	cout<<"------> Run time for Link addition: "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//    cout<<"------> Run time for Link addition: "<<(double)runTime/100<<"s"<<endl;
 	return true;
 }
 
@@ -547,7 +550,8 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 //		cout<<"QQcha_tot = "<<QQcha_tot<<endl;
 //		cout<<"Qdiff     = " << QQcha_tot-QQcha_cha<<endl;
 		
-		cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
+		cout<<"------> Run time for Qminimization: "<<(double)runTime/CLOCKS_PER_SEC<<"s\n";
+//        cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
 //		cout<<"Vc = "<<setw(12)<<CC<<" ; Qc/Qc+ = "<<setw(12)<<QQav<<" ; Nb of iterations = "<<kk<<endl;
 		return CC;
 	}
@@ -555,8 +559,8 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 	{
 		clock_t startTime = clock();
 		double	CC;
-		double	x1(VVmin)	, f1;
-		double	x2(VVmax)	, f2;
+		double	x1(VVmin)	, f1(0.);
+		double	x2(VVmax)	, f2(0.);
 //		double	x1((1-1e-5)*VV)	, f1;
 //		double	x2((1+1e-5)*VV)	, f2;
 		double	xr(0)		, fr(0);
@@ -650,7 +654,8 @@ double fMinSearch(const double VV, const double QQchannelPlus,
 		clock_t endTime = clock();
 		clock_t runTime = endTime - startTime;
 		
-		cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
+		cout<<"------> Run time for Qminimization: "<<(double)runTime/CLOCKS_PER_SEC<<"s\n";
+//        cout<<"------> Run time for Qminimization: "<<(double)runTime/100<<"s\n";
 		cout<<"Vc = "<<setw(12)<<x1<<" ; Qc = "<<setw(12)<<f1<<" ; Nb of iterations = "<<kk<<endl;
 		return CC=x1;
 	}

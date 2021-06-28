@@ -2,6 +2,7 @@ function []= Plot3D_Tree()
 close all
 clear all
 clc
+cd ../bin/results/
 
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
@@ -61,7 +62,7 @@ end
 figure(1);
 set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/3)
 hold 
-Cloud3D(3e3, 18e3, Lx, Ly, Lz, z_gnd);
+%Cloud3D(3e3, 18e3, Lx, Ly, Lz, z_gnd);
 
 Xp = [Lx 0 0 Lx]*1e-3;
 Yp = [Ly Ly 0 0]*1e-3;
@@ -102,7 +103,7 @@ for ii=1:NbOfLinks
     title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',12,'FontWeight','bold');
     set(gca,'FontSize',10);
     view([45 10])
-    Movie(ii) = getframe(gcf,[0,0, 599, 553]);
+%     Movie(ii) = getframe(gcf,[0,0, 599, 553]);
 %     Movie(ii) = getframe;
 end
 grid
@@ -115,5 +116,7 @@ if (Record == 1)
 %     movie(Movie); % play the movie
     movie2avi(Movie,'lightning.avi','quality',100);
 end
+cd ../../viz
+
 end
 %-------------------------------------------------------------------------%

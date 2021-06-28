@@ -3,10 +3,7 @@ close all
 clear all
 clc
 
-cd ..
-!make
-!./main
-cd results
+cd ../bin/results
 
 %% Load Data
 dxyz   = load('dxyz.dat');
@@ -30,8 +27,8 @@ Z = (0:d.z:(N.z-1)*d.z)+z_gnd;
 %% Plot
 figure;
 subplot(121);
-contour(X,Z,rho.XZ',60);
-contourf(X,Z,rho.XZ',60,'LineColor','none');
+contour(X,Z,rho.XZ,60);
+contourf(X,Z,rho.XZ,60,'LineColor','none');
 caxis([-max(max(abs(rho.XZ))) max(max(abs(rho.XZ)))])
 % imagesc(Y,Z,rho.XZ');
 axis image
@@ -43,8 +40,8 @@ title('\rho_{amb} (nC/m^3)','FontSize',12);
 colorbar;
 
 subplot(122);
-contour(Y,Z,rho.YZ',50);
-contourf(Y,Z,rho.YZ',60,'LineColor','none');
+contour(Y,Z,rho.YZ,50);
+contourf(Y,Z,rho.YZ,60,'LineColor','none');
 caxis([-max(max(abs(rho.YZ))) max(max(abs(rho.YZ)))])
 % imagesc(Y,Z,rho.YZ');
 axis image
@@ -54,3 +51,5 @@ xlabel('y-axis (m)','FontSize',12);
 set(gca,'XMinorTick','on','YMinorTick','on');
 title('\rho_{amb} (nC/m^3)','FontSize',12);
 colorbar;
+
+cd ../../viz

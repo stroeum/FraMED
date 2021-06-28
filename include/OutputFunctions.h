@@ -64,4 +64,4 @@ void write(ListCMatrix1D&, string);
 /**************************************************************************************/
 
 
-#endif OUTPUTFUNCTIONS_H
+#endif //OUTPUTFUNCTIONS_H

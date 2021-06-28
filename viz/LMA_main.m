@@ -19,7 +19,7 @@ Nb.Links = 0; Nb.Points = 0; Nb.Layers = 0;
 Figure.Output     =  'Plot'; % 'Movie'; %
 
 Links.Type        = 'Both'; %Lower'; % 'Upper'; %
-Links.Scheme      = 'B/R';
+Links.Scheme      = 'B/W';
 Links.Line.Width  = 1;
 Links.MarkerSize  = 7;
 Font.Size.Labels  = 12;
@@ -27,7 +27,7 @@ Font.Size.Axis    = 10;
 Font.Name         = 'Helvetica';
 
 % Charge centers %
-Layers.Type       = 'arbitrary'; % 'disks'; % 'spheres'; % 'none';
+Layers.Type       = '';% 'arbitrary'; % 'disks'; % 'spheres'; % 'none';
 Layers.Line.Style = '--';
 Layers.Line.Width = 1;
 Layers.Edge.Color = [[1 0 0];[0 0 1];[1 0 0];[0 0 1]];
@@ -44,16 +44,16 @@ FocusArea.z(1)    = 0;
 FocusArea.z(2)    = 0;
 
 % Figure dimension %
-Figure.Width       = 5.0;                                                  %_inches
-Figure.Length      = 7.5;                                                  %_inches
-Figure.hspace(1)   = .511811;                                              %_inches
-Figure.hspace(2)   = .275591;                                              %_inches
-Figure.hspace(3)   = .157480;                                              %_inches
-Figure.vspace(1)   = .472441;                                              %_inches
-Figure.vspace(2)   = .236220;                                              %_inches
-Figure.vspace(3)   = .236220;                                              %_inches
-Figure.vspace(4)   = 1.5;                                                  %_inches
-h.tz.position(4)   = 1.0;                                                  %_inches
+Figure.Width       = 2*5.0;                                                  %_inches
+Figure.Length      = 2*7.5;                                                  %_inches
+Figure.hspace(1)   = 2*.511811;                                              %_inches
+Figure.hspace(2)   = 2*.275591;                                              %_inches
+Figure.hspace(3)   = 2*.157480;                                              %_inches
+Figure.vspace(1)   = 2*.472441;                                              %_inches
+Figure.vspace(2)   = 2*.236220;                                              %_inches
+Figure.vspace(3)   = 2*.236220;                                              %_inches
+Figure.vspace(4)   = 2*1.5;                                                  %_inches
+h.tz.position(4)   = 2*1.0;                                                  %_inches
 
 % Label properties %
 h.xy.label.x.string  = 'x (km)';
@@ -121,3 +121,23 @@ if strcmp(Figure.Output,'Movie')
 elseif strcmp(Figure.Output,'Plot')
     hgexport(h.fig,'LMA.eps');
 end
+
+%% Plot Save
+f1 = figure;
+sf1_new = copyobj(sf1,f1);
+set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+axis image
+print(f1, '-dpng', 'xz')
+
+f2 = figure;
+sf2_new = copyobj(sf2,f2);
+set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+axis image
+print(f2, '-dpng', 'yz')
+
+f3 = figure;
+sf3_new = copyobj(sf3,f3);
+set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+axis image
+print(f3, '-dpng', 'xy')
+

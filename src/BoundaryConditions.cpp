@@ -245,7 +245,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 					};						
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"------> Run time for BC update    : "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//                cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
 			}
 			else {cout<<"No need for BC update.\n";};
 		}
@@ -309,7 +310,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 					};					
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"------> Run time for BC update    : "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//                cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
 			}
 			else cout<<"No need for BC update.\n";
 		}
@@ -349,7 +351,8 @@ void UpdateBC(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, co
 					};
 				endTime = clock();
 				runTime = endTime - startTime;
-				cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
+				cout<<"------> Run time for BC update    : "<<(double)runTime/CLOCKS_PER_SEC<<"s"<<endl;
+//                cout<<"------> Run time for BC update    : "<<(double)runTime/100<<"s"<<endl;
 			}
 			else {cout<<"No need for BC update.\n";};
 		};		

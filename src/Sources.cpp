@@ -62,9 +62,21 @@ bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double aaq,
 	Type = "gaussian";
 	rho.init(NN.x,NN.y,NN.z);
 	Un.init(NN.x,NN.y,NN.z);
-	double rho0 = Q / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq2);
+	double rho0 = Q / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq3);
 	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
 		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*dd.x-Xq)/Rq1,2) + pow((jj*dd.y-Yq)/Rq2,2) + pow((kk*dd.z-Zq)/Rq3,2)));
+	return true;
+}
+
+bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double aa,double bb, StepsSizes dd, BoxSteps NN)
+{
+	Charge::init(QQ, XXq,YYq,ZZq, llambda,mmu,nnu);
+	Type = "gaussian";
+	rho.init(NN.x,NN.y,NN.z);
+	Un.init(NN.x,NN.y,NN.z);
+	double rho0 = Q*(pow(aa,2)+pow(bb,2)) / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq3);
+	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
+		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*dd.x-Xq)/Rq1,2) + pow((aa*(jj*dd.y-Yq)+bb*(kk*dd.z-Zq))/Rq2,2) + pow((-bb*(jj*dd.y-Yq)+aa*(kk*dd.z-Zq))/Rq3,2)));
 	return true;
 }
 
@@ -331,7 +343,7 @@ Charge Charge::operator+(const Charge& CC) const
 
 ostream & operator<< (ostream & os, const Charge & C)
 {
-	return os<<"Type: "<<C.Type<<"\n [Q]             = ["<<C.Q<<"]\n [Xq,  Yq,  Zq ] = ["<<C.Xq<<" "<<C.Yq<<" "<<C.Zq<<"]\n [Rq1, Rq2, Rq3] = ["<<C.Rq1<<" "<<C.Rq2<<" "<<C.Rq3<<"]\n"/*<<"rho: "<<C.rho*/;
+	return os<<"Type: "<<C.Type<<"\n [Q]             = ["<<C.Q<<"]\n [Xq,  Yq,  Zq ] = ["<<C.Xq<<" "<<C.Yq<<" "<<C.Zq<<"]\n [Rq1, Rq2, Rq3] = ["<<C.Rq1<<" "<<C.Rq2<<" "<<C.Rq3<<"]\n"; // <<"rho: "<<C.rho;
 }
 
 Charge::~Charge(){}
@@ -461,7 +473,7 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, 
 
 ostream & operator<< (ostream & os, const Potential & P)
 {
-	return os<<" Vo = "<<P.Vo<<"\n [Xc, Yc, Zc] = ["<<P.Xc<<" "<<P.Yc<<" "<<P.Zc<<"]\n [L, W, H] = ["<<P.L<<" "<<P.W<<" "<<P.H<<"]\n"/*<<"rho: "<<C.rho*/;
+	return os<<" Vo = "<<P.Vo<<"\n [Xc, Yc, Zc] = ["<<P.Xc<<" "<<P.Yc<<" "<<P.Zc<<"]\n [L, W, H] = ["<<P.L<<" "<<P.W<<" "<<P.H<<"]\n"; // <<"rho: "<<C.rho;
 }
 
 void Potential::updateUn(const CMatrix3D& UUn)

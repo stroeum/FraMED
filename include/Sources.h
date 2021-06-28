@@ -37,6 +37,8 @@ public:
 														// Reset geometrical parameters
 	bool		gaussian(double QQ, double XXq, double YYq, double ZZq, double aaq, double bbq, double ccq, StepsSizes dd, BoxSteps NN);
 														// Distribute charge assuming Gaussian distribution
+	bool        gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double aa,double bb, StepsSizes dd, BoxSteps NN);
+														// Distribute charge assuming INCLINED Gaussian distribution
 	bool		disk(double QQ, double XXq,double YYq,double ZZq, double RR, double HH, StepsSizes dd, BoxSteps NN);
 														// Distribute charge assuming disk geometry
 	bool		ellipse(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double hh, StepsSizes dd, BoxSteps NN);
@@ -83,7 +85,7 @@ private:
 													//  * W: Width
 													//  * H: Heigth
 public:
-		CMatrix3D rho;									// Potential Distribution
+	CMatrix3D rho;									// Potential Distribution
 	CMatrix3D Un;									// Status of the lattice
 													// 0 is modifiable point, 1 if not.
 													// Insofar as no point other than the
@@ -95,14 +97,14 @@ public:
 	bool init(CMatrix3D& pphi, CMatrix3D& UUn);		// update potential as if constructed in the 
 													// previous way
 	Potential(double,double,double,double,double,double,double,StepsSizes,BoxSteps);
-	// Constructor surcharge - Box
+                                                    // Constructor surcharge - Box
 	Potential(double,double,double,double,double,double,StepsSizes,BoxSteps);
-	// Constructor surcharge - Vertical cylinder
+                                                    // Constructor surcharge - Vertical cylinder
 	Potential(double,double,double,double,double,StepsSizes,BoxSteps);
-	// Constructor surcharge - Sphere
+                                                    // Constructor surcharge - Sphere
 	double	getVo()	{return Vo;};					// Return the potential Vo
 	bool	getEquiPotential() {return EquiPotential;};	
-	// Return EquiPotential
+                                                    // Return EquiPotential
 	void	updateUn(const CMatrix3D&);				// Update Un when a new link is added.
 	Potential& operator=(const Potential&);			// Equal 2 Potentials distributions.
 	friend ostream & operator<< (ostream &, const Potential &);
@@ -113,4 +115,4 @@ public:
 /**************************************************************************************/
 typedef list<Charge>   ListCharge;
 /**************************************************************************************/
-#endif SOURCESBIS_H
+#endif //SOURCESBIS_H

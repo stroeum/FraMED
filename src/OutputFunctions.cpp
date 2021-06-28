@@ -226,7 +226,7 @@ CMatrix1D Eijk(int ii, int jj, int kk,const CMatrix3D& pphi,const StepsSizes& dd
 
 CMatrix3D GlobalE(const CMatrix3D& pphi,const StepsSizes& dd, const BoxSteps& NN)
 {
-	double		EEx, EEy, EEz;
+	double		EEx(0), EEy(0), EEz(0);
 	CMatrix3D	EE(NN.x,NN.y,NN.z);
 	CMatrix3D	Ex(NN.x,NN.y,NN.z);
 	CMatrix3D	Ey(NN.x,NN.y,NN.z);

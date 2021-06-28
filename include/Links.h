@@ -98,4 +98,4 @@ public:
 typedef list<Link>   ListLink;
 /**************************************************************************************/
 
-#endif LINKS_H
+#endif //LINKS_H
