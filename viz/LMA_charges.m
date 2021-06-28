@@ -20,7 +20,7 @@ elseif  strcmp(Layers.Type,'spheres')
 elseif  strcmp(Layers.Type,'arbitrary')
     subplot(h.yz.fig);
     hold on;
-    contourf(z,y,rho.YZ,60,'LineColor','none');
+    contourf(z,y,rho.YZ',60,'LineColor','none');
     caxis([-max(max(abs(rho.YZ))) max(max(abs(rho.YZ)))])
     % imagesc(Y,Z,rho.YZ');
     colorbar('Location','East');
@@ -28,7 +28,7 @@ elseif  strcmp(Layers.Type,'arbitrary')
     
     subplot(h.xz.fig);
     hold on
-    contourf(x,z,rho.XZ',60,'LineColor','none');
+    contourf(x,z,rho.XZ,60,'LineColor','none');
     caxis([-max(max(abs(rho.XZ))) max(max(abs(rho.XZ)))])
     % imagesc(Y,Z,rho.XZ');
     colorbar('Location','North');

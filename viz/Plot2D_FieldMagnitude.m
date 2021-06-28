@@ -61,7 +61,7 @@ end
 % set(gcf,'Units','inches','OuterPosition', [10 10 20 30]/3)
 
 hold on
-isFieldMagnitude = input('Plot E-field magnitude? (1: yes, else: no)\n>> ');
+isFieldMagnitude = 2; %input('Plot E-field magnitude? (1: yes, else: no)\n>> ');
 if (isFieldMagnitude ~= 1)
     imagesc(y,z,(((E-Einit)./Einit)'));
     title('Threshold Overshoot','FontSize',12,'FontWeight','bold');
@@ -72,15 +72,15 @@ end
 colormap(gray(256))
 colorbar
 
-for ii=1:NbChargeLayers
-    rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*1e-3,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*1e-3,2*ChargeLayers(ii,6)*1e-3,ChargeLayers(ii,7)*1e-3],...
-        'Curvature',[0,0],...
-        'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor','w');
-%     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*1e-3,(z_gnd+ChargeLayers(ii,4))*1e-3,...
-%         ['\leftarrow',num2str(ChargeLayers(ii,1),3),' C'],...
-%         'HorizontalAlignment','left','BackgroundColor','none',...
-%         'FontSize',10,'Color','w')
-end
+% for ii=1:NbChargeLayers
+%     rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*1e-3,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*1e-3,2*ChargeLayers(ii,6)*1e-3,ChargeLayers(ii,7)*1e-3],...
+%         'Curvature',[0,0],...
+%         'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor','w');
+% %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*1e-3,(z_gnd+ChargeLayers(ii,4))*1e-3,...
+% %         ['\leftarrow',num2str(ChargeLayers(ii,1),3),' C'],...
+% %         'HorizontalAlignment','left','BackgroundColor','none',...
+% %         'FontSize',10,'Color','w')
+% end
 xlabel('y (km)','FontSize',12);
 ylabel('z (km)','FontSize',12);
 set(gca,'FontSize',10);

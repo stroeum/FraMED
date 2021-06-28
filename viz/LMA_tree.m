@@ -72,7 +72,8 @@ for ii=1:Nb.Links
     clear tmp
 
     if strcmp(Figure.Output,'Movie')
-        Movie(ii+2) = getframe(h.fig);
+        frame = getframe(h.fig);
+        writeVideo(v,frame);
     end
 end
 

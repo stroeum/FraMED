@@ -23,17 +23,16 @@ private:
 
 public:
 	SorSolution(){};								// Default constructor
-	SorSolution(CMatrix3D&, double,int,ResGrid,SizeGrid, Charge&, const CMatrix3D&);
+	SorSolution(CMatrix3D&, double, int, ResGrid, SizeGrid, Charge&, const CMatrix3D&);
 													// Constructor surcharge
-	SorSolution(CMatrix3D&, double,int,ResGrid,SizeGrid, Potential&, CMatrix3D&);
+	SorSolution(CMatrix3D&, double, int, ResGrid, SizeGrid, Potential&, CMatrix3D&);
 													// Constructor surcharge
 	~SorSolution(){};								// Destructor
-	void init(CMatrix3D&, double,int,ResGrid,SizeGrid, Charge&, const CMatrix3D&);
-	void init(CMatrix3D&, double,int,ResGrid,SizeGrid, Potential&, CMatrix3D&);
-	void Solve(ResGrid dd, SizeGrid NN, const CMatrix3D& UUUn, CMatrix3D& ppphi);
+	void init(CMatrix3D&, double, int, ResGrid, SizeGrid, Charge&, const CMatrix3D&);
+	void init(CMatrix3D&, double, int, ResGrid, SizeGrid, Potential&, CMatrix3D&);
+	void Solve(ResGrid _d, SizeGrid N, const CMatrix3D& Un, CMatrix3D& phi);
 													// Solve solution using SOR method
 };
 /**************************************************************************************/
 
-#endif SORSOLUTION_H
-
+#endif

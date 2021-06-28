@@ -1,4 +1,4 @@
-Try close all
+close all
 clear all
 clc
 choice = 0;
@@ -17,7 +17,7 @@ Y = (0:dy:(Ny-1)*dy);
 Z = (0:dz:(Nz-1)*dz)+z_gnd;
 
 if choice == 0
-    rho2D       = load('rho2d390.dat');
+    rho2D       = load('rho2d.dat');
     imagesc(Z,Y,rho2D,[-10 10]);
     ylabel('y-axis (m)');
     xlabel('z-axis (m)');

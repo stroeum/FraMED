@@ -15,13 +15,13 @@ protected:
 public:
 	CMatrix1D initiation;							// Initiation Threshold
 	CriticalFields(){};
-	CriticalFields(double iinitiation0, double ppositive0, double nnegative0, double zz_gnd, ResGrid dd, SizeGrid NN);
+	CriticalFields(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N, int ScalingExponent);
 	// Constructor
-	bool init(double iinitiation0, double ppositive0, double nnegative0, double zz_gnd, ResGrid dd, SizeGrid NN);
+	bool init(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N, int ScalingExponent);
 	// Initiate after declaration
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
 	~CriticalFields(){};							// Destructor
 };
 /**************************************************************************************/
 
-#endif CRITICALFIELDS_H
+#endif

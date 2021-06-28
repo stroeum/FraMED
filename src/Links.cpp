@@ -8,17 +8,17 @@
 Link::Link(const Link& LL)
 {Link::init(LL);}
 
-Link::Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd)
-{Link::init(sstart,eend, ddeltaV, dd, pphiStart,pphiEnd);}
+Link::Link(Point sstart, Point eend, double ddeltaV, ResGrid _d, double pphiStart, double pphiEnd)
+{Link::init(sstart,eend, ddeltaV, _d, pphiStart,pphiEnd);}
 
-Link::Link(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd)
-{Link::init(sstarti,sstartj,sstartk, eendi,eendj,eendk, ddeltaV, dd, pphiStart, pphiEnd);}
+Link::Link(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid _d, double pphiStart, double pphiEnd)
+{Link::init(sstarti,sstartj,sstartk, eendi,eendj,eendk, ddeltaV, _d, pphiStart, pphiEnd);}
 
-Link::Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi)
-{Link::init(sstart, eend, ddeltaV, dd, pphi);}
+Link::Link(Point sstart, Point eend, double ddeltaV, ResGrid _d, CMatrix3D _phi)
+{Link::init(sstart, eend, ddeltaV, _d, _phi);}
 
-Link::Link(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid dd, CMatrix3D pphi)
-{Link::init(sstarti,sstartj,sstartk, eendi,eendj,eendk, ddeltaV, dd, pphi);}
+Link::Link(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid _d, CMatrix3D _phi)
+{Link::init(sstarti,sstartj,sstartk, eendi,eendj,eendk, ddeltaV, _d, _phi);}
 
 void Link::init(const Link& LL)
 {
@@ -31,42 +31,36 @@ void Link::init(const Link& LL)
 	proba   = LL.proba;
 }
 
-void Link::init(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd)
+void Link::init(Point sstart, Point eend, double ddeltaV, ResGrid _d, double pphiStart, double pphiEnd)
 {
 	start	= sstart;
 	end		= eend;
 
-	//if (start == end)
-	//	cout<<"ee:\t Link can be only be established if starting and ending points are different.\n";
-
-	//	l = sqrt(pow( (end.i-start.i)*dd.x,2) + pow((end.j-start.j)*dd.y,2) + pow( (end.k-start.k)*dd.z,2) );
-
 	if(start.k == end.k)
 	{
-		if		(start.j == end.j)	{type = x;		l = dd.x;  }				// Link along x
-		else if (start.i == end.i)	{type = y;		l = dd.y;  }				// Link along y
-		else						{type = xy;		l = dd.xy; }				// Link in plane xy
+		if		(start.j == end.j)	{type = x;		l = _d.x;  }				// Link along x
+		else if (start.i == end.i)	{type = y;		l = _d.y;  }				// Link along y
+		else						{type = xy;		l = _d.xy; }				// Link in plane xy
 	}
 	else if (start.j == end.j)
 	{
-		if		(start.i == end.i)	{type = z;		l = dd.z;  }
-		else if (start.k == end.k)	{type = x;		l = dd.x;  }
-		else						{type = xz;		l = dd.xz; }
+		if		(start.i == end.i)	{type = z;		l = _d.z;  }
+		else if (start.k == end.k)	{type = x;		l = _d.x;  }
+		else						{type = xz;		l = _d.xz; }
 	}
 	else if (start.i == end.i)
 	{
-		if		(start.j == end.j)	{type = z;		l = dd.z;  }
-		else if (start.k == end.k)	{type = y;		l = dd.y;  }
-		else						{type = yz;		l = dd.yz; }
+		if		(start.j == end.j)	{type = z;		l = _d.z;  }
+		else if (start.k == end.k)	{type = y;		l = _d.y;  }
+		else						{type = yz;		l = _d.yz; }
 	}
-	else							{type = xyz;	l = dd.xyz;}
+	else							{type = xyz;	l = _d.xyz;}
 
 	deltaV = ddeltaV;
-	//printf("**:\tpphiEnd = %lf, pphiStart = %lf, l = %lf.\n", pphiEnd, pphiStart, l);
 	efield = -(pphiEnd-pphiStart)/l;
 } // Endof init
 
-void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd)
+void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid _d, double pphiStart, double pphiEnd)
 {
 	start.i = sstarti;
 	start.j = sstartj;
@@ -76,18 +70,18 @@ void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int
 	end.j = eendj;
 	end.k = eendk;
 
-	Link::init(start,end, ddeltaV, dd, pphiStart, pphiEnd);
+	Link::init(start,end, ddeltaV, _d, pphiStart, pphiEnd);
 } // Endof init
 
-void Link::init(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi)
+void Link::init(Point sstart, Point eend, double ddeltaV, ResGrid _d, CMatrix3D _phi)
 {
-	double pphiStart = pphi[start.i][start.j][start.k];
-	double pphiEnd	 = pphi[end.i][end.j][end.k];
+	double pphiStart = _phi[start.i][start.j][start.k];
+	double pphiEnd	 = _phi[end.i][end.j][end.k];
 
-	Link::init(start,end, ddeltaV, dd, pphiStart, pphiEnd);
+	Link::init(start,end, ddeltaV, _d, pphiStart, pphiEnd);
 } // Endof init
 
-void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid dd, CMatrix3D pphi)
+void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int eendk, double ddeltaV, ResGrid _d, CMatrix3D _phi)
 {	start.i = sstarti;
 	start.j = sstartj;
 	start.k = sstartk;
@@ -96,7 +90,7 @@ void Link::init(int sstarti, int sstartj, int sstartk, int eendi, int eendj, int
 	end.j = eendj;
 	end.k = eendk;
 
-	Link::init(start,end, ddeltaV, dd, pphi);
+	Link::init(start,end, ddeltaV, _d, _phi);
 } // Endof init
 
 

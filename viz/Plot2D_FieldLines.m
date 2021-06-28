@@ -1,11 +1,23 @@
-function [] = Plot2D_FieldLines(num)
+close all
+clear all
+clc
+
+% cd ..
+% !make
+% !./main
+% cd results
+
+%% Load datas
+close all
+clear all
+clc
 
 dxyz         = load('dxyz.dat');
 Nxyz         = load('Nxyz.dat');
-Ex2D         = load(['Ex2D',num2str(num),'.dat']);
-Ey2D         = load(['Ey2D',num2str(num),'.dat']);
-Ez2D         = load(['Ez2D',num2str(num),'.dat']);
-phi2D        = load(['phi2D',num2str(num),'.dat']);
+Ex2D         = load('Ex2D.dat');
+Ey2D         = load('Ey2D.dat');
+Ez2D         = load('Ez2D.dat');
+phi2D        = load('phi2D.dat');
 z_gnd        = load('z_gnd.dat');
 ChargeLayers = load('ChargeLayers.dat');
 
@@ -46,7 +58,7 @@ hold on
 axis([min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
 
 
-streamslice(y,z,Ey2D,Ez2D,10,'arrows');
+streamslice(y,z,Ey2D',Ez2D',10,'arrows');
 % quiver(y,z,Ey2D',Ez2D');
 set(findobj('Type','line'),'Color','k')
 plot([min(y(:)) max(y(:))], [z_gnd z_gnd]*1e-3,'k');

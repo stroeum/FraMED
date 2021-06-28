@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <memory>
 #include <iostream>
+#include <string.h>
+#include <cstdio>
 #include "Matrix.h"
 using namespace std;
 
@@ -31,7 +33,7 @@ CMatrix& CMatrix::operator=(const CMatrix& matrix)
 
 	int iMemSize = iNbElem * DOUBLE_BYTE_SIZE;
 	memcpy(pElems, matrix.pElems, iMemSize);
-
+	
 	return *this;
 } // Operator =
 
@@ -56,7 +58,7 @@ CMatrix::CMatrix (int iiNbElem)
 	if (!init()) {throw ENotEnoughMemory();}
 } // Default constructor
 
-CMatrix::CMatrix(const CMatrix& matrix)
+CMatrix::CMatrix(const CMatrix& matrix) 
 {
 	pElems  = NULL;
 	iNbElem = matrix.iNbElem;
@@ -77,16 +79,30 @@ bool CMatrix::operator==(const CMatrix& matrix) const
 {
 	if (iNbElem != matrix.iNbElem)
 		return false;
-
+	
 	if (memcmp(pElems, matrix.pElems, iNbElem) != 0)
 		return false;
-
+	
 	return true;
 }  // Operator ==
 
+FILE* CMatrix::Open(char *fname, const char *flags)
+{
+        char pwd[FILENAME_MAX];
+        if(!getcwd(pwd,sizeof(pwd))) exit(112);
+        strcat(pwd, "/");
+        strcat(pwd, &fname[0]);
+	FILE * file = fopen(pwd, flags);
+
+	/* printf("Opening file '%s'\n",pwd); */
+	if(!file) 
+		printf("cannot open file.\n");
+	return file;
+}
+
 void CMatrix::MinMax(double& MMin, double& MMax)
 {
-	if ( iNbElem <= 0 )
+	if ( iNbElem <= 0 ) 
 		throw; // Pb, max sur une matrice vide
 	else
 	{
@@ -112,27 +128,27 @@ void CMatrix3D::freeMemIfRequired(void)
 		free (pMatrix2d);
 		free (pMatrix3d);
 	}
-	pMatrix3d = NULL;
+	pMatrix3d = NULL;	
 } // freeMemIfRequired
 
 bool CMatrix3D::init()
 {
         if (!CMatrix::init())
 		return false;
-
-	if(!(pMatrix3d = (double***)malloc(xSize * sizeof(double**))))
+	
+	if(!(pMatrix3d = (double***)malloc(xSize * sizeof(double**)))) 
 	{
 		CMatrix::freeMemIfRequired();
 		return false;
 	}
-	if(!(pMatrix2d = (double**)malloc(xSize * ySize * sizeof(double* ))))
+	if(!(pMatrix2d = (double**)malloc(xSize * ySize * sizeof(double* )))) 
 	{
 		CMatrix::freeMemIfRequired();
 		free (pMatrix3d);
 		pMatrix3d = NULL;
 		return false;
 	}
-
+	
 	for(int x=0 ; x<xSize ; x++)
 	{
 		pMatrix3d[x] = pMatrix2d + x*ySize;
@@ -183,11 +199,11 @@ CMatrix3D& CMatrix3D::operator=(const CMatrix3D& matrix)
 
 CMatrix3D& CMatrix3D::operator+=(const CMatrix3D& matrix)
 {
-	if (xSize != matrix.xSize
-		|| ySize != matrix.ySize
+	if (xSize != matrix.xSize 
+		|| ySize != matrix.ySize 
 		|| zSize != matrix.zSize)
 		throw EAdditionImpossible();
-
+	
 	CMatrix::operator +=(matrix);
 	return *this;
 } // CMatrix3D& CMatrix3D::operator+=
@@ -198,8 +214,7 @@ CMatrix3D& CMatrix3D::operator-=(const CMatrix3D& matrix)
 		|| ySize != matrix.ySize
 		|| zSize != matrix.zSize)
 		throw EAdditionImpossible();
-	//	{cout<<"Impossible Addition";};
-
+    
 	CMatrix::operator -=(matrix);
 	return *this;
 } // CMatrix3D& CMatrix3D::operator-=
@@ -236,22 +251,24 @@ ostream& operator<<(ostream& os, const CMatrix3D& matrix)
 	return os;
 } // Operator<<
 
-void CMatrix3D::fwrite(char * c)
+void CMatrix3D::fwrite(string s)
 {
-	FILE * ffile = fopen (c, "w");
-	if(ffile)
-		for (int kk=0 ; kk<zSize ; kk++)
+	char * c = &s[0];
+	FILE * ffile = Open (c, "w");
+	for (int kk=0 ; kk<zSize ; kk++)
+	{
+//		fprintf(ffile,"z = %d\n",kk);
+		for (int ii=0 ; ii<xSize ; ii++)
 		{
-			for (int ii=0 ; ii<xSize ; ii++)
-			{
-				for (int jj=0 ; jj<ySize ; jj++)
-					fprintf(ffile,"%f ", pMatrix3d[ii][jj][kk]);
-				fprintf(ffile,"\n");
-			};
+			for (int jj=0 ; jj<ySize ; jj++)
+                fprintf(ffile,"%f ", pMatrix3d[ii][jj][kk]);
 			fprintf(ffile,"\n");
 		};
+		fprintf(ffile,"\n");
+	};
 	fclose(ffile);
-}// fwrite
+} // fwrite
+
 
 /**************************************************************************************/
 
@@ -271,15 +288,15 @@ void CMatrix2D::freeMemIfRequired(void)
 bool CMatrix2D::init()
 {
 	if (!CMatrix::init()) {return false;}
-
-	if(!(pMatrix2d = (double**)malloc(xSize * sizeof(double*))))
+	
+	if(!(pMatrix2d = (double**)malloc(xSize * sizeof(double*)))) 
 	{
 		CMatrix::freeMemIfRequired();
 		return false;
 	}
-
+	
 	for(int x=0 ; x<xSize ; x++) {pMatrix2d[x] = pElems + x*ySize;}
-
+	
 	return true;
 } // bool CMatrix2D::init
 
@@ -293,10 +310,9 @@ bool CMatrix2D::init(int xxSize, int yySize)
 
 CMatrix2D::CMatrix2D(int xxSize, int yySize) : CMatrix(xxSize * yySize)
 {
-	xSize	  = xxSize;
+	xSize	  = xxSize; 
 	ySize	  = yySize;
 	pMatrix2d = NULL;
-//	if (!init()) {cout<<"Not Enough Memory"<<endl;}
 	if (!init()) {throw ENotEnoughMemory();}
 } // CMatrix2D::CMatrix2D
 
@@ -313,7 +329,7 @@ CMatrix2D& CMatrix2D::operator=(const CMatrix2D& matrix)
 	xSize = matrix.xSize;
 	ySize = matrix.ySize;
 	CMatrix::operator=(matrix);
-
+	
 	return *this;
 } // CMatrix2D& CMatrix2D::operator=
 
@@ -334,7 +350,7 @@ CMatrix2D CMatrix2D::operator-(const CMatrix2D& matrix) const
 CMatrix2D& CMatrix2D::operator+=(const CMatrix2D& matrix)
 {
 	if (xSize != matrix.xSize || ySize != matrix.ySize ) {throw EAdditionImpossible();}
-
+	
 	CMatrix::operator +=(matrix);
 	return *this;
 } // CMatrix2D& CMatrix2D::operator+=
@@ -342,7 +358,7 @@ CMatrix2D& CMatrix2D::operator+=(const CMatrix2D& matrix)
 CMatrix2D& CMatrix2D::operator-=(const CMatrix2D& matrix)
 {
 	if (xSize != matrix.xSize || ySize != matrix.ySize ) {throw EAdditionImpossible();}
-
+	
 	CMatrix::operator -=(matrix);
 	return *this;
 } // CMatrix2D& CMatrix2D::operator-=
@@ -361,16 +377,15 @@ ostream& operator<<(ostream& os, const CMatrix2D& matrix)
 	return os;
 } // std::ostream& operator<<
 
-void CMatrix2D::fwrite(char * c)
+void CMatrix2D::fwrite(string s)
 {
-	FILE * ffile = fopen (c, "w");
-	if(ffile)
-		for (int ii=0 ; ii<xSize ; ii++)
-		{
-			for (int jj=0 ; jj<ySize ; jj++)
-				fprintf(ffile,"%f ", pMatrix2d[ii][jj]);
-			fprintf(ffile,"\n");
-		};
+	char * c = &s[0];
+	FILE * ffile = Open (c, "w");
+	for (int jj=0 ; jj<ySize ; jj++)
+	{
+		for (int ii=0 ; ii<xSize ; ii++) fprintf(ffile,"%f ", pMatrix2d[ii][jj]);
+		fprintf(ffile,"\n");
+	};
 	fclose(ffile);
 }// fwrite
 /**************************************************************************************/
@@ -426,18 +441,12 @@ ostream& operator<<(ostream& os, const CMatrix1D& matrix)
 	return os;
 } // std::ostream& operator<<
 
-void CMatrix1D::fwrite(char * c)
+void CMatrix1D::fwrite(string s)
 {
-	FILE * ffile = fopen (c, "w");
-	if(ffile)
-	{
-		for (int ii=0 ; ii<iNbElem ; ii++)
-			fprintf(ffile,"%f\n",pElems[ii]);
-		fclose(ffile);
-	}
-	else
-	{
-		printf("ERROR: CMatrix1D::fwrite failed to open file.\n");
-	}
+	char * c = &s[0];
+	FILE * ffile = Open (c, "w");
+	for (int ii=0 ; ii<iNbElem ; ii++)
+		fprintf(ffile,"%f\n",pElems[ii]);
+	fclose(ffile);
 }// fwrite
 /**************************************************************************************/

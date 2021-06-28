@@ -7,15 +7,15 @@ Charge::Charge()
 	Charge::init(0, 0,0,0, 0,0,0);
 }	// No initialization of rho and Un //
 
-Charge::Charge(ResGrid dd, SizeGrid NN)
-{Charge::reset(dd,NN);}
+Charge::Charge(ResGrid _d, SizeGrid _N)
+{Charge::reset(_d,_N);}
 
 Charge::Charge(double QQ, double XXq, double YYq, double ZZq, double RRq1, double RRq2, double RRq3)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, RRq1,RRq2,RRq3);
 }	// No initialization of rho and Un //
 
-bool Charge::init(char * filename, SizeGrid& NN)
+bool Charge::init(char * filename, SizeGrid& _N)
 {
 	FILE * file = fopen (filename, "r");
 	char	tmp_c, tmp_cc;
@@ -26,29 +26,29 @@ bool Charge::init(char * filename, SizeGrid& NN)
 	Q	= 0;
 	Xq	= 0;	Yq	= 0;	Zq	= 0;
 	Rq1	= 0;	Rq2	= 0;	Rq3	= 0;
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
-	NN.x = 0;	NN.y = 0;	NN.z = 0;
+	_N.x = 0;	_N.y = 0;	_N.z = 0;
 	while((tmp_c=fgetc(file)) != EOF)
 	{
 		if(tmp_c == ' ')
-			NN.z++;
+			_N.z++;
 		if(tmp_c == '\n')
 		{
-			NN.y++;
+			_N.y++;
 			tmp_cc = fgetc(file);
 			if(tmp_cc == '\n' && tmp_cc !=EOF)
-				NN.x++;
+				_N.x++;
 		}
 	}
-	NN.x  = NN.y/NN.x;
-	NN.y  = NN.z/NN.y;
-	NN.z /= NN.x*NN.y;
+	_N.x  = _N.y/_N.x;
+	_N.y  = _N.z/_N.y;
+	_N.z /= _N.x*_N.y;
 
 	rewind(file);
-	rho.init(NN.x,NN.y,NN.z);
-	Un.init(NN.x,NN.y,NN.z);
+	rho.init(_N.x,_N.y,_N.z);
+	Un.init(_N.x,_N.y,_N.z);
 	int ii(0),jj(0),kk(0);
 
 	while((tmp_c=fgetc(file)) != EOF)
@@ -88,11 +88,11 @@ bool Charge::init(double QQ, double XXq, double YYq, double ZZq, double RRq1, do
 	return true;
 }
 
-bool Charge::reset(ResGrid dd, SizeGrid NN)
+bool Charge::reset(ResGrid _d, SizeGrid _N)
 {
 	Charge::init(0, 0,0,0, 0,0,0);
-	rho.init(NN.x,NN.y,NN.z);
-	Un.init(NN.x,NN.y,NN.z);
+	rho.init(_N.x,_N.y,_N.z);
+	Un.init(_N.x,_N.y,_N.z);
 	return true;
 }
 // Reset all charge attributes
@@ -110,7 +110,7 @@ CMatrix1D Charge::getParams()
 	return PParams;
 }
 
-bool Charge::init(char * filename1, char * filename2, char * filename3, char * filename4, char * filename5, ResGrid& dd, SizeGrid& NN, double& z_gnd, double Lr, double Lz)
+bool Charge::init(char * filename1, char * filename2, char * filename3, char * filename4, char * filename5, ResGrid& _d, SizeGrid& _N, double& z_gnd, double Lr, double Lz)
 {
 	int		Nr,Nz;
 	double	dr,dz;
@@ -129,29 +129,29 @@ bool Charge::init(char * filename1, char * filename2, char * filename3, char * f
 	fclose(z_gnd_in);
 	
 	Type = "from file";
-	NN.z = (Nz*dz<=Lz)*Nz + (Nz*dz>Lz)*(int)(Lz/dz+1);
-	NN.x = (Nr*dr<=Lr)*(2*Nr-1) + (Nr*dr>Lr)*(int)(2*(Lr/dr+1)-1);
+	_N.z = (Nz*dz<=Lz)*Nz + (Nz*dz>Lz)*(int)(Lz/dz+1);
+	_N.x = (Nr*dr<=Lr)*(2*Nr-1) + (Nr*dr>Lr)*(int)(2*(Lr/dr+1)-1);
 	
 	
-	dd.init(dr,dr,dz);
-	NN.init(NN.x,NN.x,NN.z);
-	rho.init(NN.x, NN.y, NN.z);
-	Un.init(NN.x, NN.y, NN.z);
+	_d.init(dr,dr,dz);
+	_N.init(_N.x,_N.x,_N.z);
+	rho.init(_N.x, _N.y, _N.z);
+	Un.init(_N.x, _N.y, _N.z);
 	
 	char	tmp_c;
 	string	tmp_s;
 	double	tmp_d;
 
-	int is(0), ks(0), ii(0), jj(0), ic((int)((NN.x-1)/2)), jc(ic);
+	int is(0), ks(0), ii(0), jj(0), ic((int)((_N.x-1)/2)), jc(ic);
 	while((tmp_c=fgetc(rhos_in)) != EOF && is<=Nr)
 	{
 		tmp_s += tmp_c;
 		if(tmp_c == ' ')
 		{
 			tmp_d = atof(tmp_s.c_str());
-			for(ii=0 ; ii<NN.x ; ii++) for(jj=0 ; jj<NN.y ; jj++)
-				if(is <= NN.x && ks <= NN.z)
-					if((pow((ii-ic)*dd.x,2) + pow((jj-jc)*dd.y,2)) >= pow(is*dr,2) && (pow((ii-ic)*dd.x,2) + pow((jj-jc)*dd.y,2)) < pow((is+1)*dr,2))
+			for(ii=0 ; ii<_N.x ; ii++) for(jj=0 ; jj<_N.y ; jj++)
+				if(is <= _N.x && ks <= _N.z)
+					if((pow((ii-ic)*_d.x,2) + pow((jj-jc)*_d.y,2)) >= pow(is*dr,2) && (pow((ii-ic)*_d.x,2) + pow((jj-jc)*_d.y,2)) < pow((is+1)*dr,2))
 						rho[ii][jj][ks] = tmp_d*1e-9;
 			ks++;
 			tmp_s = "";
@@ -170,9 +170,9 @@ bool Charge::init(char * filename1, char * filename2, char * filename3, char * f
 		if(tmp_c == ' ')
 		{
 			tmp_d = atof(tmp_s.c_str());
-			for(ii=0 ; ii<NN.x ; ii++) for(jj=0 ; jj<NN.y ; jj++)
-				if(is <= NN.x && ks <= NN.z)
-					if((pow((ii-ic)*dd.x,2) + pow((jj-jc)*dd.y,2)) >= pow(is*dr,2) && (pow((ii-ic)*dd.x,2) + pow((jj-jc)*dd.y,2)) < pow((is+1)*dr,2))
+			for(ii=0 ; ii<_N.x ; ii++) for(jj=0 ; jj<_N.y ; jj++)
+				if(is <= _N.x && ks <= _N.z)
+					if((pow((ii-ic)*_d.x,2) + pow((jj-jc)*_d.y,2)) >= pow(is*dr,2) && (pow((ii-ic)*_d.x,2) + pow((jj-jc)*_d.y,2)) < pow((is+1)*dr,2))
 						rho[ii][jj][ks] += tmp_d*1e-9;
 			ks++;
 			tmp_s = "";
@@ -193,7 +193,7 @@ bool Charge::init(char * filename1, char * filename2, char * filename3, char * f
 
 /* SAM function. */
 
-bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
+bool Charge::init(char * filename, ResGrid& _d, SizeGrid& _N, double& z_gnd)
 {
 
 	FILE * p_in = fopen(filename, "r");
@@ -221,10 +221,10 @@ bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
 	 * NOTE: see documentation for method of charge assignment.
 	 */
 	Type = "from file";
-	fscanf(p_in, "%d %d %d", &(NN.x), &(NN.y), &(NN.z));
+	fscanf(p_in, "%d %d %d", &(_N.x), &(_N.y), &(_N.z));
 	fscanf(p_in, "%lf %lf %lf", &(dxi), &(dyi), &(dzi));
 	fscanf(p_in, "%lf", &(z_gnd));
-	/* The step lengths cannot be read into the ResGrid 'dd' immediately, since
+	/* The step lengths cannot be read into the ResGrid '_d' immediately, since
 	 * the ResGrid must also calculate the distances between points lying across
 	 * from each other diagonally.  Also, instead of initializing the ResGrid from a
 	 * SizeDomain and a SizeGrid, the ResGrid is initialized from the side lengths and
@@ -232,12 +232,12 @@ bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
 	 * easier that way).  This is the motivation for creating the 'init(double double double)'
 	 * function for the ResGrid class.
 	 */
-	dd.init(dxi, dyi, dzi);
-	V = dd.x * dd.y * dd.z;
+	_d.init(dxi, dyi, dzi);
+	V = _d.x * _d.y * _d.z;
 
-	rho.init(NN.x, NN.y, NN.z);
-	Un.init(NN.x, NN.y, NN.z);
-	frequency.init(NN.x, NN.y, NN.z);
+	rho.init(_N.x, _N.y, _N.z);
+	Un.init(_N.x, _N.y, _N.z);
+	frequency.init(_N.x, _N.y, _N.z);
 
 	/* In order to "smooth" out the charge distribution, each source point assigns charge to the corresponding
 	 * element of the matrix 'rho', along with all of the neighboring elements.  If the current 'element' is not
@@ -250,7 +250,7 @@ bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
 		for(xs = xi - 1; xs < xi + 2; xs++) for(ys = yi - 1; ys < yi + 2; ys++) for(zs = zi - 1; zs < zi + 2; zs++)
 		{
 			/* If we've traveled off of the edge of the grid, just go to the next point in the neighborhood. */
-			if(	(xs < 0) || (xs > NN.x - 1) || (ys < 0) || (ys > NN.y - 1) || (zs < 0) || (zs > NN.z - 1))
+			if(	(xs < 0) || (xs > _N.x - 1) || (ys < 0) || (ys > _N.y - 1) || (zs < 0) || (zs > _N.z - 1))
 				continue;
 			rho[xs][ys][zs] += cha_cal/V;
 			cha_den = fabs(rho[xs][ys][zs]);
@@ -266,10 +266,10 @@ bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
 	}
 	printf("++: Completed initialization of matrix!\n");
 	printf("ii:\t The maximum absolute charge density of: %lf nC/m^3\n", rho[xm][ym][zm]*1e9);
-	printf("ii:\t\t occurred at location: [%lf km, %lf km, %lf km]\n", (xm * dd.x)/1e3, (ym * dd.y)/1e3, (zm * dd.z + z_gnd)/1e3);
+	printf("ii:\t\t occurred at location: [%lf km, %lf km, %lf km]\n", (xm * _d.x)/1e3, (ym * _d.y)/1e3, (zm * _d.z + z_gnd)/1e3);
 	printf("ii:\t\t and was based on %d source points.\n", (int) frequency[xm][ym][zm]);
 
-	if(	(xm == 0) || (xm == (NN.x - 1)) || (ym == 0) || (ym == (NN.y - 1)) || (zm == 0) || (zm == (NN.z - 1))	)
+	if(	(xm == 0) || (xm == (_N.x - 1)) || (ym == 0) || (ym == (_N.y - 1)) || (zm == 0) || (zm == (_N.z - 1))	)
 		printf("ii:\t The location is a boundary!\n");
 	else
 	{
@@ -285,67 +285,67 @@ bool Charge::init(char * filename, ResGrid& dd, SizeGrid& NN, double& z_gnd)
 string	Charge::getType()
 {return Type;}
 
-bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double aaq, double bbq, double ccq, ResGrid dd, SizeGrid NN)
+bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double aaq, double bbq, double ccq, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, aaq,bbq,ccq);
 	Type = "gaussian";
-	rho.init(NN.x,NN.y,NN.z);
-	Un.init(NN.x,NN.y,NN.z);
+	rho.init(_N.x,_N.y,_N.z);
+	Un.init(_N.x,_N.y,_N.z);
 	double rho0 = Q / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq2);
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*dd.x-Xq)/Rq1,2) + pow((jj*dd.y-Yq)/Rq2,2) + pow((kk*dd.z-Zq)/Rq3,2)));
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*_d.x-Xq)/Rq1,2) + pow((jj*_d.y-Yq)/Rq2,2) + pow((kk*_d.z-Zq)/Rq3,2)));
 	return true;
 }
 // Gaussian charge with tilt along vector (a,b)
 /*
-bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double aa,double bb, ResGrid dd, SizeGrid NN)
+bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double aa,double bb, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, llambda,mmu,nnu);
 	Type = "gaussian";
-	rho.init(NN.x,NN.y,NN.z);
-	Un.init(NN.x,NN.y,NN.z);
+	rho.init(_N.x,_N.y,_N.z);
+	Un.init(_N.x,_N.y,_N.z);
 	double rho0 = Q*(pow(aa,2)+pow(bb,2)) / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq3);
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*dd.x-Xq)/Rq1,2) + pow((aa*(jj*dd.y-Yq)+bb*(kk*dd.z-Zq))/Rq2,2) + pow((-bb*(jj*dd.y-Yq)+aa*(kk*dd.z-Zq))/Rq3,2)));
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*_d.x-Xq)/Rq1,2) + pow((aa*(jj*_d.y-Yq)+bb*(kk*_d.z-Zq))/Rq2,2) + pow((-bb*(jj*_d.y-Yq)+aa*(kk*_d.z-Zq))/Rq3,2)));
 	return true;
 }
 */
 // Gaussian charge with tilt, angle phi,theta
 /*
-bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double pphi,double ttheta, ResGrid dd, SizeGrid NN)
+bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double _phi,double ttheta, ResGrid _d, SizeGrid _N)
 {
 	 double xp,yp,zp;
 	 Charge::init(QQ, XXq,YYq,ZZq, llambda,mmu,nnu);
 	 Type	 = "gaussian";
 	 ttheta	*= M_PI/180;
-	 pphi	*= M_PI/180;
-	 rho.init(NN.x,NN.y,NN.z);
-	 Un.init(NN.x,NN.y,NN.z);
+	 _phi	*= M_PI/180;
+	 rho.init(_N.x,_N.y,_N.z);
+	 Un.init(_N.x,_N.y,_N.z);
 	 double rho0 = Q / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq3);
-	 for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
+	 for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
 	 {
-		 xp =  cos(ttheta)*cos(pphi)*(ii*dd.x-XXq) + sin(pphi)*(jj*dd.y-YYq) - sin(ttheta)*cos(pphi)*(kk*dd.z-ZZq);
-		 yp = -cos(ttheta)*sin(pphi)*(ii*dd.x-XXq) + cos(pphi)*(jj*dd.y-YYq) + sin(ttheta)*sin(pphi)*(kk*dd.z-ZZq);
-		 zp =  sin(ttheta)          *(ii*dd.x-XXq)                           - cos(ttheta)          *(kk*dd.z-ZZq);
+		 xp =  cos(ttheta)*cos(_phi)*(ii*_d.x-XXq) + sin(_phi)*(jj*_d.y-YYq) - sin(ttheta)*cos(_phi)*(kk*_d.z-ZZq);
+		 yp = -cos(ttheta)*sin(_phi)*(ii*_d.x-XXq) + cos(_phi)*(jj*_d.y-YYq) + sin(ttheta)*sin(_phi)*(kk*_d.z-ZZq);
+		 zp =  sin(ttheta)          *(ii*_d.x-XXq)                           - cos(ttheta)          *(kk*_d.z-ZZq);
 		 rho[ii][jj][kk] = rho0 * exp(-(pow(xp/Rq1,2) + pow(yp/Rq2,2) + pow(zp/Rq3,2)));
 	 }
 	 return true;
 }
 */
-bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double pphi,double ttheta, ResGrid dd, SizeGrid NN)
+bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llambda,double mmu,double nnu, double _phi,double ttheta, ResGrid _d, SizeGrid _N)
 {
-	Charge::gaussian(QQ, XXq,YYq,ZZq, llambda,mmu,nnu, dd,NN);
-	Charge::rotate(XXq,YYq,ZZq,0,0,1,pphi,dd,NN);
-	Charge::rotate(XXq,YYq,ZZq,-sin(pphi*M_PI/180),cos(pphi*M_PI/180),0,ttheta,dd,NN);
+	Charge::gaussian(QQ, XXq,YYq,ZZq, llambda,mmu,nnu, _d,_N);
+	Charge::rotate(XXq,YYq,ZZq,0,0,1,_phi,_d,_N);
+	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*M_PI/180),cos(_phi*M_PI/180),0,ttheta,_d,_N);
 	return true;
 }
 
-bool	Charge::disk(double QQ, double XXq,double YYq,double ZZq, double RR, double HH, ResGrid dd, SizeGrid NN)
+bool	Charge::disk(double QQ, double XXq,double YYq,double ZZq, double RR, double HH, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, RR,RR,HH);
 	Type = "disk";
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
 	double rho0 = Q / (M_PI * pow(Rq1,2) * Rq3);
 	double	ccptPoints	= 0;
@@ -355,26 +355,26 @@ bool	Charge::disk(double QQ, double XXq,double YYq,double ZZq, double RR, double
 	/* is actually the one inserted. However, the volume might be modified to ensure  */
 	/* that.																		  */
 	/**********************************************************************************/
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xq,2)+pow(jj*dd.y-Yq,2))<=Rq1 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xq,2)+pow(jj*_d.y-Yq,2))<=Rq1 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			ccptPoints++;
-	rho0 = Q/(ccptPoints*dd.x*dd.y*dd.z);
+	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
 
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xq,2)+pow(jj*dd.y-Yq,2))<=Rq1 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xq,2)+pow(jj*_d.y-Yq,2))<=Rq1 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			rho[ii][jj][kk] = rho0;
 	return true;
 }
 
-bool	Charge::ellipse(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double hh, ResGrid dd, SizeGrid NN)
+bool	Charge::ellipse(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double hh, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, aa,bb,hh);
 	Type = "ellipse";
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
 	double rho0 = Q / (M_PI * Rq1*Rq2 * Rq3);
 	double	ccptPoints	= 0;
@@ -384,26 +384,26 @@ bool	Charge::ellipse(double QQ, double XXq,double YYq,double ZZq, double aa, dou
 	/* is actually the one inserted. However, the volume might be modified to ensure  */
 	/* that.																		  */
 	/**********************************************************************************/
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(pow( (ii*dd.x-Xq)/Rq1 ,2) + pow( (jj*dd.y-Yq)/Rq2 ,2) <= 1 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(pow( (ii*_d.x-Xq)/Rq1 ,2) + pow( (jj*_d.y-Yq)/Rq2 ,2) <= 1 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			ccptPoints++;
-	rho0 = Q/(ccptPoints*dd.x*dd.y*dd.z);
+	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
 
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(pow( (ii*dd.x-Xq)/Rq1 ,2) + pow( (jj*dd.y-Yq)/Rq2 ,2) <= 1 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(pow( (ii*_d.x-Xq)/Rq1 ,2) + pow( (jj*_d.y-Yq)/Rq2 ,2) <= 1 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			rho[ii][jj][kk] = rho0;
 	return true;
 }
 
-bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double cc, ResGrid dd, SizeGrid NN)
+bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double cc, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, aa,bb,cc);
 	Type = "ellipsoid";
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
 	double rho0 = Q / (4/3 * M_PI * Rq1*Rq2*Rq3);
 	double	ccptPoints	= 0;
@@ -412,34 +412,34 @@ bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, d
 	/* is actually the one inserted. However, the volume might be modified to ensure  */
 	/* that.																		  */
 	/**********************************************************************************/
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(pow( (ii*dd.x-Xq)/Rq1 ,2) + pow( (jj*dd.y-Yq)/Rq2 ,2) + pow( (kk*dd.z-Zq)/Rq3 ,2) <= 1)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(pow( (ii*_d.x-Xq)/Rq1 ,2) + pow( (jj*_d.y-Yq)/Rq2 ,2) + pow( (kk*_d.z-Zq)/Rq3 ,2) <= 1)
 			ccptPoints++;
-	rho0 = Q/(ccptPoints*dd.x*dd.y*dd.z);
+	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
 
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(pow( (ii*dd.x-Xq)/Rq1 ,2) + pow( (jj*dd.y-Yq)/Rq2 ,2) + pow( (kk*dd.z-Zq)/Rq3 ,2) <= 1)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(pow( (ii*_d.x-Xq)/Rq1 ,2) + pow( (jj*_d.y-Yq)/Rq2 ,2) + pow( (kk*_d.z-Zq)/Rq3 ,2) <= 1)
 			rho[ii][jj][kk] = rho0;
 	return true;
 }
 
-bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double cc, double pphi,double ttheta, ResGrid dd, SizeGrid NN)
+bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, double bb, double cc, double _phi,double ttheta, ResGrid _d, SizeGrid _N)
 {
-	Charge::ellipsoid(QQ, XXq,YYq,ZZq, aa,bb,cc, dd,NN);
-	Charge::rotate(XXq,YYq,ZZq,0,0,1,pphi,dd,NN);
-	Charge::rotate(XXq,YYq,ZZq,-sin(pphi*M_PI/180),cos(pphi*M_PI/180),0,ttheta,dd,NN);
+	Charge::ellipsoid(QQ, XXq,YYq,ZZq, aa,bb,cc, _d,_N);
+	Charge::rotate(XXq,YYq,ZZq,0,0,1,_phi,_d,_N);
+	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*M_PI/180),cos(_phi*M_PI/180),0,ttheta,_d,_N);
 	return true;
 }
 
-bool	Charge::rectangle(double QQ, double XXq,double YYq,double ZZq, double llx,double lly,double llz, ResGrid dd, SizeGrid NN)
+bool	Charge::rectangle(double QQ, double XXq,double YYq,double ZZq, double llx,double lly,double llz, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, llx,lly,llz);
 	Type = "rectangle";
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
 	double rho0 = Q / (Rq1*Rq2*Rq3);
 	double	ccptPoints	= 0;
@@ -449,26 +449,26 @@ bool	Charge::rectangle(double QQ, double XXq,double YYq,double ZZq, double llx,d
 	/* is actually the one inserted. However, the volume might be modified to ensure  */
 	/* that.																		  */
 	/**********************************************************************************/
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(fabs(ii*dd.x-Xq)<=Rq1/2 && fabs(jj*dd.y-Yq)<=Rq2/2 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(fabs(ii*_d.x-Xq)<=Rq1/2 && fabs(jj*_d.y-Yq)<=Rq2/2 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			ccptPoints++;
-	rho0 = Q/(ccptPoints*dd.x*dd.y*dd.z);
+	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
 
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(fabs(ii*dd.x-Xq)<=Rq1/2 && fabs(jj*dd.y-Yq)<=Rq2/2 && fabs(kk*dd.z-Zq)<=Rq3/2)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(fabs(ii*_d.x-Xq)<=Rq1/2 && fabs(jj*_d.y-Yq)<=Rq2/2 && fabs(kk*_d.z-Zq)<=Rq3/2)
 			rho[ii][jj][kk] = rho0;
 	return true;
 }
 
-bool	Charge::sphere(double QQ, double XXq, double YYq, double ZZq, double RR, ResGrid dd, SizeGrid NN)
+bool	Charge::sphere(double QQ, double XXq, double YYq, double ZZq, double RR, ResGrid _d, SizeGrid _N)
 {
 	Charge::init(QQ, XXq,YYq,ZZq, RR,RR,RR);
 	Type = "sphere";
-	Un.init(NN.x,NN.y,NN.z);
-	rho.init(NN.x,NN.y,NN.z);
+	Un.init(_N.x,_N.y,_N.z);
+	rho.init(_N.x,_N.y,_N.z);
 
 	double rho0 = Q / (4/3 * M_PI * pow(Rq1,3));
 	double	ccptPoints	= 0;
@@ -480,56 +480,56 @@ bool	Charge::sphere(double QQ, double XXq, double YYq, double ZZq, double RR, Re
 	/**********************************************************************************/
 	cout<<"!!! Modification of the volume to garantee precision on the implemented charge. !!!\n";
 	ccptPoints = 0;
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xq,2)+pow(jj*dd.y-Yq,2)+pow(kk*dd.z-Zq,2))<=Rq1)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xq,2)+pow(jj*_d.y-Yq,2)+pow(kk*_d.z-Zq,2))<=Rq1)
 			ccptPoints++;
-	rho0 = Q/(ccptPoints*dd.x*dd.y*dd.z);
+	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	cout<<"Error on the volume due to the correction  : "<<
-		fabs(4/3 * M_PI * pow(Rq1,3) - ccptPoints*dd.x*dd.y*dd.z)
+		fabs(4/3 * M_PI * pow(Rq1,3) - ccptPoints*_d.x*_d.y*_d.z)
 		/(4/3 * M_PI * pow(Rq1,3)) *100<<" %"<<endl;
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
 
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xq,2)+pow(jj*dd.y-Yq,2)+pow(kk*dd.z-Zq,2))<=Rq1)
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xq,2)+pow(jj*_d.y-Yq,2)+pow(kk*_d.z-Zq,2))<=Rq1)
 			rho[ii][jj][kk] = rho0;
 	return true;
 }
 
-CMatrix1D	Charge::MonopoleAnalyticalSolution(	ResGrid dd, SizeGrid NN)
+CMatrix1D	Charge::MonopoleAnalyticalSolution(	ResGrid _d, SizeGrid _N)
 {
-	CMatrix1D pphiAn(NN.z);
-	// int kkq = (int)round(Zq/dd.z);
+	CMatrix1D pphiAn(_N.z);
+	// int kkq = (int)round(Zq/_d.z);
 
-	for(int kk=0 ; kk<NN.z ; kk++)
+	for(int kk=0 ; kk<_N.z ; kk++)
 	{
-		if(fabs(kk*dd.z-Zq)<=Rq1)
-			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*dd.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
+		if(fabs(kk*_d.z-Zq)<=Rq1)
+			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
 		else
-			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*dd.z-Zq));
+			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq));
 	}
 	return pphiAn;
 }// Analytical solution: Monopole case
 
-CMatrix1D	Charge::DipoleAnalyticalSolution(	ResGrid dd, SizeGrid NN)
+CMatrix1D	Charge::DipoleAnalyticalSolution(	ResGrid _d, SizeGrid _N)
 {
-	CMatrix1D pphiAn(NN.z);
-	//	int kkq = (int)round(Zq/dd.z);
+	CMatrix1D pphiAn(_N.z);
+	//	int kkq = (int)round(Zq/_d.z);
 
-	for(int kk=0 ; kk<NN.z ; kk++)
+	for(int kk=0 ; kk<_N.z ; kk++)
 	{
-		if(fabs(kk*dd.z-Zq)<=Rq1)
-			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*dd.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1)) - Q/(4*eps0*M_PI*(kk*dd.z+Zq));
+		if(fabs(kk*_d.z-Zq)<=Rq1)
+			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1)) - Q/(4*eps0*M_PI*(kk*_d.z+Zq));
 		else
-			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*dd.z-Zq))								  - Q/(4*eps0*M_PI*(kk*dd.z+Zq));
+			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq))								  - Q/(4*eps0*M_PI*(kk*_d.z+Zq));
 	}
 	return pphiAn;
 }// Analytical solution: Dipole case
 
-CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid dd, SizeGrid NN)
+CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid _d, SizeGrid _N)
 {
-	CMatrix1D pphiAn(NN.z);
+	CMatrix1D pphiAn(_N.z);
 	/******************************************************************************/
 	/* We neglect the ambient Laplacian field on Earth (100 V/m = 1e-3kV/cm)	  */
 	/* The potential due to the ambient Laplacian field VL = 0.					  */
@@ -544,22 +544,22 @@ CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid dd, SizeGrid NN)
 	int		M(1000);						// Account for M ground images and M ionospheric images
 	double	z_GndImg = 0;				// Altitude of ground images
 	double	z_IonImg = 0;				// Altitude of iono/electrosphere images
-	double	z_Ion    = (NN.z-1)*dd.z;	// Altitude coordinate of the iono/electrosphere
+	double	z_Ion    = (_N.z-1)*_d.z;	// Altitude coordinate of the iono/electrosphere
 
 	/******************************************************************************/
 	/* Derive potential on the central axis										  */
 	/******************************************************************************/
-	for(int kk=0 ; kk<NN.z ; kk++)
+	for(int kk=0 ; kk<_N.z ; kk++)
 	{
-		VL = Eambient * kk *dd.z;
+		VL = Eambient * kk *_d.z;
 		pphiAn[kk] = VL;
 	}
-	for(int kk=0 ; kk<NN.z ; kk++)
+	for(int kk=0 ; kk<_N.z ; kk++)
 	{
-		if(fabs(kk*dd.z-Zq)<=Rq1)
-			pphiAn[kk] += -Q/(4*eps0*M_PI)*(pow(kk*dd.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
+		if(fabs(kk*_d.z-Zq)<=Rq1)
+			pphiAn[kk] += -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
 		else
-			pphiAn[kk] += Q/(4*eps0*M_PI*fabs(kk*dd.z-Zq));
+			pphiAn[kk] += Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq));
 
 		z_GndImg = Zq; // Altitude of ground images			    //
 		z_IonImg = Zq; // Altitude of iono/electrosphere images //
@@ -571,8 +571,8 @@ CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid dd, SizeGrid NN)
 			//			cout<<"m = "<<setw(3)<<mm<<"; z_Ion = "<<setw(8)<<z_Ion<<"; z_GndImg = "<<setw(8)<<z_GndImg<<"; z_IonImg = "<<setw(8)<<z_IonImg<<endl;
 
 			pphiAn[kk] += pow(-1.0,mm)*
-				(Q/(4*eps0*M_PI*fabs(kk*dd.z-z_GndImg)) +	// Ground Images
-				 Q/(4*eps0*M_PI*fabs(kk*dd.z-z_IonImg)) ); // Ionosphere Images
+				(Q/(4*eps0*M_PI*fabs(kk*_d.z-z_GndImg)) +	// Ground Images
+				 Q/(4*eps0*M_PI*fabs(kk*_d.z-z_IonImg)) ); // Ionosphere Images
 		};
 	}
 	return pphiAn;
@@ -623,33 +623,33 @@ void	Charge::fwrite(char * title)
 	fclose(file);
 } // fwrite
 
-bool Charge::rotate(double a, double b, double c, double u, double v, double w, double theta, ResGrid dd, SizeGrid NN)
+bool Charge::rotate(double a, double b, double c, double u, double v, double w, double theta, ResGrid _d, SizeGrid _N)
 {
 	double	xp, yp, zp;
 	double	x(0),	y(0),	z(0);
 	bool	flag = 0;
 	int		ip_inf,	jp_inf,	kp_inf;
 	int		ip_sup,	jp_sup,	kp_sup;
-	CMatrix3D rhop(NN.x,NN.y,NN.z);
+	CMatrix3D rhop(_N.x,_N.y,_N.z);
 
 	theta *= M_PI/180;
-	for (int ii = 0; ii<NN.x ; ii++) for (int jj = 0 ; jj<NN.y ; jj++) for (int kk = 0 ; kk<NN.z ; kk++)
+	for (int ii = 0; ii<_N.x ; ii++) for (int jj = 0 ; jj<_N.y ; jj++) for (int kk = 0 ; kk<_N.z ; kk++)
 		if (rho(ii,jj,kk)!=0) //If all the rotated points are on the mesh
 		{
-			x = ii*dd.x;
-			y = jj*dd.y;
-			z = kk*dd.z;
+			x = ii*_d.x;
+			y = jj*_d.y;
+			z = kk*_d.z;
 
 			xp = ( a*(v*v + w*w) + u*(-b*v - c*w + u*x + v*y + w*z) + ( (x-a)*(v*v + w*w) + u*(b*v + c*w - v*y - w*z) )*cos(theta) + sqrt(u*u + v*v + w*w)*( b*w - c*v -w*y + v*z)*sin(theta) ) / (u*u + v*v + w*w);
 			yp = ( b*(u*u + w*w) + v*(-a*u - c*w + u*x + v*y + w*z) + ( (y-b)*(u*u + w*w) + v*(a*u + c*w - u*x - w*z) )*cos(theta) + sqrt(u*u + v*v + w*w)*(-a*w + c*u +w*x - u*z)*sin(theta) ) / (u*u + v*v + w*w);
 			zp = ( c*(u*u + v*v) + w*(-a*u - b*v + u*x + v*y + w*z) + ( (z-c)*(u*u + v*v) + w*(a*u + b*v - u*x - v*y) )*cos(theta) + sqrt(u*u + v*v + w*w)*( a*v - b*u -v*x + u*y)*sin(theta) ) / (u*u + v*v + w*w);
 
-			ip_inf	= floor(xp/dd.x);	jp_inf	= floor(yp/dd.y);	kp_inf	= floor(zp/dd.z);
-			ip_sup	=  ceil(xp/dd.x);	jp_sup	=  ceil(yp/dd.y);	kp_sup	=  ceil(zp/dd.z);
+			ip_inf	= floor(xp/_d.x);	jp_inf	= floor(yp/_d.y);	kp_inf	= floor(zp/_d.z);
+			ip_sup	=  ceil(xp/_d.x);	jp_sup	=  ceil(yp/_d.y);	kp_sup	=  ceil(zp/_d.z);
 
 			if(ip_inf == ip_sup && jp_inf == jp_sup && kp_inf == kp_sup ) // case: rotated point is on the mesh
 			{
-				if (ip_inf >= 0 && ip_inf < NN.x && jp_inf >= 0 && jp_inf < NN.y && kp_inf >= 0 && kp_inf < NN.z)
+				if (ip_inf >= 0 && ip_inf < _N.x && jp_inf >= 0 && jp_inf < _N.y && kp_inf >= 0 && kp_inf < _N.z)
 					rhop(ip_inf,jp_inf,kp_inf) += rho(ii,jj,kk);
 			}
 			else
@@ -660,25 +660,25 @@ bool Charge::rotate(double a, double b, double c, double u, double v, double w, 
 		};
 	if (flag == 1)
 	{
-		rhop.init(NN.x,NN.y,NN.z);
-		for (int ii = 0; ii<NN.x ; ii++) for (int jj = 0 ; jj<NN.y ; jj++) for (int kk = 0 ; kk<NN.z ; kk++)
+		rhop.init(_N.x,_N.y,_N.z);
+		for (int ii = 0; ii<_N.x ; ii++) for (int jj = 0 ; jj<_N.y ; jj++) for (int kk = 0 ; kk<_N.z ; kk++)
 			if (rho(ii,jj,kk)!=0) //If at least one of the rotated points is NOT on the mesh
 			{
-				x = ii*dd.x;
-				y = jj*dd.y;
-				z = kk*dd.z;
+				x = ii*_d.x;
+				y = jj*_d.y;
+				z = kk*_d.z;
 
 				xp = ( a*(v*v + w*w) + u*(-b*v - c*w + u*x + v*y + w*z) + ( (x-a)*(v*v + w*w) + u*(b*v + c*w - v*y - w*z) )*cos(theta) + sqrt(u*u + v*v + w*w)*( b*w - c*v -w*y + v*z)*sin(theta) ) / (u*u + v*v + w*w);
 				yp = ( b*(u*u + w*w) + v*(-a*u - c*w + u*x + v*y + w*z) + ( (y-b)*(u*u + w*w) + v*(a*u + c*w - u*x - w*z) )*cos(theta) + sqrt(u*u + v*v + w*w)*(-a*w + c*u +w*x - u*z)*sin(theta) ) / (u*u + v*v + w*w);
 				zp = ( c*(u*u + v*v) + w*(-a*u - b*v + u*x + v*y + w*z) + ( (z-c)*(u*u + v*v) + w*(a*u + b*v - u*x - v*y) )*cos(theta) + sqrt(u*u + v*v + w*w)*( a*v - b*u -v*x + u*y)*sin(theta) ) / (u*u + v*v + w*w);
 
-				ip_inf	= floor(xp/dd.x);	jp_inf	= floor(yp/dd.y);	kp_inf	= floor(zp/dd.z);
-				ip_sup	=  ceil(xp/dd.x);	jp_sup	=  ceil(yp/dd.y);	kp_sup	=  ceil(zp/dd.z);
+				ip_inf	= floor(xp/_d.x);	jp_inf	= floor(yp/_d.y);	kp_inf	= floor(zp/_d.z);
+				ip_sup	=  ceil(xp/_d.x);	jp_sup	=  ceil(yp/_d.y);	kp_sup	=  ceil(zp/_d.z);
 				if (ip_inf == ip_sup) ip_sup = ip_inf+1;
 				if (jp_inf == jp_sup) jp_sup = jp_inf+1;
 				if (kp_inf == kp_sup) kp_sup = kp_inf+1;
 
-				if (ip_inf >= 0 && ip_inf < NN.x && jp_inf >= 0 && jp_inf < NN.y && kp_inf >= 0 && kp_inf < NN.z)
+				if (ip_inf >= 0 && ip_inf < _N.x && jp_inf >= 0 && jp_inf < _N.y && kp_inf >= 0 && kp_inf < _N.z)
 				{
 					// Reset Charge Density if two points are moved to the same gridpoints //
 					/*rhop(ip_inf,jp_inf,kp_inf)  = rho(ii,jj,kk)/8;
@@ -709,7 +709,7 @@ bool Charge::rotate(double a, double b, double c, double u, double v, double w, 
 
 ostream & operator<< (ostream & os, const Charge & C)
 {
-	return os<<"Type: "<<C.Type<<"\n [Q]             = ["<<C.Q<<"]\n [Xq,  Yq,  Zq ] = ["<<C.Xq<<" "<<C.Yq<<" "<<C.Zq<<"]\n [Rq1, Rq2, Rq3] = ["<<C.Rq1<<" "<<C.Rq2<<" "<<C.Rq3<<"]\n"/*<<"rho: "<<C.rho*/;
+	return os<<"Type: "<<C.Type<<"\n [Q]             = ["<<C.Q<<"]\n [Xq,  Yq,  Zq ] = ["<<C.Xq<<" "<<C.Yq<<" "<<C.Zq<<"]\n [Rq1, Rq2, Rq3] = ["<<C.Rq1<<" "<<C.Rq2<<" "<<C.Rq3<<"]\n"; /* <<"rho: "<<C.rho */
 }
 
 Charge::~Charge(){}
@@ -728,7 +728,7 @@ Potential::Potential()
 	H				= 0;
 }
 
-Potential::Potential(CMatrix3D& pphi, CMatrix3D& UUn)
+Potential::Potential(CMatrix3D& _phi, CMatrix3D& UUn)
 {
 	EquiPotential	= false;
 	Vo				= 0;
@@ -740,10 +740,10 @@ Potential::Potential(CMatrix3D& pphi, CMatrix3D& UUn)
 	H				= 0;
 
 	Un	= UUn;
-	rho	= pphi; // potential distribution
+	rho	= _phi; // potential distribution
 }
 
-bool Potential::init(CMatrix3D& pphi, CMatrix3D& UUn)
+bool Potential::init(CMatrix3D& _phi, CMatrix3D& UUn)
 {
 	EquiPotential	= false;
 	Vo				= 0;
@@ -755,11 +755,15 @@ bool Potential::init(CMatrix3D& pphi, CMatrix3D& UUn)
 	H				= 0;
 
 	Un	= UUn;
-	rho	= pphi; // potential distribution
+	rho	= _phi; // potential distribution
 	return true;
 }
 
-Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double LL, double WW, double HH, ResGrid dd, SizeGrid NN)
+Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double LL, double WW, double HH, ResGrid _d, SizeGrid _N)
+{Potential::init(VVo, XXc,YYc,ZZc, LL,WW,HH, _d,_N);}
+
+
+bool Potential::init(double VVo, double XXc, double YYc, double ZZc, double LL, double WW, double HH, ResGrid _d, SizeGrid _N)
 {
 	EquiPotential	= true;
 	Vo				= VVo;
@@ -771,21 +775,22 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double LL, 
 	H				= HH;
 
 	// Derivation of the potential distribution //
-	//	int iic = (int)round(Xc/dd.x);
-	//  int jjc = (int)round(Yc/dd.y);
-	//  int kkc = (int)round(Zc/dd.z);
+	//	int iic = (int)round(Xc/_d.x);
+	//  int jjc = (int)round(Yc/_d.y);
+	//  int kkc = (int)round(Zc/_d.z);
 
-	rho.init(NN.x, NN.y, NN.z);
-	Un.init(NN.x, NN.y, NN.z);
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(fabs(ii*dd.x-Xc)<=L/2 && fabs(jj*dd.y-Yc)<=W/2 && fabs(kk*dd.z-Zc)<=H/2)
+	rho.init(_N.x, _N.y, _N.z);
+	Un.init(_N.x, _N.y, _N.z);
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(fabs(ii*_d.x-Xc)<=L/2 && fabs(jj*_d.y-Yc)<=W/2 && fabs(kk*_d.z-Zc)<=H/2)
 		{
 			rho[ii][jj][kk] = Vo;
 			Un[ii][jj][kk]  = 1;
 		};
+    return true;
 }
 
-Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, double HH, ResGrid dd, SizeGrid NN)
+Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, double HH, ResGrid _d, SizeGrid _N)
 {
 	EquiPotential	= true;
 	Vo				= VVo;
@@ -797,21 +802,21 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, 
 	H				= HH;								// Height of the cylinder
 
 	// Derivation of the potential distribution //
-	//	int iic = (int)round(Xc/dd.x);
-	//  int jjc = (int)round(Yc/dd.y);
-	//  int kkc = (int)round(Zc/dd.z);
+	//	int iic = (int)round(Xc/_d.x);
+	//  int jjc = (int)round(Yc/_d.y);
+	//  int kkc = (int)round(Zc/_d.z);
 
-	rho.init(NN.x, NN.y, NN.z);
-	Un.init(NN.x, NN.y, NN.z);
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xc,2) + pow(jj*dd.y-Yc,2))<=RR && fabs(kk*dd.z-Zc)<=H/2)
+	rho.init(_N.x, _N.y, _N.z);
+	Un.init(_N.x, _N.y, _N.z);
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xc,2) + pow(jj*_d.y-Yc,2))<=RR && fabs(kk*_d.z-Zc)<=H/2)
 		{
 			rho[ii][jj][kk] = Vo;
 			Un[ii][jj][kk]  = 1;
 		};
 }
 
-Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, ResGrid dd, SizeGrid NN)
+Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, ResGrid _d, SizeGrid _N)
 {
 	EquiPotential	= true;
 	Vo				= VVo;
@@ -823,14 +828,14 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, 
 	H				= 0;
 
 	// Derivation of the potential distribution //
-	//	int iic = (int)round(Xc/dd.x);
-	//  int jjc = (int)round(Yc/dd.y);
-	//  int kkc = (int)round(Zc/dd.z);
+	//	int iic = (int)round(Xc/_d.x);
+	//  int jjc = (int)round(Yc/_d.y);
+	//  int kkc = (int)round(Zc/_d.z);
 
-	rho.init(NN.x, NN.y, NN.z);
-	Un.init(NN.x, NN.y, NN.z);
-	for(int ii=0 ; ii<NN.x ; ii++) for(int jj=0 ; jj<NN.y ; jj++) for(int kk=0 ; kk<NN.z ; kk++)
-		if(sqrt(pow(ii*dd.x-Xc,2) + pow(jj*dd.y-Yc,2) + pow(kk*dd.z-Zc,2))<=RR)
+	rho.init(_N.x, _N.y, _N.z);
+	Un.init(_N.x, _N.y, _N.z);
+	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+		if(sqrt(pow(ii*_d.x-Xc,2) + pow(jj*_d.y-Yc,2) + pow(kk*_d.z-Zc,2))<=RR)
 		{
 			rho[ii][jj][kk] = Vo;
 			Un[ii][jj][kk]  = 1;
@@ -839,7 +844,7 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, 
 
 ostream & operator<< (ostream & os, const Potential & P)
 {
-	return os<<" Vo = "<<P.Vo<<"\n [Xc, Yc, Zc] = ["<<P.Xc<<" "<<P.Yc<<" "<<P.Zc<<"]\n [L, W, H] = ["<<P.L<<" "<<P.W<<" "<<P.H<<"]\n"/*<<"rho: "<<C.rho*/;
+	return os<<" Vo = "<<P.Vo<<"\n [Xc, Yc, Zc] = ["<<P.Xc<<" "<<P.Yc<<" "<<P.Zc<<"]\n [L, W, H] = ["<<P.L<<" "<<P.W<<" "<<P.H<<"]\n"; /* <<"rho: "<<C.rho */
 }
 
 void Potential::updateUn(const CMatrix3D& UUn)

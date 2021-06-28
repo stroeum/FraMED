@@ -7,7 +7,7 @@ clc
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
-
+cd ../results
 dxyz       = load('dxyz.dat');
 Nxyz       = load('Nxyz.dat');
 z_gnd      = load('z_gnd.dat');
@@ -51,7 +51,7 @@ if (choice == 1)
     %---------------------------------------------------------------------%
     % Isosurface                                                          %
     %---------------------------------------------------------------------%
-    rho   = load('rho.dat');
+    rho   = load('rho3d.dat');
     rho3D   = ConvertTo3d(rho,Nxyz);
     save rho3D.mat rho3D -mat
     clear Nxyz
@@ -229,8 +229,11 @@ for m=1:M
         AA(ii,jj,kk) = A(m,n);
     end
 end
+cd ../viz
 
 end
+
+
 
 % function [AA] = ConvertTo1d(A,B)
 % [M N] = size(A);

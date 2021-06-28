@@ -1,4 +1,4 @@
-44function []= Plot3D_Tree()
+function []= Plot3D_Tree()
 close all
 clear all
 clc
@@ -97,8 +97,7 @@ for ii=1:NbOfLinks
     ylabel('y (km)','FontSize',12);
     zlabel('z (km)','FontSize',12);
     title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',12,'FontWeight','bold');
-    set(gca,'FontSize',10);4
-    
+    set(gca,'FontSize',10);
     view([45 10])
     Movie(ii) = getframe(gcf,[0,0, 499, 453]);
 %     Movie(ii) = getframe;
@@ -117,70 +116,70 @@ end
 %-------------------------------------------------------------------------%
 % Fractal Dimension                                                       %
 %-------------------------------------------------------------------------%
-% figure(2);
-% set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
-% clf
+figure(2);
+set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
+clf
+
+% Define which boundary will be reached first                             %
+% NbSpheres defines the number of sphere used to draw the plot            %
+
+NbSpheres = min([Initi ; Nx-Initi ; Initj ; Ny-Initj ; Initk ; Nz - Initk]);
+fprintf('Number of Spheres = %f\n',NbSpheres);
+for n = 1:6
+    if     (NbSpheres == Initk || NbSpheres == Nz-Initk)
+        ds = dz;
+    elseif (NbSpheres == Initj || NbSpheres == Ny-Initj)
+        ds = dy;
+    elseif (NbSpheres == Initi || NbSpheres == Nx-Initi)
+        ds = dx;
+    end
+end
+
+R(NbSpheres) = 0;
+N(NbSpheres) = 0;
+for n = 1:NbSpheres
+    R(n) = InitR + n*ds;
+
+    N(n) = 0;
+    for m=1:NbOfLinks
+        if ( (EstablishedLinks(m,4)*dx-InitX)^2 +...
+                (EstablishedLinks(m,5)*dy-InitY)^2 +...
+                (EstablishedLinks(m,6)*dz-InitZ)^2 <= R(n)^2 )
+            N(n) = N(n)+1;
+        end
+    end
+end
+
+P=polyfit(log(R(3:end)), log(N(3:end)), 1);
+% P=polyfit(log(R(1:3)), log(N(1:3)), 1);
+plot(log(R), log(N), 'o', log(R), polyval(P, log(R)), '--')
+grid
+set(gca,'FontSize',10);
+xlabel('ln(R)','FontSize',12)
+ylabel('ln(N)','FontSize',12)
+D=P(1,1);
+title(['Sprite fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
+Lowest_Altitude = min(EstablishedLinks(:,6)*dz)+z_gnd;
+fprintf('Lowest Altitude   = %f\n\n',Lowest_Altitude);
+
+end
+%-------------------------------------------------------------------------%
+
+%-------------------------------------------------------------------------%
+% function [AA] = ConvertTo3d(A,B)
+% [M N] = size(A)
 % 
-% % Define which boundary will be reached first                             %
-% % NbSpheres defines the number of sphere used to draw the plot            %
-% 
-% NbSpheres = min([Initi ; Nx-Initi ; Initj ; Ny-Initj ; Initk ; Nz - Initk]);
-% fprintf('Number of Spheres = %f\n',NbSpheres);
-% for n = 1:6
-%     if     (NbSpheres == Initk || NbSpheres == Nz-Initk)
-%         ds = dz;
-%     elseif (NbSpheres == Initj || NbSpheres == Ny-Initj)
-%         ds = dy;
-%     elseif (NbSpheres == Initi || NbSpheres == Nx-Initi)
-%         ds = dx;
-%     end
-% end
-% 
-% R(NbSpheres) = 0;
-% N(NbSpheres) = 0;
-% for n = 1:NbSpheres
-%     R(n) = InitR + n*ds;
-% 
-%     N(n) = 0;
-%     for m=1:NbOfLinks
-%         if ( (EstablishedLinks(m,4)*dx-InitX)^2 +...
-%                 (EstablishedLinks(m,5)*dy-InitY)^2 +...
-%                 (EstablishedLinks(m,6)*dz-InitZ)^2 <= R(n)^2 )
-%             N(n) = N(n)+1;
+% for m=1:M
+%     for n=1:N
+%         ii = rem(m,B(1));
+%         if(ii==0)
+%             ii =B(1);
 %         end
+%         jj = n;
+%         kk = (m-ii)/B(1)+1;
+%         AA(ii,jj,kk) = A(m,n);
 %     end
 % end
 % 
-% P=polyfit(log(R(3:end)), log(N(3:end)), 1);
-% % P=polyfit(log(R(1:3)), log(N(1:3)), 1);
-% plot(log(R), log(N), 'o', log(R), polyval(P, log(R)), '--')
-% grid
-% set(gca,'FontSize',10);
-% xlabel('ln(R)','FontSize',12)
-% ylabel('ln(N)','FontSize',12)
-% D=P(1,1);
-% title(['Sprite fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
-% Lowest_Altitude = min(EstablishedLinks(:,6)*dz)+z_gnd;
-% fprintf('Lowest Altitude   = %f\n\n',Lowest_Altitude);
-% 
 % end
-% %-------------------------------------------------------------------------%
-% 
-% %-------------------------------------------------------------------------%
-% % function [AA] = ConvertTo3d(A,B)
-% % [M N] = size(A)
-% % 
-% % for m=1:M
-% %     for n=1:N
-% %         ii = rem(m,B(1));
-% %         if(ii==0)
-% %             ii =B(1);
-% %         end
-% %         jj = n;
-% %         kk = (m-ii)/B(1)+1;
-% %         AA(ii,jj,kk) = A(m,n);
-% %     end
-% % end
-% % 
-% % end
-% %-------------------------------------------------------------------------%
+%-------------------------------------------------------------------------%

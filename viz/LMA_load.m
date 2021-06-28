@@ -1,6 +1,6 @@
 % LMA data loading
 % global d Init Links N Nb z_gnd
-
+cd ../results
 dxyz              = load('dxyz.dat')*1e-3;                                 %_km
 Nxyz              = load('Nxyz.dat');                                      %_dimensionless
 InitPoint         = load('InitPoint.dat')*1e-3;                            %_km
@@ -9,6 +9,7 @@ z_gnd             = load('z_gnd.dat')*1e-3;                                %_km
 Layers.data       = load('ChargeLayers.dat')*1e-3;                         %_kC, _km
 rho.YZ            = load('rhoAmbYZ.dat');
 rho.XZ            = load('rhoAmbXZ.dat');
+cd ../viz
 
 % Derive main parameters
 Nb.Links          = size(Links.data);

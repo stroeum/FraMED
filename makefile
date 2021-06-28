@@ -71,7 +71,7 @@ reset:
 	rm -rfv \
 	  $(EXE) \
 	  $(BDIR)/JOB.ID $(BDIR)/*log* \
-	  $(RDIR)/*.?at $(RDIR)/*.avi $(RDIR)/*.eps $(RDIR)/*.ps $(RDIR)/*.pdf
+	  $(RDIR)/*.?at $(RDIR)/*.avi $(RDIR)/*.eps $(RDIR)/*.ps $(RDIR)/*.pdf $(RDIR)/*.txt
 
 # Display
 print:

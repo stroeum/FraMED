@@ -59,7 +59,7 @@ hgexport(gcf,'FieldLines.eps');
 cd ..
 
 %% LMA
-Plot2D_LMA_BETA;
+LMA_main;
 cd Figures
 hgexport(gcf,'LMA.eps');
 cd ..

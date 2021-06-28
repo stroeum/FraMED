@@ -34,28 +34,27 @@ public:
 	double	proba;									// Probability of establishment of the link (bounding)
 
 	Link(){};										// default constructor
-	Link(const Link& LL);							// Constructor surcharge
-	Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
+	Link(const Link& lk);							// Constructor surcharge
+	Link(Point A, Point B, double dV, ResGrid d, double phiStart, double phiEnd);
 													// Constructor surcharge
-	Link(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
+	Link(int Ai,int Aj,int Ak, int Bi,int Bj,int Bk, double dV, ResGrid d, double phiStart, double phiEnd);
 													// Constructor surcharge
-	Link(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+	Link(Point A, Point B, double dV, ResGrid d, CMatrix3D phi);
 													// Constructor surcharge
-	Link(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+	Link(int iA, int jA, int kA, int iB, int jB, int kB, double dV, ResGrid d, CMatrix3D phi);
 													// Constructor surcharge
 
-	void init(const Link& LL);						// Define a link after its declaration
-	void init(Point sstart, Point eend, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
+	void init(const Link& lk);						// Define a link after its declaration
+	void init(Point A, Point B, double dV, ResGrid d, double phiStart, double phiEnd);
 													// Define a link after its declaration
-	void init(int SStarti,int SStartj,int SStartk, int EEndi,int EEndj,int EEndk, double ddeltaV, ResGrid dd, double pphiStart, double pphiEnd);
+	void init(int Ai,int Aj,int Ak, int Bi,int Bj,int Bk, double dV, ResGrid d, double phiStart, double phiEnd);
 													// Define a link after its declaration
-	void init(Point sstart, Point eend, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+	void init(Point A, Point B, double dV, ResGrid d, CMatrix3D phi);
 													// Define a link after its declaration
-	void init(int iiStart, int jjStart, int kkStart, int iiEnd, int jjEnd, int kkEnd, double ddeltaV, ResGrid dd, CMatrix3D pphi);
+	void init(int iA, int jA, int kA, int iB, int jB, int kB, double dV, ResGrid d, CMatrix3D phi);
 													// Define a link after its declaration
 
-	void set_deltaV(double ddeltaV){deltaV = ddeltaV;};
-													// Set voltage drop
+	void set_deltaV(double dV){deltaV = dV;};       // Set voltage drop
 	void fixLink(CMatrix3D&);						// Set value 1 at each extremities of the link in matrix Un
 	bool operator==(const Link&) const;				// Compare two Link, return true if identical
 	bool operator!=(const Link&) const;				// Compare two Link, return false if identical
@@ -72,4 +71,4 @@ public:
 typedef list<Link>   ListLink;
 /**************************************************************************************/
 
-#endif LINKS_H
+#endif

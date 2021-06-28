@@ -16,7 +16,7 @@ Nb.Links = 0; Nb.Points = 0; Nb.Layers = 0;
 
 %% Preferences %%
 % Links %
-Figure.Output     =  'Plot'; % 'Movie'; %
+Figure.Output     = 'Movie'; % 'none'; % 'Plot'; % 'none'; %
 
 Links.Type        = 'Both'; %Lower'; % 'Upper'; %
 Links.Scheme      = 'B/R';
@@ -113,11 +113,15 @@ LMA_ground(h,'all')
 LMA_initiation
 
 %% Plot discharge tree branches %%
+if strcmp(Figure.Output,'Movie')
+    v=VideoWriter('Movie.mp4','MPEG-4');
+    open(v);
+end
 LMA_tree
 
 %% Output results %%
 if strcmp(Figure.Output,'Movie')
-    movie2avi(Movie,'LMA.avi','quality',100);
+    close(v);
 elseif strcmp(Figure.Output,'Plot')
     hgexport(h.fig,'LMA.eps');
 end

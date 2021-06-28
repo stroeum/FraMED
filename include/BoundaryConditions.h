@@ -8,8 +8,8 @@
 class BC
 {
 public:
-	static void Apply(int BBCtype, CMatrix3D& pphi, CMatrix3D rrho, const ResGrid& dd, const SizeGrid& NN);
-	static void Update(bool iisFlashAccoutedForInBC, int BBCtype, CMatrix3D& pphi_cha, const double rrhoAmbMin, const double rrhoAmbMax, const ResGrid& dd, const SizeGrid& NN);
-	static void AddUniformE(bool uuniformE, const double& EEo, CMatrix3D& pphi, CMatrix3D& UUn, const SizeDomain& LL, const ResGrid& dd, const SizeGrid& NN);
+	static void Apply(int BCtype, CMatrix3D& phi, CMatrix3D rho, const ResGrid& d, const SizeGrid& N);
+	static void Update(bool isFlashAccoutedForInBC, int BCtype, CMatrix3D& phi_cha, const double rhoAmbMin, const double rhoAmbMax, const ResGrid& d, const SizeGrid& N);
+	static void AddUniformE(bool UniformE, const double& Eo, CMatrix3D& phi, CMatrix3D& Un, const SizeDomain& L, const ResGrid& d, const SizeGrid& N);
 };
-#endif BOUNDARYCONDITIONS_H
+#endif
