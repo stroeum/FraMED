@@ -760,10 +760,6 @@ bool Potential::init(CMatrix3D& _phi, CMatrix3D& UUn)
 }
 
 Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double LL, double WW, double HH, ResGrid _d, SizeGrid _N)
-{Potential::init(VVo, XXc,YYc,ZZc, LL,WW,HH, _d,_N);}
-
-
-bool Potential::init(double VVo, double XXc, double YYc, double ZZc, double LL, double WW, double HH, ResGrid _d, SizeGrid _N)
 {
 	EquiPotential	= true;
 	Vo				= VVo;
@@ -787,7 +783,6 @@ bool Potential::init(double VVo, double XXc, double YYc, double ZZc, double LL, 
 			rho[ii][jj][kk] = Vo;
 			Un[ii][jj][kk]  = 1;
 		};
-    return true;
 }
 
 Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, double HH, ResGrid _d, SizeGrid _N)

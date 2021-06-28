@@ -22,10 +22,10 @@ public:
 	CMatrix1D negative;								// Negative propagation threshold
 
 	ScaledFields(){};								// Default constructor
-	ScaledFields(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent);
+	ScaledFields(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N);
 	// Constructor surcharge
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
-	bool init(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent);
+	bool init(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N);
 	// Initiate after declaration
 	~ScaledFields(){};								// Destructor
 };

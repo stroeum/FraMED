@@ -15,9 +15,9 @@ protected:
 public:
 	CMatrix1D initiation;							// Initiation Threshold
 	CriticalFields(){};
-	CriticalFields(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N, int ScalingExponent);
+	CriticalFields(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N);
 	// Constructor
-	bool init(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N, int ScalingExponent);
+	bool init(double initiation0, double positive0, double negative0, double z_gnd, ResGrid d, SizeGrid N);
 	// Initiate after declaration
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
 	~CriticalFields(){};							// Destructor

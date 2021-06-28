@@ -6,7 +6,6 @@
 #include "BoundaryConditions.h"
 #include "Trees.h"
 #include "Cloud.h"
-#include "Input.h"
 
 #include <stdlib.h>
 /**************************************************************************************/
@@ -36,10 +35,10 @@ int main()
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
     Var::BCtype					= TIN_CAN;                                          // Boundary conditions
-    Var::LoadingType            = SET_POTENTIAL;                                    // Charge loading type
-    Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
+    Var::LoadingType            = CURRENTS;                                         // Charge loading type
+    Var::InitiationType			= RANDOM;                                           // Initiation type
     
-    Var::step3d                 = 50;                                             // rho, E, V is calculated and store every step3d
+    Var::step3d                 = 10;                                               // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
     Var::AddNew					= true;                                             // Channel is allowed to propagate: Y/N
     Var::isBndXingPossible		= false;                                            // Channel is allowed to cross boundaries: Y/N
@@ -49,8 +48,8 @@ int main()
     Var::isLinkXingPossible		= false;                                            // Channels crosses are allowed: Y/N
     Var::isRsDeveloped			= true;                                             // Return stroke development: Y/N
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
-    Var::isEsEnergyCalculated	= true;                                             // Electrostatic energy calculated at each step: Y/N
-    Var::isBCerrorCalculated	= true;                                             // Error at boundary is calculated at each step: Y/N
+    Var::isEsEnergyCalculated	= true;                                            // Electrostatic energy calculated at each step: Y/N
+    Var::isBCerrorCalculated	= true;                                            // Error at boundary is calculated at each step: Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
     
@@ -78,43 +77,6 @@ int main()
     if(Var::isNewRun) {
         file = IO::openFile((char *)"summary.txt", "w");
         IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
-        
-        IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(101,101,201);
-        IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
-
-        IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(8e+3,8e+3,16e+3);
-        IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
-
-        IO::print(file, "..: Reading grid resolution (d)\n");
-        Var::d.init(Var::L,Var::N);
-        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-
-        InitMatrices(Var::N);
-        
-        IO::print(file, "..: Reading ground altitude (z_gnd)\n");
-        Var::z_gnd   = 0e3;
-        IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
-        
-        Var::z_shift = 0e3;                                                            // _m Vertical displacement of the cloud
-        Var::y_shift = 0e3;                                                            // _m Horizontal influence of a windshear
-        
-        //    We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
-        IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
-        Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1);
-        IO::print(file, "..: Critical fields read (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-
-        IO::print(file, "..: Reading initiation point (InitPoint)\n");
-        Var::InitX    = Var::L.x/2;
-        Var::InitY    = Var::L.y/2;
-        Var::InitZ    = 8e3;
-        Var::InitR    = 0;
-        Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
-        // Initiation point with coordinates expressed as i,j,k and not x,y,z
-        IO::print(file, "ii: Discharge initiated at: [" + to_string(Var::InitX/1e3) + " " + to_string(Var::InitY/1e3) + " " + to_string(Var::InitZ/1e3) + "] km; Radius of init. region: " + to_string(Var::InitR/1e3) + "km\n");
-
     } else {
         file = IO::openFile((char *)"summary.txt", "a");
         IO::print(file,"ii: Resuming previous discharge simulation\n");
@@ -122,7 +84,7 @@ int main()
         IO::print(file, "..: Reading grid size (N).\n");
         IO::read(Var::N,(char *)"Nxyz.dat");
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
-        
+
         InitMatrices(Var::N);
         
         IO::print(file, "..: Reading grid resolution (d)\n");
@@ -144,7 +106,7 @@ int main()
         IO::read(Var::Vd.negative,		(char*)"VdNegative.dat");
         IO::read(Var::Vd.positive,		(char*)"VdPositive.dat");
         IO::print(file, "..: Critical fields read (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        
+
         IO::print(file, "..: Reading 3-D output increment step (step3d)\n");
         IO::read(Var::step3d,(char*)"step3d.dat");
         IO::print(file, "..: 3-D output increment step (step3d): " + to_string((int)Var::step3d) + "\n");
@@ -197,8 +159,6 @@ int main()
         sprintf(filename,"Un3d%d.dat",LastStep);
         IO::print(file, "..: Initializing map of fixed potential points (Un<<"+(string)filename+")\n");
         IO::read(Var::Un,filename);
-        
-        Var::V.init(Var::phi,Var::Un);
         
         sprintf(filename,"rho3d%d.dat",LastStep);
         IO::print(file, "..: Initializing electric charge density matrix (rho<<"+(string)filename+")\n");
@@ -267,74 +227,75 @@ int main()
     }
     
     if(Var::isNewRun){
-        if (Var::LoadingType == SET_CHARGES) {
-            IO::print(file, "..: Setting charge layers\n");
-            // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
-            Var::Q =    2.99236;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 2.00e+3+Var::z_shift; Var::Rq1 = 1.50e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =	-52.865;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3.75e+3+Var::z_shift; Var::Rq1 = 3.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    49.8727;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 6.75e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 8.00e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 0.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
+        if(Var::LoadingType == SET_CHARGES || Var::LoadingType == CURRENTS)
+        {
+            Var::N.init(41,41,61);														// Number of discretization points
+            Var::L.init(12e+3,12e+3,12e+3);												// _m	Size of the simulation domain
+            Var::d.init(Var::L,Var::N);													// _m	Sizes of grid-steps
             
-            for (it=Var::ChargeCfg.begin(); it!=Var::ChargeCfg.end(); it++)
-                Var::C += *it;
-            IO::print(file, "++: Finished Setting charge layers!\n");
-        } else if (Var::LoadingType == CURRENTS) {
-            IO::print(file, "..: Setting charge layers geometry\n");
-            // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
-            Var::Q =    0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 2.00e+3+Var::z_shift; Var::Rq1 = 1.50e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =	0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3.75e+3+Var::z_shift; Var::Rq1 = 3.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 6.75e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 8.00e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 0.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            IO::print(file, "++: Finished setting charge layers geometry!\n");
+            InitMatrices(Var::N);
             
-            IO::print(file, "..: Loading charge layers\n");
-            Var::I1			= 1.5;														// _A Loading current I1
-            Var::I2			= -90e-3;													// _A Loading current I2
-            Var::Iscreen	= 0*664e-3;													// _A Screening current Iscreen
-            Cloud::LoadTripole(file, Var::I1,Var::I2,Var::Iscreen);
-            IO::print(file, "++: Finished loading charge layers!\n");
-        } else if (Var::LoadingType == SET_POTENTIAL) {
-            IO::print(file, "..: Setting potential\n");
-            //        C.reset(d,N);
-            //        for(it=ChargeCfg.begin() ; it!=ChargeCfg.end() ; it++)
-            //            C += *it;
-            //       
-            //        ApplyBC(BCtype,phi,C.rho,d,N);
+            Var::z_gnd   = 3e3;															// _m Altitude of ground level
+            Var::z_shift = 0e3;															// _m Vertical displacement of the cloud
+            Var::y_shift = 0e3;															// _m Horizontal influence of a windshear
             
-            Var::Eo  = 1e5; // _V/_m
-            Var::Vo  = -Var::Eo*(Var::N.z-1)*Var::d.z;
-            Var::Xp  = Var::L.x/2;
-            Var::Yp  = Var::L.y/2;
-            Var::Zp  = Var::L.z;
-            Var::Rp1 = Var::L.x;
-            Var::Rp2 = Var::L.y;
-            Var::Rp3 = Var::d.z;
+            //	We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
+            Var::Ec.init(216e+3,216e+3,-216e+3, Var::z_gnd,Var::d,Var::N);				// _V/m Initiation-, Positive channel propagation-, Negative channel propagation-threshold
+            Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N);							// _V/m Voltage drop in positive, negative channels
+            // CG //
+            Var::InitX	= 0;															// _m X-coordinate of initiation point
+            Var::InitY	= 0;															// _m Y-coordinate of initiation point
+            Var::InitZ	= 0;                                                            // _m Z-coordinate of initiation point
+            Var::InitR	= 0;															// _m Radius of the initiation region (if applicable)
             
-            
-            Var::V.init(Var::Vo, Var::Xp,Var::Yp, Var::Zp,Var::Rp1,Var::Rp2,Var::Rp3, Var::d,Var::N);
-            
-            //        for(int ii=0 ; ii<N.x ; ii++) for(int jj=0 ; jj<N.y ; jj++)    for(int kk=0 ; kk<N.z ; kk++)
-            //        {phi[ii][jj][kk]=-Eo*kk*d.z;};
-            
-            
-            IO::print(file, "++: Finished setting potential!\n");
-        } else if(Var::LoadingType == FROM_FILE) {
+            Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
+            // Initiation point with coordinates expressed as i,j,k and not x,y,z
+            if (Var::LoadingType == SET_CHARGES) {
+                IO::print(file, "..: Setting charge layers\n");
+                // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
+                Var::Q =    2.99236;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 2.00e+3+Var::z_shift; Var::Rq1 = 1.50e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =	-52.865;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3.75e+3+Var::z_shift; Var::Rq1 = 3.00e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =    49.8727;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 6.75e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =    0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 8.00e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 0.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                
+                for (it=Var::ChargeCfg.begin(); it!=Var::ChargeCfg.end(); it++)
+                    Var::C += *it;
+                IO::print(file, "++: Finished Setting charge layers!\n");
+            } else if (Var::LoadingType == CURRENTS) {
+                IO::print(file, "..: Setting charge layers geometry\n");
+                // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
+                Var::Q =    0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 2.00e+3+Var::z_shift; Var::Rq1 = 1.50e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =	0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3.75e+3+Var::z_shift; Var::Rq1 = 3.00e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =    0.;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 6.75e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 1.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                Var::Q =    0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 8.00e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 0.50e+3;
+                Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+                Var::ChargeCfg.push_back(Var::C);
+                IO::print(file, "++: Finished Setting charge layers geometry!\n");
+                
+                IO::print(file, "..: Loading charge layers\n");
+                Var::I1			= 1.5;														// _A Loading current I1
+                Var::I2			= -90e-3;													// _A Loading current I2
+                Var::Iscreen	= 0*664e-3;													// _A Screening current Iscreen
+                Cloud::LoadTripole(file, Var::I1,Var::I2,Var::Iscreen);
+                IO::print(file, "++: Finished loading charge layers!\n");
+            }
+        }
+        else if(Var::LoadingType == FROM_FILE)
+        {
             double Lr = 9e3;
             Var::L.z  = 21e3;
             Var::C.init((char*)"results/rho2d280000.dat",(char*)"results/rhos2d280000.dat",(char*)"results/d.dat",(char*)"results/N.dat",(char*)"results/z_gnd.dat", Var::d, Var::N, Var::z_gnd, Lr, Var::L.z);
@@ -348,8 +309,8 @@ int main()
             InitMatrices(Var::N);
             
             //	We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
-            Var::Ec.init(2.10e+5,2.16e+5,-2.16e+5, Var::z_gnd,Var::d,Var::N,1);			// _V/m Initiation-, Positive channel propagation-, Negative channel propagation-threshold
-            Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N,1);							// _V/m Voltage drop in positive, negative channels
+            Var::Ec.init(2.10e+5,2.16e+5,-2.16e+5, Var::z_gnd,Var::d,Var::N);			// _V/m Initiation-, Positive channel propagation-, Negative channel propagation-threshold
+            Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N);							// _V/m Voltage drop in positive, negative channels
             Var::InitX	= Var::L.x/2;													// _m X-coordinate of initiation point
             Var::InitY	= Var::L.y/2;													// _m Y-coordinate of initiation point
             Var::InitZ	= 9.25e3;														// _m Z-coordinate of initiation point
@@ -388,21 +349,27 @@ int main()
         }
     }
     IO::print(file, "..: Initializing domain\n");
-    if(Var::LoadingType == SET_POTENTIAL) {
-        bool UniformE = true;
-        BC::AddUniformE(UniformE, Var::Eo, Var::phi, Var::Un, Var::L, Var::d, Var::N);
-        cout << Var::V;
-        Var::SOR.init(Var::phi,Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::V, Var::Un);
-    } else {
-        Var::SOR.init(Var::phi, Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::C, Var::Un);
-        BC::Apply(Var::BCtype,Var::phi,Var::C.rho,Var::d,Var::N);
-    }
-    
+    Var::SOR.init(Var::phi, Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::C, Var::Un);
+
+    BC::Apply(Var::BCtype,Var::phi,Var::C.rho,Var::d,Var::N);
     Var::SOR.Solve(Var::d,Var::N,Var::Un,Var::phi);
     IO::print(file, "++: Domain initialized!\n");
     
     IO::print(file, "..: Fractal structure read\n");
-    
+   
+//    double mini, maxi;
+//    Var::rho.MinMax(mini,maxi);
+//    cout << "rho: mini maxi = " << mini << " " << maxi <<endl ;
+//    
+//    Var::phi_amb.MinMax(mini,maxi);
+//    cout << "phi_amb: mini maxi = " << mini << " " << maxi <<endl ;
+//
+//    Var::phi_cha.MinMax(mini,maxi);
+//    cout << "phi_cha: mini maxi = " << mini << " " << maxi <<endl ;
+//    
+//    Var::phi.MinMax(mini,maxi);
+//    cout << "phi: mini maxi = " << mini << " " << maxi <<endl ;
+
     
     IO::print(file, "ii: Calculating electrostatic energy before the discharge\n");
     Var::Eps_bf=0;
