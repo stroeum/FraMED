@@ -43,10 +43,15 @@ double					Var::Qtot_af		= 0;									// Total charge in the simulation domain a
 // The previous  values are only use to avoid warning at compilation //
 
 double					Var::I1, Var::I2, Var::Iscreen;								// Loading currents I1 and I2, and screening current Iscreen
-double					Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3;// Charge center parameters:
-																					// * Charge (Q),
-																					// * X-,Y-,Z-coordinates of a charge center (Xq,Yq,Zq),
-																					// * 1st, 2nd and 3rd geometrical parameters (Rq1, Rq2, Rq3)
+double                  Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3;// Charge center parameters:
+                                                                                    // * Charge (Q),
+                                                                                    // * X-,Y-,Z-coordinates of a charge center (Xq,Yq,Zq),
+                                                                                    // * 1st, 2nd and 3rd geometrical parameters (Rq1, Rq2, Rq3)
+double                  Var::Eo,Var::Vo, Var::Xp,Var::Yp,Var::Zp, Var::Rp1,Var::Rp2,Var::Rp3;
+                                                                                    // Potential center parameters:
+                                                                                    // * Reference electric potential (Vo) and field (Eo)
+                                                                                    // * X-,Y-,Z-coordinates of a potential center (Xp,Yp,Zp),
+                                                                                    // * 1st, 2nd and 3rd geometrical parameters (Rp1, Rp2, Rp3)
 double					Var::ThresholdOvershoot;									// % by which threshold must be exceeded to initiate discharge
 bcType                  Var::BCtype;												// Boundary conditions
 initType				Var::InitiationType;										// Initiation type
@@ -67,6 +72,7 @@ bool					Var::isRsDeveloped;											// Return stroke development: Y/N
 bool                    Var::isNewRun;                                              // Check if the run is a new run or a resumed simulation
 
 Charge					Var::C;														// Charge center
+Potential               Var::V;                                                     // Potential center
 SorSolution				Var::SOR;													// Parameters of SOR algorithms
 
 ListDouble				Var::ChannelPotential;										// Channel potential at each stage of development

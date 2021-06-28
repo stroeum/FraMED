@@ -104,8 +104,11 @@ public:
 													// distribution and Un
 	bool init(CMatrix3D& phi, CMatrix3D& UUn);		// update potential as if constructed in the
 													// previous way
-	Potential(double,double,double,double,double,double,double,ResGrid,SizeGrid);
-													// Constructor surcharge - Box
+    Potential(double,double,double,double,double,double,double,ResGrid,SizeGrid);
+                                                    // Constructor surcharge - Box
+    bool init(double,double,double,double,double,double,double,ResGrid,SizeGrid);
+                                                    // update potential as if constructed in the
+                                                    // previous way
 	Potential(double,double,double,double,double,double,ResGrid,SizeGrid);
 													// Constructor surcharge - Vertical cylinder
 	Potential(double,double,double,double,double,ResGrid,SizeGrid);

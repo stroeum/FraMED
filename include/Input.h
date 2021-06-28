@@ -13,7 +13,7 @@
 typedef enum {INTRA_CLOUD, CLOUD_TO_GROUND, JET, HORIZONTAL} disType;
 typedef enum {TIN_CAN, OPEN_BC, G_G, FREE_SPACE} bcType;
 typedef enum {RANDOM, AT_EMAX, AT_PREDEF_POS, AT_REL_EMAX} initType;
-typedef enum {SET_CHARGES, CURRENTS, FROM_FILE} loadType;
+typedef enum {SET_POTENTIAL, SET_CHARGES, CURRENTS, FROM_FILE} loadType;
 
 struct	Vector {double x,y,z;};
 typedef list<Vector> ListVector;
@@ -65,10 +65,14 @@ public:
 																					// The previous  values are only use to avoid warning at compilation //
 
 	static	double					I1, I2, Iscreen;								// Loading currents I1 and I2, and screening current Iscreen
-	static	double					Q,  Xq,Yq,Zq, Rq1,Rq2,Rq3;						// Charge center parameters:
+	static	double					Q, Xq,Yq,Zq, Rq1,Rq2,Rq3;						// Charge center parameters:
 																					// * Charge (Q),
 																					// * X-,Y-,Z-coordinates of a charge center (Xq,Yq,Zq),
 																					// * 1st, 2nd and 3rd geometrical parameters (Rq1, Rq2, Rq3)
+    static  double                  Eo,Vo, Xp,Yp,Zp, Rp1,Rp2,Rp3;                   // Potential center parameters:
+                                                                                    // * Reference electric potential (Vo) and field (Eo)
+                                                                                    // * X-,Y-,Z-coordinates of a potential center (Xp,Yp,Zp),
+                                                                                    // * 1st, 2nd and 3rd geometrical parameters (Rp1, Rp2, Rp3)
 	static	double					ThresholdOvershoot;								// %-age by which threshold must be exceeded to initiate discharge
     
 	static	bcType					BCtype;											// Boundary conditions
@@ -91,6 +95,7 @@ public:
     static  bool                    isNewRun;                                       // Check if the run is a new run or a resumed simulation
     
 	static	Charge					C;												// Charge center
+    static  Potential               V;                                              // Potential
 	static	SorSolution				SOR;											// Parameters of SOR algorithms
 
 	static	ListDouble				ChannelPotential;								// Channel potential at each stage of development

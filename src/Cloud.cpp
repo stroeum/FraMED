@@ -12,7 +12,7 @@ void Cloud::LoadTripole(FILE * file, const double II1, const double II2, const d
     ListCharge::iterator  it;														// Table with all parameters of the charge configuation
     CriticalFields _OverShotEc((1+Var::ThresholdOvershoot)*Var::Ec.getParams()[0],
                                Var::Ec.getParams()[1],Var::Ec.getParams()[2],Var::Ec.getParams()[3],
-                               Var::d,Var::N);
+                               Var::d,Var::N,1);
     int		_choice		= 2;	// Define choice of method to derive bd time
     double	TT			= 0;	// Bd Time
     double	rr			= 0;	// E/[(1+ThresholdOvershoot)*Einit]
