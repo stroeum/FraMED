@@ -36,8 +36,8 @@ int main()
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
     Var::BCtype					= TIN_CAN;                                          // Boundary conditions
-    Var::LoadingType            = SET_POTENTIAL;                                    // Charge loading type
-    Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
+    Var::LoadingType            = SET_CHARGES;                                    // Charge loading type
+    Var::InitiationType			= AT_REL_EMAX;                                    // Initiation type
     
     Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
@@ -53,7 +53,6 @@ int main()
     Var::isBCerrorCalculated	= true;                                            // Error at boundary is calculated at each step: Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
-    
     
     ListCharge::iterator	it;													// Table with all parameters of the charge configuration
     clock_t					startTime;
@@ -80,11 +79,11 @@ int main()
         IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
         
         IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(101,101,201);
+        Var::N.init(161,161,81);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(8e+3,8e+3,16e+3);
+        Var::L.init(40e+3,40e+3,20e+3);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
 
         IO::print(file, "..: Reading grid resolution (d)\n");
@@ -102,8 +101,10 @@ int main()
         
         //    We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
-        Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1);
+        //Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
+        //Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1);
+        Var::Ec.init(.1e+5,.1e+5,-.1e+5, Var::z_gnd,Var::d,Var::N,1);
+        Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1);
         IO::print(file, "..: Critical fields read (Ec,Eth+,Eth-,Vd+,Vd-)\n");
 
         IO::print(file, "..: Reading initiation point (InitPoint)\n");
@@ -268,16 +269,10 @@ int main()
         if (Var::LoadingType == SET_CHARGES) {
             IO::print(file, "..: Setting charge layers\n");
             // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
-            Var::Q =    2.99236;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 2.00e+3+Var::z_shift; Var::Rq1 = 1.50e+3;	Var::Rq3 = 1.50e+3;
+            Var::Q =     15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3e+3+Var::z_shift; Var::Rq1 = 5.00e+3;	Var::Rq3 = 6.0e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
-            Var::Q =	-52.865;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3.75e+3+Var::z_shift; Var::Rq1 = 3.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    49.8727;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 6.75e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 1.50e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2+Var::y_shift/2;	Var::Zq = 8.00e+3+Var::z_shift; Var::Rq1 = 4.00e+3;	Var::Rq3 = 0.50e+3;
+            Var::Q =    -15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 8e+3+Var::z_shift; Var::Rq1 = 10.00e+3;	Var::Rq3 = 4.0e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
