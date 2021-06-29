@@ -211,9 +211,12 @@ void IO::read(CMatrix2D & M, char * ffile)
 
 void IO::read(CMatrix1D & M, char * ffile)
 {
-    
     // Read Matrix Size //
     fp = openFile(ffile, "r");
+    if(fp == 0) {
+        perror("fopen");
+        exit(1);
+    }
     char	tmp_c;
     string	tmp_s;
     int m(0);
@@ -226,7 +229,6 @@ void IO::read(CMatrix1D & M, char * ffile)
     M.init(m);
     
     rewind(fp);
-    
   
     int ii(0);
     

@@ -17,7 +17,9 @@ Charge::Charge(double QQ, double XXq, double YYq, double ZZq, double RRq1, doubl
 
 bool Charge::init(char * filename, SizeGrid& _N)
 {
+    cout<<filename<<endl;
 	FILE * file = fopen (filename, "r");
+    cout<<filename<<endl;
 	char	tmp_c, tmp_cc;
 	string	tmp_s;
 	double	tmp_d;
@@ -45,6 +47,7 @@ bool Charge::init(char * filename, SizeGrid& _N)
 	_N.x  = _N.y/_N.x;
 	_N.y  = _N.z/_N.y;
 	_N.z /= _N.x*_N.y;
+    cout<<_N.x<<" "<<_N.y<<" "<<_N.z<<endl;
 
 	rewind(file);
 	rho.init(_N.x,_N.y,_N.z);

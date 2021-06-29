@@ -9,6 +9,9 @@
 CriticalFields::CriticalFields(double iinitiation0, double ppositive0, double nnegative0, double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent)
 {CriticalFields::init(iinitiation0,ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent);}
 
+CriticalFields::CriticalFields(double iinitiation0, double ppositive0, double nnegative0, double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent, list<double> _alt, list<double> _ng)
+{CriticalFields::init(iinitiation0,ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent,_alt, _ng);}
+
 CMatrix1D CriticalFields::getParams()
 {
 	CMatrix1D PParams(4);
@@ -40,5 +43,29 @@ bool CriticalFields::init(double iinitiation0, double ppositive0, double nnegati
 		negative[kk] = negative0*pow(Scaling::StdAtmosphere((kk+kk_gnd)*_d.z),alpha);
 	}
 	return true;
+}
+/**************************************************************************************/
+
+bool CriticalFields::init(double iinitiation0, double ppositive0, double nnegative0,
+                          double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent, list<double> _alt, list<double> _ng)
+{
+    z_gnd        = zz_gnd;
+    initiation0 = iinitiation0;
+    positive0    = ppositive0;
+    negative0    = nnegative0;
+    initiation.init(_N.z);
+    positive.init(_N.z);
+    negative.init(_N.z);
+    
+    int alpha = ScalingExponent;
+
+    int kk_gnd = (int)round(z_gnd/_d.z);
+    for (int kk=0 ; kk<_N.z ; kk++)
+    {
+        initiation[kk] = initiation0*pow(Scaling::StdAtmosphere((kk+kk_gnd)*_d.z,_alt, _ng),alpha);
+        positive[kk] = positive0*pow(Scaling::StdAtmosphere((kk+kk_gnd)*_d.z, _alt, _ng),alpha);
+        negative[kk] = negative0*pow(Scaling::StdAtmosphere((kk+kk_gnd)*_d.z, _alt, _ng),alpha);
+    }
+    return true;
 }
 /**************************************************************************************/
