@@ -7,7 +7,7 @@
 
 /**************************************************************************************/
 ScaledFields::ScaledFields(double ppositive0, double nnegative0, double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent)
-{ScaledFields::ScaledFields(ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent);}
+{ScaledFields(ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent);}
 
 CMatrix1D ScaledFields::getParams()
 {

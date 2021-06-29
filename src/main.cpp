@@ -39,7 +39,7 @@ int main()
     Var::LoadingType            = SET_POTENTIAL;                                    // Charge loading type
     Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
     
-    Var::step3d                 = 50;                                             // rho, E, V is calculated and store every step3d
+    Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
     Var::AddNew					= true;                                             // Channel is allowed to propagate: Y/N
     Var::isBndXingPossible		= false;                                            // Channel is allowed to cross boundaries: Y/N
@@ -49,8 +49,8 @@ int main()
     Var::isLinkXingPossible		= false;                                            // Channels crosses are allowed: Y/N
     Var::isRsDeveloped			= true;                                             // Return stroke development: Y/N
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
-    Var::isEsEnergyCalculated	= true;                                             // Electrostatic energy calculated at each step: Y/N
-    Var::isBCerrorCalculated	= true;                                             // Error at boundary is calculated at each step: Y/N
+    Var::isEsEnergyCalculated	= true;                                            // Electrostatic energy calculated at each step: Y/N
+    Var::isBCerrorCalculated	= true;                                            // Error at boundary is calculated at each step: Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
     
@@ -197,8 +197,6 @@ int main()
         sprintf(filename,"Un3d%d.dat",LastStep);
         IO::print(file, "..: Initializing map of fixed potential points (Un<<"+(string)filename+")\n");
         IO::read(Var::Un,filename);
-        
-        Var::V.init(Var::phi,Var::Un);
         
         sprintf(filename,"rho3d%d.dat",LastStep);
         IO::print(file, "..: Initializing electric charge density matrix (rho<<"+(string)filename+")\n");
@@ -391,7 +389,6 @@ int main()
     if(Var::LoadingType == SET_POTENTIAL) {
         bool UniformE = true;
         BC::AddUniformE(UniformE, Var::Eo, Var::phi, Var::Un, Var::L, Var::d, Var::N);
-        cout << Var::V;
         Var::SOR.init(Var::phi,Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::V, Var::Un);
     } else {
         Var::SOR.init(Var::phi, Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::C, Var::Un);
