@@ -1,7 +1,7 @@
 close all
 clear all
 clc
-
+cd ../results
 Q = load('CarriedCharge.dat');
 step = (0:size(Q)-1)';
 
@@ -14,3 +14,4 @@ set(gca,'FontSize',10);
 axis([0 max(step) min(0) max(Q)]) ;
 box on
 grid on
+cd ../viz

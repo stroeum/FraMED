@@ -1,11 +1,14 @@
 close all
-clear all
+clearvars
 clc
 
+cd ../results
 dxyz         = load('dxyz.dat');
 Nxyz         = load('Nxyz.dat');
 z_gnd        = load('z_gnd.dat');
 ChargeLayers = load('ChargeLayers.dat');
+cd ../viz
+
 dx = dxyz(1);           % _m
 dy = dxyz(2);           % _m
 dz = dxyz(3);           % _m
@@ -26,7 +29,7 @@ NbOrthoRad = 25;
 Color      = ['r' 'r' 'b' 'b'];
 
 hold on
-for n = 1:4
+for n = 1:2
     Ellipsoid(ChargeLayers(n,2)*1e-3,ChargeLayers(n,3)*1e-3,(z_gnd+ChargeLayers(n,4))*1e-3,...
         ChargeLayers(n,5)*1e-3,ChargeLayers(n,6)*1e-3,ChargeLayers(n,7)*1e-3,...
         Color(n),NbRad);

@@ -1,4 +1,4 @@
-% Initiation of discharge tree %
+% Initiation of discharge tree
 % Figure.Outerposition = get
 if strcmp(Figure.Output,'Movie')
     Movie(1) = getframe(h.fig);

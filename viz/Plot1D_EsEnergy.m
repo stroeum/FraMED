@@ -1,7 +1,8 @@
 close all
-clear all
+clearvars
 clc
 
+cd ../results/
 Es = load('EsEnergy.dat')*1e-9;
 step = (0:size(Es)-1)';
 
@@ -14,3 +15,4 @@ set(gca,'FontSize',10);
 axis([0 max(step) min(0) max(Es)]) ;
 box on
 grid on
+cd ../viz/

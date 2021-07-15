@@ -1,5 +1,7 @@
 function []=Plot3D_rho()
-clear all
+% Plot an axisymmetric view of the charge layers assumed cylindrical at the
+% center of the domain prior to the flash.
+clearvars
 close all
 clc
 global Charges NbLayers
@@ -8,10 +10,12 @@ global Charges NbLayers
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
 
+cd ../results
 Charges = load('ChargeLayers.dat');
 dxyz    = load('dxyz.dat');
 Nxyz    = load('Nxyz.dat');
 z_gnd   = load('z_gnd.dat');
+cd ../viz
 
 gnd_color = [.5 .5 .5];
 
@@ -34,8 +38,8 @@ Lz = (Nz-1)*dz;         % _m
 clear Nxyz
 clear dxyz
 
-NbLayers = size(Charges);
-NbLayers = NbLayers(1)-1;
+NbLayers = size(Charges)
+NbLayers = NbLayers(1);
 
 %-------------------------------------------------------------------------%
 % Draw the layers                                                         %
@@ -50,7 +54,7 @@ end
 
 x             = disk;
 y             = z;
-[theta,rho,z] = cart2pol(x, zeros(size(x,1), size(x,2)), y); 
+[~,rho,z] = cart2pol(x, zeros(size(x,1), size(x,2)), y); 
 r             = 25;
 theta         = repmat( linspace(0,2*pi,r)', 1, length(rho(:)) );
 rho           = repmat(rho(:).', r, 1);

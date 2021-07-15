@@ -2,65 +2,66 @@
 % Plot all figures and store them as .eps
 % NB: Videos should be store separately
 
+!mkdir ../Figures
 %% Clear Folder
-cd Figures
+cd ../Figures
 !rm -rf *.eps
-cd ..
+cd ../viz
 
 %% Charge Transfer
 Plot1D_ChannelCharge;
-cd Figures
+cd ../Figures
 hgexport(gcf,'ChargeTransfer.eps');
-cd ..
+cd ../viz
 
 %% Channel Potential
 Plot1D_ChannelPotential;
-cd Figures
+cd ../Figures
 hgexport(gcf,'ChannelPotential.eps');
-cd ..
+cd ../viz
 
 %% Dipole Moment
 Plot1D_DipoleMoment;
-cd Figures
+cd ../Figures
 hgexport(gcf,'DipoleMoment.eps');
-cd ..
+cd ../viz
 
 %% Electrostatic Energy
 Plot1D_EsEnergy;
-cd Figures
+cd ../Figures
 hgexport(gcf,'EsEnergy.eps');
-cd ..
+cd ../viz
 
 %% Field Evolution
 Plot1D_FieldEvolution;
-cd Figures
+cd ../figures
 hgexport(1,'FieldTimeEvolution.eps');
 hgexport(2,'phiTimeEvolution.eps');
 hgexport(3,'ETimeEvolution.eps');
-cd ..
+cd ../viz
 
 %% Field Evolution (cont.)
 Plot1D_Fields;
-cd Figures
+cd ../figures
 hgexport(2,'phi.eps');
 hgexport(3,'E.eps');
-cd ..
+cd ../viz
 
 %% Field Evolution (cont.)
 Plot2D_Fields3x3;
-cd Figures
+cd ../figures
 hgexport(gcf,'FieldSpaceEvolution.eps');
-cd ..
+cd ../viz
 
 %% Fieldlines
-Plot2D_FieldLines;
-cd Figures
+Plot2D_FieldLines(10);
+cd ../figures
 hgexport(gcf,'FieldLines.eps');
-cd ..
+cd ../viz
 
 %% LMA
 LMA_main;
-cd Figures
+cd ../figures
 hgexport(gcf,'LMA.eps');
-cd ..
+cd ../viz
 

@@ -2,7 +2,10 @@ close all
 clear all
 clc
 beep  off
+cd ../results
 load BndError.dat
+cd ../viz
+
 A1 = BndError(:,1);
 A2 = BndError(:,2);
 A3 = BndError(:,3);

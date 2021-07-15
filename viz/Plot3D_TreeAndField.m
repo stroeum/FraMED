@@ -1,6 +1,6 @@
 function []=Plot3D_TreeAndField()
 close all
-clear all
+clearvars
 clc
 
 figure;
@@ -8,13 +8,14 @@ figure;
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
 
+cd ../results
 % load Un.dat                 -ascii
 load dxyz.dat               -ascii
 load Nxyz.dat               -ascii
 load InitPoint.dat          -ascii
 load EstablishedLinks.dat   -ascii
 % EzNum       = load('EzNum.dat');
-phiNum      = load('phiNum.dat');
+phiNum      = load('phiNumBF.dat');
 % Einitiation = load('Einitiation.dat');
 % EthPositive = load('EthPositive.dat');
 % EthNegative = load('EthNegative.dat');
@@ -199,6 +200,7 @@ D=P(1,1);
 fprintf('Fractal dimension D = %f\n',D);
 Lowest_Altitude=min(EstablishedLinks(:,6)*dz)+z_gnd;
 fprintf('Lowest altitude = %f\n', Lowest_Altitude);
+cd ../viz
 end
 %-------------------------------------------------------------------------%
 

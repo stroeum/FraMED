@@ -1,4 +1,4 @@
-% Subplot dimensioning %
+% Subplot dimensioning
 if (FocusArea.x(1) == 0 && FocusArea.x(2) == 0 && FocusArea.y(1) == 0 && FocusArea.y(2) == 0 && FocusArea.z(1) == 0 && FocusArea.z(2) == 0)
     FocusArea.x(1) = 0;
     FocusArea.x(2) = L.x;

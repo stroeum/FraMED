@@ -1,8 +1,9 @@
 function []= Plot3D_Tree()
 close all
-clear all
+clearvars
 clc
 
+cd ../results/
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
@@ -48,7 +49,7 @@ clear InitPoint
 %-------------------------------------------------------------------------%
 gnd_color = [.5 .5 .5];
 color     = colormap(jet(NbOfLinks));
-isMonochrome = input('Is plot Monochrome? (1: yes, else: no)\n>> ');
+isMonochrome = 1; %input('Is plot Monochrome? (1: yes, else: no)\n>> ');
 if (isMonochrome == 1)
     for ii=1:NbOfLinks
         color(ii,:) = [0 0 1];
@@ -59,7 +60,8 @@ end
 % Draw the tree                                                           %
 %-------------------------------------------------------------------------%
 figure(1);
-set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/3)
+subplot(121);
+set(gcf,'Units','Normalized','OuterPosition', [0 0 1 1])
 hold on;
 
 % xc = InitX;
@@ -80,7 +82,8 @@ Xp = [Lx 0 0 Lx]*1e-3;
 Yp = [Ly Ly 0 0]*1e-3;
 Zp = [z_gnd z_gnd z_gnd z_gnd]*1e-3;
 patch(Xp, Yp, Zp, z_gnd,'FaceColor',gnd_color);
-% Movie(NbOfLinks) = getframe(gcf,[0,0, 560, 420]);
+vFile = VideoWriter('lightning','MPEG-4');
+open(vFile);
 for ii=1:NbOfLinks
     if(rem(ii,10)==0)
         %         pause;
@@ -92,34 +95,24 @@ for ii=1:NbOfLinks
         [EstablishedLinks(ii,3)*dz+z_gnd, EstablishedLinks(ii,6)*dz+z_gnd]*1e-3,...
         'Color',color(ii,:));
     axis([Lx*0/4 Lx*4/4 Ly*0/4 Ly*4/4 0 2/2*(Lz+z_gnd)]*1e-3)
-%     axis equal
+    axis vis3d
     xlabel('x (km)','FontSize',12);
     ylabel('y (km)','FontSize',12);
     zlabel('z (km)','FontSize',12);
     title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',12,'FontWeight','bold');
     set(gca,'FontSize',10);
+    
     view([45 10])
-    Movie(ii) = getframe(gcf,[0,0, 499, 453]);
-%     Movie(ii) = getframe;
+    frame = getframe(gcf);
+    writeVideo(vFile,frame);
 end
 grid
-Movie(NbOfLinks+1) = getframe(gcf,[0,0, 499, 453]);
 hold off;
-
-Record = input('Record the movie? (1: yes, else: no)\n>> ');
-if (Record == 1)
-%     close all;
-%     movie(Movie); % play the movie
-    movie2avi(Movie,'lightning.avi','quality',100);
-end
 
 %-------------------------------------------------------------------------%
 % Fractal Dimension                                                       %
 %-------------------------------------------------------------------------%
-figure(2);
-set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
-clf
-
+subplot(122);
 % Define which boundary will be reached first                             %
 % NbSpheres defines the number of sphere used to draw the plot            %
 
@@ -158,28 +151,40 @@ set(gca,'FontSize',10);
 xlabel('ln(R)','FontSize',12)
 ylabel('ln(N)','FontSize',12)
 D=P(1,1);
-title(['Sprite fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
+title(['Fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
 Lowest_Altitude = min(EstablishedLinks(:,6)*dz)+z_gnd;
 fprintf('Lowest Altitude   = %f\n\n',Lowest_Altitude);
 
-end
-%-------------------------------------------------------------------------%
+print(gcf,'-depsc','fractal_sphere');
 
-%-------------------------------------------------------------------------%
-% function [AA] = ConvertTo3d(A,B)
-% [M N] = size(A)
+frame = getframe(gcf);
+writeVideo(vFile,frame);
+close(vFile);
+cd ../viz/
+
+
+end
+
+
+
+
+% %-------------------------------------------------------------------------%
 % 
-% for m=1:M
-%     for n=1:N
-%         ii = rem(m,B(1));
-%         if(ii==0)
-%             ii =B(1);
-%         end
-%         jj = n;
-%         kk = (m-ii)/B(1)+1;
-%         AA(ii,jj,kk) = A(m,n);
-%     end
-% end
-% 
-% end
-%-------------------------------------------------------------------------%
+% %-------------------------------------------------------------------------%
+% % function [AA] = ConvertTo3d(A,B)
+% % [M N] = size(A)
+% % 
+% % for m=1:M
+% %     for n=1:N
+% %         ii = rem(m,B(1));
+% %         if(ii==0)
+% %             ii =B(1);
+% %         end
+% %         jj = n;
+% %         kk = (m-ii)/B(1)+1;
+% %         AA(ii,jj,kk) = A(m,n);
+% %     end
+% % end
+% % 
+% % end
+% %-------------------------------------------------------------------------%

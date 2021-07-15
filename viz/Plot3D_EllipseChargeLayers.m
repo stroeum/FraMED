@@ -1,11 +1,14 @@
 close all
-clear all
+clearvars
 clc
 
+cd ../results/
 dxyz         = load('dxyz.dat');
 Nxyz         = load('Nxyz.dat');
 z_gnd        = load('z_gnd.dat');
 ChargeLayers = load('ChargeLayers.dat');
+cd ../viz/
+
 dx = dxyz(1);           % _m
 dy = dxyz(2);           % _m
 dz = dxyz(3);           % _m

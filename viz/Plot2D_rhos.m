@@ -1,20 +1,14 @@
 close all
-clear all
+clearvars
 clc
 
-cd ..
-!make
-!./main
-cd results
+cd ../results
 
 %% Load datas
-close all
-clear all
-clc
 
 dxyz         = load('dxyz.dat');
 Nxyz         = load('Nxyz.dat');
-rhos2D       = load('rhos2D.dat')*1e-9;
+rhos2D       = load('rhoAmbYZ0.dat')*1e-9;
 z_gnd        = load('z_gnd.dat');
 ChargeLayers = load('ChargeLayers.dat');
 
@@ -56,3 +50,5 @@ ylabel('y (km)','FontSize',12);
 set(gca,'FontSize',10);
 axis square
 box on
+
+cd ../viz/

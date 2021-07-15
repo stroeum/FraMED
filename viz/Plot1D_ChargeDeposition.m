@@ -13,7 +13,7 @@ close all
 clear all
 clc
 beep  off
-
+cd ../results/
 %% Load relevant data
 dxyz              = load('dxyz.dat')*1e-3;                                 %_km
 Nxyz              = load('Nxyz.dat');                                      %_dimensionless
@@ -130,3 +130,21 @@ format long
 fprintf('Total charge induced         : %f C.\n',sum(sum(sum(rho.cha))));
 fprintf('Total positive induced charge: %f C.\n',sum(Q.cha.plus));
 fprintf('Total negative induced charge: %f C.\n',sum(Q.cha.minus));
+cd ../viz/
+
+function [AA] = ConvertTo3d(A,B)
+[M N] = size(A);
+AA(M,N,1)=0;
+
+for m=1:M
+    for n=1:N
+        ii = rem(m,B(1));
+        if(ii==0)
+            ii =B(1);
+        end
+        jj = n;
+        kk = (m-ii)/B(1)+1;
+        AA(ii,jj,kk) = A(m,n);
+    end
+end
+end

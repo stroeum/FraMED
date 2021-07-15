@@ -1,8 +1,8 @@
 close all
-clear all
+clearvars
 clc
-choice = 0;
-
+choice = 1;
+cd ../results/
 dxyz        = load('dxyz.dat');
 Nxyz        = load('Nxyz.dat');
 z_gnd       = load('z_gnd.dat');
@@ -17,11 +17,12 @@ Y = (0:dy:(Ny-1)*dy);
 Z = (0:dz:(Nz-1)*dz)+z_gnd;
 
 if choice == 0
-    rho2D       = load('rho2d.dat');
-    imagesc(Z,Y,rho2D,[-10 10]);
-    ylabel('y-axis (m)');
-    xlabel('z-axis (m)');
+    rho2D       = load('rhoAmbYZ0.dat');
+    imagesc(Y*1e-3,Z*1e-3,rho2D,[-10 10]);
+    xlabel('y-axis (m)');
+    ylabel('z-axis (m)');
     title(['\rho  (nC) after ', int2str(390) ,' step(s)']);
+    axis xy equal
     colormap(jet(256))
     colorbar;
 elseif choice == 1
@@ -29,29 +30,31 @@ elseif choice == 1
     N = 2;
     P = M*N;
     figure;
-    SavingStep = 40;
+    SavingStep = 10;
     for k=1:P
         subplot(M,N,k)
-        fname=['rho2d',int2str(k*SavingStep),'.dat'];
+        fname=['rhoAmbYZ',int2str(k*SavingStep),'.dat'];
         rho2D       = load(fname);
-        imagesc(Z,Y,rho2D,[-10 10]);
+        imagesc(Y*1e-3,Z*1e-3,rho2D,[-10 10]);
         ylabel('y-axis (m)');
         xlabel('z-axis (m)');
         title(['\rho  (nC) after ', int2str(k*SavingStep) ,' step(s)']);
-        colormap(jet(256))
-        colorbar;
-    end
+        axis xy equal tight
+        col 
 
     figure;
     for k=P+1:12
         subplot(M,N,k-P)
-        fname=['rho2d',int2str(k*SavingStep),'.dat'];
+        fname=['rhoAmbYZ',int2str(k*SavingStep),'.dat'];
         rho2D       = load(fname);
-        imagesc(Z,Y,rho2D,[-10 10]);
+        imagesc(Y*1e-3,Z*1e-3,rho2D,[-10 10]);
         ylabel('y-axis (m)');
         xlabel('z-axis (m)');
         title(['\rho  (nC) after ', int2str(k*SavingStep) ,' step(s)']);
+        axis xy equal tight
         colormap(jet(256))
         colorbar;
     end
 end
+
+cd ../viz/

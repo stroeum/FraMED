@@ -4,6 +4,7 @@ close all
 clc
 global Charges NbLayers
 
+cd ../results/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 dxyz        = load('dxyz.dat');
@@ -34,6 +35,8 @@ xlabel('Charge extension');
 ylabel('Altitude (m)');
 grid on
 axis([0 max(rho) 0 Lz+z_gnd])
+
+cd ../viz/
 end
 
 function [answer]=ro(z)

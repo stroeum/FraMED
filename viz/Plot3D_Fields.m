@@ -1,19 +1,23 @@
 function []=Plot3D_Fields()
-clear all
+% Plot an axisymmetric view of the electric field at the center of the 
+% domain prior to the flash
+
+clearvars
 close all
 clc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+cd ../results
 dxyz        = load('dxyz.dat');
 Nxyz        = load('Nxyz.dat');
-EzNum       = load('EzNum.dat');
+EzNum       = load('EnumBF.dat');
 % phiNum      = load('phiNum.dat');
 % Einitiation = load('Einitiation.dat');
 % EthPositive = load('EthPositive.dat');
 % EthNegative = load('EthNegative.dat');
 z_gnd       = load('z_gnd.dat');
-
+cd ../viz
 gnd_color = [.5 .5 .5];
 
 Nx = Nxyz(1);
@@ -44,7 +48,7 @@ z  = (0:Nz-1)*dz;
 
 x             = EzNum/max(max(max(abs(EzNum))))*1e3;
 y             = z;
-[theta,rho,z] = cart2pol(x, zeros(size(x,1), size(x,2)), y); 
+[~,rho,z] = cart2pol(x, zeros(size(x,1), size(x,2)), y); 
 r             = 10;
 theta         = repmat( linspace(0,2*pi,r)', 1, length(rho(:)) );
 rho           = repmat(rho(:).', r, 1);

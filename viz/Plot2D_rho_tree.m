@@ -1,5 +1,5 @@
 close all
-clear all
+clearvars
 clc
 beep  off
 
@@ -7,7 +7,7 @@ beep  off
 %-------------------------------------------------------------------------%
 % Load data files %
 %-------------------------------------------------------------------------%
-
+cd ../results/
 dxyz = load('dxyz.dat')*1e-3; %_km
 Nxyz = load('Nxyz.dat'); %_dimensionless
 InitPoint = load('InitPoint.dat')*1e-3; %_km
@@ -105,12 +105,12 @@ set(gca,'LineWidth',.25)
 
 hold on
 if strcmp(ChargeLayers.Density,'on')
-    imagescSgnLog(x,z,rho.XZ,-3,1);
+    imagescSgnLog(x,z,rho.XZ',-3,1);
     axis([0 12 z(1)*1e-3 z(end)*1e-3])
     xlabel('x (km)','fontsize',18)
     ylabel('z (km)','fontsize',18)
     XTick = get(gca,'XTick');
-    set(gca,'XMinorTick','on','YMinorTick','on','XTick',[0 6 12 18]);
+    set(gca,'XMinorTick','on','YMinorTick','on');
     title('\rho_t=\rho_s+\rho_f (nC/m^3)','fontsize',18);
     set(gca,'FontSize',18);
 end
@@ -168,12 +168,12 @@ set(gca,'LineWidth',.25)
 
 hold on
 if strcmp(ChargeLayers.Density,'on')
-    imagescSgnLog(y,z,rho.YZ,-3,1);
+    imagescSgnLog(y,z,rho.YZ',-3,1);
     axis([y(1) y(end) z(1)*1e-3 z(end)*1e-3])
     xlabel('y (km)','fontsize',18)
     ylabel('z (km)','fontsize',18)
     XTick = get(gca,'XTick');
-    set(gca,'XMinorTick','on','YMinorTick','on','XTick',[0 6 12 18]);
+    set(gca,'XMinorTick','on','YMinorTick','on');
     title('\rho_t=\rho_s+\rho_f (nC/m^3)','fontsize',18);
     set(gca,'FontSize',18);
 end
@@ -218,8 +218,111 @@ hold off
 box on
 axis image
 axis([FocusArea.y(1) FocusArea.y(2) FocusArea.z(1) FocusArea.z(2)]);
+cd ../viz
 
-%% Ambient charge density and tree
-% cd Figures
-hgexport(gcf,'~/Desktop/BJ/Fractal.ai');
-% cd ..
+function [M]=imagescSgnLog(varargin)
+% output = imagescSgnLog(density matrix)
+% output = imagescSgnLog(r,z,density matrix)
+% output = imagescSgnLog(r,z,density matrix,lower boundary)
+% output = imagescSgnLog(r,z,density matrix,lower boundary, upper boundary)
+% output = imagescSgnLog(r,z,density matrix,lower boundary, upper boundary,colorbar label)
+% Plot a logscaled image of the input matrix accounting for the original
+% sign of each element of the input
+format short e
+narginchk(1,6);
+if(nargin==2)
+    error('Wrong number of arguments (1, 3-6)');
+end
+
+if nargin==1
+    NN  = size(varargin{1});
+    N.r = NN(1);
+    N.z = NN(2);
+    M.data = varargin{1};
+    clear NN;
+else
+    N.r = length(varargin{1});
+    N.z = length(varargin{2});
+    M.data = varargin{3};
+end
+
+M.log.P = log10((M.data>=0).*M.data);
+M.log.N = log10(-(M.data<=0).*M.data);
+
+M.max.P = max(max(M.log.P));
+M.max.N = max(max(M.log.N));
+M.max.T = max(M.max.P,M.max.N);
+
+M.min.P = min(min(M.log.P));
+M.min.N = min(min(M.log.N));
+M.min.T = min(M.min.P,M.min.N);
+
+if nargin<4
+    if(isinf(M.max.T))
+        M.max.T = 2;
+    end
+    if(isinf(M.min.T))
+        M.min.T = -6;
+    end
+elseif nargin == 4
+    M.min.T = varargin{4};
+elseif nargin > 4
+    M.min.T = varargin{4};
+    M.max.T = varargin{5};
+end
+for ii=1:N.r
+    for kk=1:N.z
+        if M.log.P(ii,kk) < M.min.T
+            M.log.P(ii,kk) = M.min.T;
+        end
+        if M.log.N(ii,kk) < M.min.T
+            M.log.N(ii,kk) = M.min.T;
+        end
+        
+    end
+end
+
+M.len.T = ceil(2*(M.max.T-M.min.T));
+
+% M.log.P = M.log.P+M.len.T/2;
+% M.log.N = -M.log.N-M.len.T/2;
+M.log.P = M.log.P-M.min.T;
+M.log.N = -M.log.N+M.min.T;
+
+M.log.T = (M.data>=0).*M.log.P + (M.data<0).*M.log.N;
+
+% subplot(131); imagesc(M.log.P'); colorbar; title('+'); axis xy; axis image; caxis([-M.len.T/2 M.len.T/2]);
+% subplot(132); imagesc(M.log.N'); colorbar; title('-'); axis xy; axis image; caxis([-M.len.T/2 M.len.T/2]);
+% subplot(133); imagesc(M.log.T'); colorbar; title('T'); axis xy; axis image; caxis([-M.len.T/2 M.len.T/2]);
+
+if nargin==1
+    imagesc(M.log.T');
+else
+    imagesc(varargin{1},varargin{2},M.log.T');
+end
+axis xy;
+axis image;
+caxis([-M.len.T/2 M.len.T/2]);
+cbar = colorbar;
+% cbar.AxisLocation = 'in';
+cTick = cbar.Ticks;
+c = '';
+for ii=1:numel(cTick)
+    if cTick(ii)<0
+        c{ii} = num2str(-10^(-cTick(ii)+M.min.T),'%2.1e\n');
+    elseif cTick(ii)==0
+        c{ii} = ['+/-',num2str(10^M.min.T,'%2.1e\n')];
+    elseif cTick(ii)>0
+        c{ii} = num2str( 10^(cTick(ii)+M.min.T),'%2.1e\n');
+    end
+    
+end
+if nargin<6
+    cbar.TickLabels = c;
+    cbar.TickDirection = 'out';
+else
+    cbar.TickLabels = c;
+    cbar.TickDirection = 'out';
+    cbar.Label.String = varargin{6};
+end    
+end

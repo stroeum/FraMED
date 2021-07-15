@@ -1,8 +1,9 @@
 close all
-clear all
+clearvars
 clc
 beep  off
 
+cd ../results/
 %% Load
 EthPositive = load('EthPositive.dat')*1e-5;
 EthNegative = load('EthNegative.dat')*1e-5;
@@ -84,3 +85,21 @@ for nn=1:3
     end
 end
 clear mm nn pp ii jj kk
+cd ../viz/
+
+function [AA] = ConvertTo3d(A,B)
+[M,N] = size(A);
+AA(M,N,1)=0;
+
+for m=1:M
+    for n=1:N
+        ii = rem(m,B(1));
+        if(ii==0)
+            ii =B(1);
+        end
+        jj = n;
+        kk = (m-ii)/B(1)+1;
+        AA(ii,jj,kk) = A(m,n);
+    end
+end
+end

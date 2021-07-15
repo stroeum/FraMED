@@ -1,7 +1,8 @@
 close all
-clear all
+clearvars
 clc
 
+cd ../results/
 figure;
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
@@ -77,7 +78,7 @@ ChargeLayersLineWidth  = 1;
 %% Derive data for plotting
 x        = (0:Nx-1)'*dx*1e-3;
 y        = (0:Ny-1)'*dy*1e-3;
-z        = ((0:Nz-1)'*dz+z_gnd)*1e-3;	
+z        = ((0:Nz-1)'*dz+z_gnd)*1e-3;
 [y,z]    = meshgrid(y,z);
 
 %% Plot
@@ -92,15 +93,15 @@ box on
 hold on;
 
 rectangle('Position',[(ChargeLayers(1,3)-2*ChargeLayers(1,5)/2)*1e-3,(z_gnd+ChargeLayers(1,4)-ChargeLayers(1,6)/2)*1e-3,2*ChargeLayers(1,5)*1e-3,ChargeLayers(1,6)*1e-3],...
-          'Curvature',[0,0],...
-         'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',LPcolor);
+    'Curvature',[0,0],...
+    'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',LPcolor);
 rectangle('Position',[(ChargeLayers(2,3)-2*ChargeLayers(2,5)/2)*1e-3,(z_gnd+ChargeLayers(2,4)-ChargeLayers(2,6)/2)*1e-3,2*ChargeLayers(2,5)*1e-3,ChargeLayers(2,6)*1e-3],...
-          'Curvature',[0,0],...
-         'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',Ncolor);
-rectangle('Position',[(ChargeLayers(3,3)-2*ChargeLayers(3,5)/2)*1e-3,(z_gnd+ChargeLayers(3,4)-ChargeLayers(3,6)/2)*1e-3,2*ChargeLayers(3,5)*1e-3,ChargeLayers(3,6)*1e-3],...
-          'Curvature',[0,0],...
-         'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',Pcolor);
-     
+    'Curvature',[0,0],...
+    'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',Ncolor);
+% rectangle('Position',[(ChargeLayers(3,3)-2*ChargeLayers(3,5)/2)*1e-3,(z_gnd+ChargeLayers(3,4)-ChargeLayers(3,6)/2)*1e-3,2*ChargeLayers(3,5)*1e-3,ChargeLayers(3,6)*1e-3],...
+%           'Curvature',[0,0],...
+%          'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',Pcolor);
+
 plot(Y*1e-3,z_gnd*1e-3*ones(size(Y)),'k','LineWidth',LineWidth);
 plot(...
     EstablishedLinks(1,2)*dy*1e-3,(EstablishedLinks(1,3)*dz+z_gnd)*1e-3,...
@@ -108,15 +109,18 @@ plot(...
     'MarkerEdgeColor',color(1,:),'MarkerFaceColor',color(1,:));
 for ii=1:NbOfLinks
     % plots ending point of each link %
-    plot(... 
+    plot(...
         [EstablishedLinks(ii,2)*dy, EstablishedLinks(ii,5)*dy]*1e-3,...
         [EstablishedLinks(ii,3)*dz+z_gnd, EstablishedLinks(ii,6)*dz+z_gnd]*1e-3,...
-       'Color',color(ii,:)...
+        'Color',color(ii,:)...
         );
-%    axis([0 Ly LzMin LzMax]*1e-3);
-     axis([0 40 0 20]);
+    axis([0 Ly LzMin LzMax]*1e-3);
+    axis equal tight xy
+    %      axis([0 40 0 20]);
 end
 xlabel('y (km)','FontSize',FontSizeLabels)
 ylabel('z (km)','FontSize',FontSizeLabels)
 
 hold off;
+
+cd ../viz/

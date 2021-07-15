@@ -1,13 +1,13 @@
 %% Load datas
 close all
-clear all
+clearvars
 clc
 
 %% Compile
 % cd ..
 % !make
 % !./main
-% cd results
+cd ../results/
 
 %% Draw
 dxyz         = load('dxyz.dat');
@@ -51,9 +51,9 @@ z        = ((0:Nz-1)'*dz+z_gnd)*1e-3;
 
 E        = (Ex2D.^2+Ey2D.^2+Ez2D.^2).^.5*1e-5;
 [M, N]   = size(E);
-Einit    = zeros(M,N);
-for mm=1:M
-    Einit(mm,:) = Einitiation(:)*1e-5;
+Einit    = 0*E;
+for mm=1:N
+    Einit(:,mm) = Einitiation(:)*1e-5;
 end
 
 %% Plot
@@ -63,10 +63,10 @@ end
 hold on
 isFieldMagnitude = 2; %input('Plot E-field magnitude? (1: yes, else: no)\n>> ');
 if (isFieldMagnitude ~= 1)
-    imagesc(y,z,(((E-Einit)./Einit)'));
+    imagesc(y,z,(E-Einit)./Einit);
     title('Threshold Overshoot','FontSize',12,'FontWeight','bold');
 elseif (isFieldMagnitude == 1)
-    imagesc(y,z,E');
+    imagesc(y,z,E);
     title('E-field magnitude (kV/cm)','FontSize',12,'FontWeight','bold');
 end
 colormap(gray(256))
@@ -89,3 +89,4 @@ axis image
 % axis([0 Ly 0 25]);
 box on
 hold off
+cd ../viz/

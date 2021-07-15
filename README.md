@@ -9,9 +9,13 @@ FraMED is FRActal Model of Electrical Discharges in the atmosphere using a varie
 
 To install, simple copy and paste the executable to the desired location.
 
-Hardware requirements:		N/A
-Software requirements:		macOS / linux
+Prior to a new run:
+ * Ensure the presence of an empty "results" folder in the root directory; 
+ * Remove the summary.txt file from the results folder if applicable.
+
+Hardware requirements:	N/A
+Software requirements:	macOS / linux
 Version history:			1.2
 Pricing information:		freeware
 Contact information:		jriousset@fit.edu
-Date:				July 14, 2008
+Date:                                  July 14, 2008

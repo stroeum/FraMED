@@ -1,7 +1,9 @@
 %% Initialize procedure
 close all
-clear all
+clearvars
 clc
+
+cd ../results/
 
 %% Load data
 dxyz        = load('dxyz.dat');
@@ -127,3 +129,5 @@ axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
 box on
 grid on
 clear n m M N CurveIndex CurveStep NbOfCurves
+
+cd ../viz/

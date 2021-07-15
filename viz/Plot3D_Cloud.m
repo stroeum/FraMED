@@ -1,7 +1,7 @@
 function []=Plot3D_Cloud()
 beep  off
 close all
-% clear all
+clearvars
 clc
 % figure(1);
 %-------------------------------------------------------------------------%
@@ -45,24 +45,24 @@ fprintf('3. Scatter3D\n');
 fprintf('exit else\n');
 % choice =4;
 % fprintf('choice >> %d\n',choice);
-choice = input('choice >> ');
+choice = 2;%input('choice >> ');
 
 if (choice == 1)
     %---------------------------------------------------------------------%
     % Isosurface                                                          %
     %---------------------------------------------------------------------%
-    rho   = load('rho3d.dat');
+    rho   = load('rho3d0.dat');
     rho3D   = ConvertTo3d(rho,Nxyz);
-    save rho3D.mat rho3D -mat
+    %     save rho3D.mat rho3D -mat
     clear Nxyz
     % load rho3D.mat -mat
-
+    
     figure;
     % 1. Prepare the Data %
     data = rho3D;
     % data = smooth3(data,'gaussian',1);
     data = smooth3(data,'box',5);
-
+    
     % 2. Create the Isosurface and Set Properties %
     isoval = .5;
     h = patch(isosurface(X,Y,Z,data,isoval),...
@@ -72,18 +72,18 @@ if (choice == 1)
         'SpecularStrength',.7,...
         'DiffuseStrength',.4);
     isonormals(data,h)
-
+    
     % 3. Create the Isocaps and Set Properties %
     patch(isocaps(X,Y,Z,data,isoval),...
         'FaceColor','interp',...
         'EdgeColor','none')
     colormap hsv
-
+    
     % 4. Define the View %
     daspect([1,1,1])
     axis([0 Lx 0 Ly 0 Lz+z_gnd])% tight
     view(3)
-
+    
     % 5. Add Lighting %
     camlight right
     camlight left
@@ -93,33 +93,42 @@ elseif(choice == 2)
     %---------------------------------------------------------------------%
     % Slice                                                               %
     %---------------------------------------------------------------------%
-    rho   = load('rho.dat');
+    rho   = load('rho3d0.dat');
     rho3D   = ConvertTo3d(rho,Nxyz);
-    save rho3D.mat rho3D -mat
+%     save rho3D.mat rho3D -mat
     % load rho3D.mat -mat
     clear Nxyz
-
+    
     figure;
-    Record   = input('Record the movie? (1: yes, else: no)\n>> ');
+    Record   = 0; %input('Record the movie? (1: yes, else: no)\n>> ');
     N        = Nz;
     Movie(N) = getframe;
+    
     [X,Y,Z]  = meshgrid(X,Y,Z);
+    size(X)
+    size(Y)
+    size(Z)
+    size(rho3D)
+    
     slice(X,Y,Z,rho3D,Lx,Ly,Lz);
     set(gca,'nextplot','replacechildren');
+    axis equal tight
     if (Record ~= 1)
         for n = 1:N
             Sx      = Lx/2;
             Sy      = Ly/2;
             Sz      = [0 (n-1)*dz]+z_gnd;
-            slice(X,Y,Z,rho3D,Sx,Sy,Sz);
+            h=slice(X*1e-3,Y*1e-3,Z*1e-3,rho3D,Sx*1e-3,Sy*1e-3,Sz*1e-3,'makima');
+            set(h,'edgecolor','none');
             colorbar
             xlabel('x-axis');
             ylabel('y-axis');
             zlabel('z-axis');
             title('Charge density \rho [nC]')
-            axis([0 Lx 0 Ly 0 Lz+z_gnd])
+            axis([0 Lx 0 Ly 0 Lz+z_gnd]*1e-3)
             view([315+((n-1)*90/(N-2)) 25])
             Movie(n) = getframe;
+            
         end
         colorbar;
     elseif (Record == 1)
@@ -127,28 +136,28 @@ elseif(choice == 2)
             Sx      = [Lx/2 Lx];
             Sy      = [Ly/2 Ly];
             Sz      = [0 (n-1)*dz]+z_gnd;
-            slice(X,Y,Z,rho3D,Sx,Sy,Sz);
-
+            slice(X*1e-3,Y*1e-3,Z*1e-3,rho3D,Sx*1e-3,Sy*1e-3,Sz*1e-3);
+            
             colorbar;
             xlabel('x-axis');
             ylabel('y-axis');
             zlabel('z-axis');
             title('Charge density \rho [nC]')
-            axis([0 Lx 0 Ly 0 Lz+z_gnd])
+            axis([0 Lx 0 Ly 0 Lz+z_gnd]*1e-3)
             %         view([315+((n-1)*90/(N-2)) 25]);
             view([315 25])
             Movie(n) = getframe;
         end
-        %     close all;
-        %     movie(Movie); % play the movie
-        movie2avi(Movie,'cloud.avi','quality',100);
+%         writeVide(Movie,'cloud.avi','quality',100);
     end
 elseif(choice == 3)
     %---------------------------------------------------------------------%
     % Scatter3                                                            %
     %---------------------------------------------------------------------%
     rhoAmb     = load('rho3d0.dat');
-    isStatic = input('Display a movie? (1: yes, else: no)\n>> ');
+    isStatic = 1;%input('Display a movie? (1: yes, else: no)\n>> ');
+    
+    
     if(isStatic~=1)
         rho   = rhoAmb;
         clear Nxyz
@@ -187,7 +196,7 @@ elseif(choice == 3)
                 end
             end
         end
-
+        
         Movie(K+1) =getframe();
         for k=0:K
             fname = ['rho3d',int2str(k*SavingStep),'.dat'];
@@ -205,32 +214,33 @@ elseif(choice == 3)
             set(gca,'FontSize',10);
             view([300 5])
             % view([0 1 0])
+            axis xy equal
             Movie(k+1) = getframe(gcf,[0,0, 560, 420]);
         end
-        movie2avi(Movie,'cloud.avi','quality',100);
+        %         movie2avi(Movie,'cloud.avi','quality',100);
     end
 end
+cd ../viz
+
 end
 %-------------------------------------------------------------------------%
 
 %-------------------------------------------------------------------------%
 function [AA] = ConvertTo3d(A,B)
-[M N] = size(A);
-AA(M,N,1)=0;
-
-for m=1:M
-    for n=1:N
-        ii = rem(m,B(1));
-        if(ii==0)
-            ii =B(1);
+Nx = B(1);
+Ny = B(2);
+Nz = B(3);
+AA = zeros(Nx,Ny,Nz);
+size(AA)
+m = 1;
+for k=1:Nz
+    for i=1:Nx
+        for j=1:Ny
+            AA(i,j,k) = A(m);
+            m = m + 1;
         end
-        jj = n;
-        kk = (m-ii)/B(1)+1;
-        AA(ii,jj,kk) = A(m,n);
     end
 end
-cd ../viz
-
 end
 
 
@@ -253,6 +263,6 @@ end
 %         p = p+1;
 %     end
 % end
-% 
+%
 % end
 %-------------------------------------------------------------------------%

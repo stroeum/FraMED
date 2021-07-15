@@ -1,6 +1,6 @@
 function []=Plot3D_TreeAndCharge()
 close all
-clear all
+clearvars
 clc
 
 figure;
@@ -9,6 +9,7 @@ global Charges NbLayers
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
 
+cd ../results/
 % load Un.dat                 -ascii
 load dxyz.dat               -ascii
 load Nxyz.dat               -ascii
@@ -52,7 +53,7 @@ Initj = round(InitY/dy);
 Initk = round(InitZ/dz);
 
 NbLayers = size(Charges);
-NbLayers = NbLayers(1)-1;
+NbLayers = NbLayers(1);
 
 clear Nxyz
 clear dxyz
@@ -169,6 +170,7 @@ D=P(1,1);
 fprintf('Fractal dimension D= %f\n',D);
 Lowest_Altitude=min(EstablishedLinks(:,6)*dz)+z_gnd;
 fprintf('Lowest altitude = %f\n',Lowest_Altitude);
+cd ../viz
 end
 %-------------------------------------------------------------------------%
 
