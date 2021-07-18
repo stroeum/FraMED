@@ -32,3 +32,11 @@
 *.out
 *.app
 FraMED
+
+# Plots
+results/*.mp4
+results/*.eps
+results/*.mat
+viz/*.png
+viz/*.eps
+figures/*
