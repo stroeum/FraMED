@@ -12,6 +12,7 @@ LDIR = lib
 ODIR = build
 RDIR = results
 SDIR = src
+VDIR = viz
 
 # Setup files & libs
 DEPS = $(wildcard $(IDIR)/*.h)
@@ -71,7 +72,7 @@ reset:
 	rm -rfv \
 	  $(EXE) \
 	  $(BDIR)/JOB.ID $(BDIR)/*log* \
-	  $(RDIR)/*.?at $(RDIR)/*.avi $(RDIR)/*.eps $(RDIR)/*.ps $(RDIR)/*.pdf $(RDIR)/*.txt
+	  $(RDIR)/*.?at $(RDIR)/*.mp4 $(RDIR)/*.avi $(RDIR)/*.eps $(RDIR)/*.ps $(RDIR)/*.pdf $(RDIR)/*.txt $(VDIR)/*.eps $(VDIR)/*.png
 
 # Display
 print:
