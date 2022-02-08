@@ -29,7 +29,8 @@ NbOrthoRad = 25;
 Color      = ['r' 'r' 'b' 'b'];
 
 hold on
-for n = 1:2
+[maxn,~] = size(ChargeLayers);
+for n = 1:maxn
     Ellipsoid(ChargeLayers(n,2)*1e-3,ChargeLayers(n,3)*1e-3,(z_gnd+ChargeLayers(n,4))*1e-3,...
         ChargeLayers(n,5)*1e-3,ChargeLayers(n,6)*1e-3,ChargeLayers(n,7)*1e-3,...
         Color(n),NbRad);

@@ -195,7 +195,7 @@ plot(log(R), log(N), 'o', log(R), polyval(P, log(R)), '--')
 grid
 xlabel('ln(R)')
 ylabel('ln(N)')
-title('Sprite fractal dimension D=')
+title(['Sprite fractal dimension D = ',num2str(P(1,1))])
 D=P(1,1);
 fprintf('Fractal dimension D = %f\n',D);
 Lowest_Altitude=min(EstablishedLinks(:,6)*dz)+z_gnd;
