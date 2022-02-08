@@ -8,9 +8,9 @@ cd ../results/
 EthPositive = load('EthPositive.dat')*1e-5;
 EthNegative = load('EthNegative.dat')*1e-5;
 EzBF        = load('EnumBF.dat')*1e-5;
-ExAF3D      = load('Ex.dat')*1e-5;
-EyAF3D      = load('Ey.dat')*1e-5;
-EzAF3D      = load('Ez.dat')*1e-5;
+ExAF3D      = load('Ex3d.dat')*1e-5;
+EyAF3D      = load('Ey3d.dat')*1e-5;
+EzAF3D      = load('Ez3d.dat')*1e-5;
 dxyz        = load('dxyz.dat')*1e-3;
 Nxyz        = load('Nxyz.dat');
 z_gnd       = load('z_gnd.dat')*1e-3;

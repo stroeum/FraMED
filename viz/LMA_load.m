@@ -8,8 +8,8 @@ InitPoint         = load('InitPoint.dat')*1e-3;                            %_km
 Links.data        = load('EstablishedLinks.dat');
 z_gnd             = load('z_gnd.dat')*1e-3;                                %_km
 Layers.data       = load('ChargeLayers.dat')*1e-3;                         %_kC, _km
-rho.YZ            = load('rhoAmbYZ0.dat');
-rho.XZ            = load('rhoAmbXZ0.dat');
+rho.YZ            = load('rhoAmbYZ.dat');
+rho.XZ            = load('rhoAmbXZ.dat');
 
 % Derive main parameters
 Nb.Links          = size(Links.data);

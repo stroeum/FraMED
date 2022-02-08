@@ -2,10 +2,19 @@ function [] = Plot2D_FieldLines(num)
 cd ../results
 dxyz         = load('dxyz.dat');
 Nxyz         = load('Nxyz.dat');
-Ex2D         = load(['Ex2D',num2str(num),'.dat']);
-Ey2D         = load(['Ey2D',num2str(num),'.dat']);
-Ez2D         = load(['Ez2D',num2str(num),'.dat']);
-phi2D        = load(['phi2D',num2str(num),'.dat']);
+
+if num=='~'
+    Ex2D         = load('Ex2d.dat');
+    Ey2D         = load('Ey2d.dat');
+    Ez2D         = load('Ez2d.dat');
+    phi2D        = load('phi2d.dat');
+else 
+    Ex2D         = load(['Ex2D',num2str(num),'.dat']);
+    Ey2D         = load(['Ey2D',num2str(num),'.dat']);
+    Ez2D         = load(['Ez2D',num2str(num),'.dat']);
+    phi2D        = load(['phi2D',num2str(num),'.dat']);
+end
+
 z_gnd        = load('z_gnd.dat');
 ChargeLayers = load('ChargeLayers.dat');
 cd ../viz
@@ -67,3 +76,4 @@ set(gca,'FontSize',10);
 axis xy
 axis image
 box on
+end 
