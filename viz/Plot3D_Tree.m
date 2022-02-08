@@ -2,7 +2,9 @@ function []= Plot3D_Tree()
 close all
 clearvars
 clc
-
+if ~exist('../Figures', 'dir')
+    mkdir('../Figures')
+end
 cd ../results/
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
@@ -82,7 +84,7 @@ Xp = [Lx 0 0 Lx]*1e-3;
 Yp = [Ly Ly 0 0]*1e-3;
 Zp = [z_gnd z_gnd z_gnd z_gnd]*1e-3;
 patch(Xp, Yp, Zp, z_gnd,'FaceColor',gnd_color);
-vFile = VideoWriter('lightning','MPEG-4');
+vFile = VideoWriter('../Figures/LightningAndFractalD','MPEG-4');
 open(vFile);
 for ii=1:NbOfLinks
     if(rem(ii,10)==0)
@@ -155,7 +157,7 @@ title(['Fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
 Lowest_Altitude = min(EstablishedLinks(:,6)*dz)+z_gnd;
 fprintf('Lowest Altitude   = %f\n\n',Lowest_Altitude);
 
-print(gcf,'-depsc','fractal_sphere');
+print(gcf,'-depsc','../Figures/fractal_sphere');
 
 frame = getframe(gcf);
 writeVideo(vFile,frame);

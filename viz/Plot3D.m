@@ -2,8 +2,10 @@ function []= Plot3D()
 close all
 clearvars
 clc
+if ~exist('../Figures', 'dir')
+    mkdir('../Figures')
+end
 cd ../results/
-
 %-------------------------------------------------------------------------%
 % Load data files                                                         %
 %-------------------------------------------------------------------------%
@@ -57,7 +59,7 @@ if (isMonochrome == 1)
 end
 Record = input('Record the movie? (1: yes, else: no)\n>> ');
 if (Record == 1)
-    Movie = VideoWriter('lightning','MPEG-4');
+    Movie = VideoWriter('../Figures/lightning','MPEG-4');
     open(Movie);
 end
 %-------------------------------------------------------------------------%
