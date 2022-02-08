@@ -1,4 +1,4 @@
-function []=LMA_axes(h,panels)
+function []=LMA_labels(h,panels)
 global alt_hist FocusArea Font Nb
 % LMA axes %
 
