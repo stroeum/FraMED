@@ -41,9 +41,9 @@ for n=1:NbOfCurves
         plot(phi(n,:),z,'Color',color(n,:))
     end
 end
+set(gca,'FontSize',8);
 xlabel('\phi (MV)','FontSize',12);
 ylabel('z(km)','FontSize',12);
-set(gca,'FontSize',10);
 
 axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]) ;
 box on
@@ -58,9 +58,9 @@ for n=1:NbOfCurves
 end
 plot(EthNegative,z, 'g--',EthPositive,z, 'g--');
 
+set(gca,'FontSize',8);
 xlabel('E_z (kV/cm)','FontSize',12);
 ylabel('z(km)','FontSize',12);
-set(gca,'FontSize',10);
 axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
 box on
 grid on
@@ -79,10 +79,10 @@ for n=1:M*N-1
     plot(phi(CurveIndex(n),:),z,'Color',0*color(CurveIndex(n),:));
     plot(phi(1,:),z,'b--')
     hold off
+    set(gca,'FontSize',8);
     xlabel('\phi (MV)','FontSize',12);
     ylabel('z(km)','FontSize',12);
-    title(['\phi  scan after ',int2str(CurveIndex(n)-1),' steps']);
-    set(gca,'FontSize',10);
+    title(['\phi  scan after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',6);
     axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]) ;
     box on
     grid on
@@ -91,10 +91,10 @@ subplot(M,N,M*N);
 hold on
 plot(phi(NbOfCurves,:),z,'Color',0*color(NbOfCurves,:));
 plot(phi(1,:),z,'b--')
+set(gca,'FontSize',8);
 xlabel('\phi (MV)','FontSize',12);
 ylabel('z(km)','FontSize',12);
-title(['\phi  scan after ',int2str(NbOfCurves-1),' steps']);
-set(gca,'FontSize',10);
+title(['\phi  scan after ',int2str(NbOfCurves-1),' steps'],'FontSize',6);
 axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]);
 box on
 grid on
@@ -107,10 +107,10 @@ for n=1:M*N-1
     plot(Ez(CurveIndex(n),:),z,'Color',0*color(CurveIndex(n),:))
     plot(Ez(1,:),z,'r--')
     hold off
+    set(gca,'FontSize',8);
     xlabel('E_z (kV/cm)','FontSize',12);
     ylabel('z(km)','FontSize',12);
-    title(['E_z  scan after ',int2str(CurveIndex(n)-1),' steps']);
-    set(gca,'FontSize',10);
+    title(['E_z  scan after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',6);
     axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
     box on
     grid on
@@ -121,10 +121,10 @@ plot(EthNegative,z, 'g--',EthPositive,z, 'g--');
 plot(Ez(NbOfCurves,:),z,'Color',0*color(NbOfCurves,:))
 plot(Ez(1,:),z,'r--')
 hold off
+set(gca,'FontSize',8);
 xlabel('E_z (kV/cm)','FontSize',12);
 ylabel('z(km)','FontSize',12);
-title(['E_z  scan after ',int2str(NbOfCurves-1),' steps']);
-set(gca,'FontSize',10);
+title(['E_z  scan after ',int2str(NbOfCurves-1),' steps'],'FontSize',6);
 axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
 box on
 grid on
