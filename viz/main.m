@@ -34,7 +34,7 @@ cd ../viz
 
 %% Field Evolution
 Plot1D_FieldEvolution;
-cd ../figures
+cd ../Figures
 hgexport(1,'FieldTimeEvolution.eps');
 hgexport(2,'phiTimeEvolution.eps');
 hgexport(3,'ETimeEvolution.eps');
@@ -42,26 +42,27 @@ cd ../viz
 
 %% Field Evolution (cont.)
 Plot1D_Fields;
-cd ../figures
+cd ../Figures
+hgexport(1,'InitiationRequirements.eps')
 hgexport(2,'phi.eps');
 hgexport(3,'E.eps');
 cd ../viz
 
 %% Field Evolution (cont.)
 Plot2D_Fields3x3;
-cd ../figures
+cd ../Figures
 hgexport(gcf,'FieldSpaceEvolution.eps');
 cd ../viz
 
 %% Fieldlines
-Plot2D_FieldLines(10);
-cd ../figures
+Plot2D_FieldLines('~');
+cd ../Figures
 hgexport(gcf,'FieldLines.eps');
 cd ../viz
 
 %% LMA
 LMA_main;
-cd ../figures
+cd ../Figures
 hgexport(gcf,'LMA.eps');
 cd ../viz
 

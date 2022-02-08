@@ -2,9 +2,13 @@
 clearvars
 close all
 clc
+if ~exist('../Figures', 'dir')
+    fprintf('Files required do not exist.');
+    return;
+end
 
 %% xy
-c = imread('xy.png');
+c = imread('../Figures/xy.png');
 
 figure(1)
 subplot(331)
@@ -22,8 +26,8 @@ xlabel('r')
 ylabel('n(r)')
 legend('actual box-count','space-filling box-count');
 
-%% xy
-c = imread('xz.png');
+%% xz
+c = imread('../Figures/xz.png');
 
 subplot(334)
 imagesc(~c);
@@ -41,7 +45,7 @@ ylabel('n(r)')
 legend('actual box-count','space-filling box-count');
 
 %% yz
-c = imread('yz.png');
+c = imread('../Figures/yz.png');
 
 subplot(337)
 imagesc(~c);
@@ -58,4 +62,4 @@ xlabel('r')
 ylabel('n(r)')
 legend('actual box-count','space-filling box-count');
 
-print(gcf,'-depsc','fractal_box')
+print(gcf,'-depsc','../Figures/fractal_box')

@@ -6,6 +6,10 @@ beep  off
 global d Init Links N Nb z_gnd
 global alt_hist FocusArea Font Ground
 
+if ~exist('../Figures', 'dir')
+    mkdir('../Figures')
+end
+
 %% Initialisation %%
 % !rm -rf *.avi *.eps
 Nb.Links = 0; Nb.Points = 0; Nb.Layers = 0;
@@ -114,7 +118,7 @@ LMA_initiation
 
 %% Plot discharge tree branches %%
 if strcmp(Figure.Output,'Movie')
-    vFile = VideoWriter('../results/LMA','MPEG-4');
+    vFile = VideoWriter('../Figures/LMA','MPEG-4');
     open(vFile);
 end
 LMA_tree
@@ -131,17 +135,17 @@ f1 = figure;
 sf1_new = copyobj(sf1,f1);
 set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f1, '-dpng', 'xz')
+print(f1, '-dpng', '../Figures/xz')
 
 f2 = figure;
 sf2_new = copyobj(sf2,f2);
 set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f2, '-dpng', 'yz')
+print(f2, '-dpng', '../Figures/yz')
 
 f3 = figure;
 sf3_new = copyobj(sf3,f3);
 set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f3, '-dpng', 'xy')
+print(f3, '-dpng', '../Figures/xy')
 
