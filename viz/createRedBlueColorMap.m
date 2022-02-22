@@ -1,5 +1,5 @@
 % Creates a custom color map for negative charge densities (red) and positive charge
-% densities (blue). Assumed preference for 
+% densities (blue). Assumed preference for colorblind-friendly mode, 'white':
 function customColorMap = createRedBlueColorMap(neutralcolor)
     customColorMap = zeros([101,3]);
     customColorMap(51,:) = [0.75 0.75 0.75];
