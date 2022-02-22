@@ -66,3 +66,9 @@ cd ../Figures
 hgexport(gcf,'LMA.eps');
 cd ../viz
 
+%% Charged cloud structure
+Plot3D_CloudDistribution;
+cd ../Figures
+hgexport(gcf,'CloudDistribution.eps');
+cd ../viz
+
