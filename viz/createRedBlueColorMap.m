@@ -20,11 +20,11 @@ function customColorMap = createRedBlueColorMap(neutralcolor)
         decreasing4zero_value = linspace(0.75,0,50);
         increasing4one_value = linspace(0.75,1,50);
         decreasing4one_value = linspace(1,0.75,50);
-        customColorMap(1:50,1) = decreasing4one_value;
+        customColorMap(1:50,1) = increasing4zero_value;
         customColorMap(1:50,2) = increasing4zero_value;
-        customColorMap(1:50,3) = increasing4zero_value;
-        customColorMap(52:end,1) = decreasing4zero_value;
+        customColorMap(1:50,3) = decreasing4one_value;
+        customColorMap(52:end,1) = increasing4one_value;
         customColorMap(52:end,2) = decreasing4zero_value;
-        customColorMap(52:end,3) = increasing4one_value;
+        customColorMap(52:end,3) = decreasing4zero_value;
     end
 end
