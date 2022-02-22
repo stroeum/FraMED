@@ -26,7 +26,6 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoData,Xval,Yval,Zval,x
                 uniquePatch = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)),'FaceAlpha',alphaValue,'FaceColor',colorVertices(j,:),'EdgeColor','none'); 
                 Legend{location}=['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3'];
                 isonormals(xval,yval,zval,rhoData.data,uniquePatch);
-                set(uniquePatch,'FaceAlpha',0.06)% set the color, mesh and transparency level of the surface
             else
                 isonormals(xval,yval,zval,rhoData.data,patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)),'FaceColor',colorVertices(j,:),'EdgeColor','none','FaceAlpha',alphaValue,'HandleVisibility','off')); % set the color, mesh and transparency level of the surface
             end
