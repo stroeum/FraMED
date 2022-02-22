@@ -9,6 +9,7 @@
 #include "CriticalFields.h"
 #include "Links.h"
 #include "SorSolution.h"
+#include <cstring>
 
 typedef enum {INTRA_CLOUD, CLOUD_TO_GROUND, JET, HORIZONTAL} disType;
 typedef enum {TIN_CAN, OPEN_BC, G_G, FREE_SPACE} bcType;
