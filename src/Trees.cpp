@@ -597,7 +597,7 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
     IO::print(file,"..: Attempting to add new link\n");
 
 	/* Seed the random number generator. */
-	srand((uint)(time(NULL) * 101));
+	srand((int)(time(NULL) * 101));
 
 	_start = InitiationPoint;
     
