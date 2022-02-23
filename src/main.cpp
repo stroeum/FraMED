@@ -79,7 +79,7 @@ int main()
         IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
         
         IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(161,161,81);
+        Var::N.init(41,41,61);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
