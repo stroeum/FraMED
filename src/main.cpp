@@ -36,7 +36,7 @@ int main()
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
     Var::BCtype					= TIN_CAN;                                          // Boundary conditions
-    Var::LoadingType            = FROM_FILE;                                    // Charge loading type
+    Var::LoadingType            = SET_CHARGES;                                    // Charge loading type
     Var::InitiationType			= RANDOM;                                    // Initiation type
     
     Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
