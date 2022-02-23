@@ -1,5 +1,14 @@
-% Creates a custom color map for negative charge densities (red) and positive charge
-% densities (blue). Assumed preference for colorblind-friendly mode, 'white':
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% File Name: createRedBlueColorMap.m                                      %
+% Purpose: Creates a custom color map for negative charge densities (blue)%
+%          and positive charge densities (red). Assumed preference for    %
+%          colorblind-friendly mode, 'white'.                             %
+% Author: Annelisa Esparza                                                %
+% Contact: aesparza2014@my.fit.edu                                        %
+% Added Date: February 22, 2022                                           %
+% Last Update: N/A                                                        %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 function customColorMap = createRedBlueColorMap(neutralcolor)
     customColorMap = zeros([101,3]);
     customColorMap(51,:) = [0.75 0.75 0.75];

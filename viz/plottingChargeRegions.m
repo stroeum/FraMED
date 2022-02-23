@@ -1,3 +1,14 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% File Name: plottingChargeRegions.m                                      %
+% Purpose: Visualizes the charged cloud structure with custom color map.  %
+%          Outputs a figure to the screen but does not save it to a file  %
+%          automatically.                                                 %
+% Author: Annelisa Esparza                                                %
+% Contact: aesparza2014@my.fit.edu                                        %
+% Added Date: February 22, 2022                                           %
+% Last Update: N/A                                                        %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 function plottingChargeRegions(colorbarRange,alphaValue,rhoData,Xval,Yval,Zval,xval,yval,zval)
     %Creates a unique colormap to represent the charge regions:
     rgbValues = createRedBlueColorMap(colorbarRange); 

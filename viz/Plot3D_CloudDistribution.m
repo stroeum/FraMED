@@ -1,4 +1,15 @@
-% Initiate
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% File Name: Plot3D_CloudDistribution.m                                   %
+% Purpose: Visualizes the charged cloud structure and ground with custom  %
+%          colormap. Outputs a figure to the screen but does not save it  %
+%          to a file automatically.                                       %
+% Author: Annelisa Esparza                                                %
+% Contact: aesparza2014@my.fit.edu                                        %
+% Added Date: February 22, 2022                                           %
+% Last Update: N/A                                                        %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+%% Initiate
 close all
 clearvars
 clc
@@ -6,13 +17,14 @@ if ~exist('../Figures', 'dir')
     mkdir('../Figures')
 end
 cd ../results/
-% Load data files
+
+%% Load data files
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
 rho.data = load('rhoAmb.dat','-ascii');
 gnd.alt  = load('z_gnd.dat', '-ascii');
 
-% Derive main parameters
+%% Derive main parameters
 N.x = Nxyz(1);
 N.y = Nxyz(2);
 N.z = Nxyz(3);
@@ -39,17 +51,20 @@ z = ((0:(N.z-1))*d.z + gnd.alt)*1e-3;
 [X,Y,Z] = meshgrid(x,y,z);
 rho.max = max(max(max(rho.data)));
 rho.min = min(min(min(rho.data)));
+
+%% Plotting figure:
 % Map ColorScale
 gnd.color = [.75 .75 .75]; % light gray for neutral charges
 % Draw the tree
 figure(1);
 hold on;
+
 % Sets bounds for the axes (comment out if clouds get cut off):
 %axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
 axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
 % Calls the new function that automatically recognizes charge regions:
-plottingChargeRegions('white',0.04,rho,X,Y,Z,x,y,z);
+plottingChargeRegions('white',0.03,rho,X,Y,Z,x,y,z);
 
 % Represents the neutrally charged (grounded) surface:
 P.x = [L.x 0 0 L.x]*1e-3;
@@ -59,7 +74,7 @@ patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color);
 % view([90,0]) 
 % camlight; lighting gouraud
 
-
+%% Additional functions:
 function [AA] = ConvertTo3d(A,B)
     [M, N] = size(A);
     AA = zeros(B');
