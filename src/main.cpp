@@ -83,7 +83,7 @@ int main()
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(40e+3,40e+3,20e+3);
+        Var::L.init(20e+3,20e+3,20e+3);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
 
         IO::print(file, "..: Reading grid resolution (d)\n");
@@ -268,10 +268,10 @@ int main()
         if (Var::LoadingType == SET_CHARGES) {
             IO::print(file, "..: Setting charge layers\n");
             // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
-            Var::Q =     15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3e+3+Var::z_shift; Var::Rq1 = 5.00e+3;	Var::Rq3 = 6.0e+3;
+            Var::Q =     50;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 3e+3+Var::z_shift; Var::Rq1 = 5.00e+3;	Var::Rq3 = 6.0e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
-            Var::Q =    -15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 8e+3+Var::z_shift; Var::Rq1 = 10.00e+3;	Var::Rq3 = 4.0e+3;
+            Var::Q =    -50;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2-Var::y_shift/2;	Var::Zq = 8e+3+Var::z_shift; Var::Rq1 = 10.00e+3;	Var::Rq3 = 4.0e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
