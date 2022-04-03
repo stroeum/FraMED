@@ -19,7 +19,6 @@ dz = dxyz(3);                  % _m
 Nz = Nxyz(3);                  % _
 Lz = (Nz-1)*dz*1e-3;           % _km
 z  = (z_gnd+(0:Nz-1)*dz)*1e-3; % _km
-
 clear dxyz Nxyz
 
 NbOfCurves = size(phi);
@@ -42,8 +41,8 @@ for n=1:NbOfCurves
     end
 end
 set(gca,'FontSize',8);
-xlabel('\phi (MV)','FontSize',12);
-ylabel('z(km)','FontSize',12);
+xlabel('\phi (MV)','FontSize',10);
+ylabel('z(km)','FontSize',10);
 
 axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]) ;
 box on
@@ -59,8 +58,8 @@ end
 plot(EthNegative,z, 'g--',EthPositive,z, 'g--');
 
 set(gca,'FontSize',8);
-xlabel('E_z (kV/cm)','FontSize',12);
-ylabel('z(km)','FontSize',12);
+xlabel('E_z (kV/cm)','FontSize',10);
+ylabel('z(km)','FontSize',10);
 axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
 box on
 grid on
@@ -80,9 +79,9 @@ for n=1:M*N-1
     plot(phi(1,:),z,'b--')
     hold off
     set(gca,'FontSize',8);
-    xlabel('\phi (MV)','FontSize',12);
-    ylabel('z(km)','FontSize',12);
-    title(['\phi  scan after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',6);
+    xlabel('\phi (MV)','FontSize',10);
+    ylabel('z(km)','FontSize',10);
+    title(['\phi  after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',5);
     axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]) ;
     box on
     grid on
@@ -92,9 +91,9 @@ hold on
 plot(phi(NbOfCurves,:),z,'Color',0*color(NbOfCurves,:));
 plot(phi(1,:),z,'b--')
 set(gca,'FontSize',8);
-xlabel('\phi (MV)','FontSize',12);
-ylabel('z(km)','FontSize',12);
-title(['\phi  scan after ',int2str(NbOfCurves-1),' steps'],'FontSize',6);
+xlabel('\phi (MV)','FontSize',10);
+ylabel('z(km)','FontSize',10);
+title(['\phi  after ',int2str(NbOfCurves-1),' steps'],'FontSize',5);
 axis([-MaxAbsPhi MaxAbsPhi min(z) max(z)]);
 box on
 grid on
@@ -108,9 +107,9 @@ for n=1:M*N-1
     plot(Ez(1,:),z,'r--')
     hold off
     set(gca,'FontSize',8);
-    xlabel('E_z (kV/cm)','FontSize',12);
-    ylabel('z(km)','FontSize',12);
-    title(['E_z  scan after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',6);
+    xlabel('E_z (kV/cm)','FontSize',10);
+    ylabel('z(km)','FontSize',10);
+    title(['E_z  after ',int2str(CurveIndex(n)-1),' steps'],'FontSize',5);
     axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
     box on
     grid on
@@ -122,9 +121,9 @@ plot(Ez(NbOfCurves,:),z,'Color',0*color(NbOfCurves,:))
 plot(Ez(1,:),z,'r--')
 hold off
 set(gca,'FontSize',8);
-xlabel('E_z (kV/cm)','FontSize',12);
-ylabel('z(km)','FontSize',12);
-title(['E_z  scan after ',int2str(NbOfCurves-1),' steps'],'FontSize',6);
+xlabel('E_z (kV/cm)','FontSize',10);
+ylabel('z(km)','FontSize',10);
+title(['E_z  after ',int2str(NbOfCurves-1),' steps'],'FontSize',5);
 axis([-MaxAbsEz MaxAbsEz min(z) max(z)]);
 box on
 grid on
