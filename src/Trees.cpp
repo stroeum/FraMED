@@ -212,7 +212,7 @@ void Tree::Grow(FILE * file, bool AddNew)
     
     
     _CntLinks = Var::NumLinks;
-    while(AddNew==true && _CntLinks>=0 && _CntLinks<55)
+    while(AddNew==true && _CntLinks>=0 )//&& _CntLinks<55)
     {
         AddNew	= Tree::AddNewLink(file,Var::d,Var::N,Var::Un,Var::phi, Var::Ec,Var::Vd, Var::InitiationPoint,Var::EstablishedLinks,
                                    Var::isBndXingPossible,  Var::isRsDeveloped,
