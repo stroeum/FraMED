@@ -135,17 +135,17 @@ f1 = figure;
 sf1_new = copyobj(sf1,f1);
 set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f1, '-dpng', '../Figures/xz')
+exportgraphics(f1, '../Figures/xz.png','BackgroundColor','white')
 
 f2 = figure;
 sf2_new = copyobj(sf2,f2);
 set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f2, '-dpng', '../Figures/yz')
+exportgraphics(f2, '../Figures/yz.png','BackgroundColor','white')
 
 f3 = figure;
 sf3_new = copyobj(sf3,f3);
 set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
 axis image
-print(f3, '-dpng', '../Figures/xy')
+exportgraphics(f3, '../Figures/xy.png','BackgroundColor','white')
 
