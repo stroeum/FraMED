@@ -13,6 +13,7 @@
 close all
 clearvars
 clc
+clf
 if ~exist('../Figures', 'dir')
     mkdir('../Figures')
 end
@@ -70,7 +71,7 @@ plottingChargeRegions('white',0.03,rho,X,Y,Z,x,y,z);
 P.x = [L.x 0 0 L.x]*1e-3;
 P.y = [L.y L.y 0 0]*1e-3;
 P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
-patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color);
+patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName','Ground');
 % view([90,0]) 
 % camlight; lighting gouraud
 
