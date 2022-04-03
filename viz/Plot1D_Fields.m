@@ -23,7 +23,10 @@ Nz = Nxyz(3);
 Lz = (Nz-1)*dz;
 z  = (0:Nz-1)*dz+z_gnd;
 clear dxyz Nxyz
-
+if length(EthNegative)~=length(EzNumBF)
+    fprintf('\nMismatching data set sizes, ensure simulation parameters are correctly executed.\n');
+    return;
+end
 figure;
 subplot(121)
 hold on
