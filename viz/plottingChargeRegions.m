@@ -61,7 +61,6 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
             % If so, add it to the legend:
             if included == 1
                 if location == 1
-                    disp(rhoDataOG.min>uniqueRhos(location))
                     if rhoDataOG.max<uniqueRhos(location)
                         p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
                     else
