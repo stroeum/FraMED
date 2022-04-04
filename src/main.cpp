@@ -7,7 +7,6 @@
 #include "Trees.h"
 #include "Cloud.h"
 #include "Input.h"
-
 #include <stdlib.h>
 /**************************************************************************************/
 
