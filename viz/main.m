@@ -11,25 +11,25 @@ cd ../viz
 %% Charge Transfer
 Plot1D_ChannelCharge;
 cd ../Figures
-hgexport(gcf,'ChargeTransfer.eps');
+exportgraphics(gcf,'ChargeTransfer.eps','BackgroundColor','white');
 cd ../viz
 
 %% Channel Potential
 Plot1D_ChannelPotential;
 cd ../Figures
-hgexport(gcf,'ChannelPotential.eps');
+exportgraphics(gcf,'ChannelPotential.eps','BackgroundColor','white');
 cd ../viz
 
 %% Dipole Moment
 Plot1D_DipoleMoment;
 cd ../Figures
-hgexport(gcf,'DipoleMoment.eps');
+exportgraphics(gcf,'DipoleMoment.eps','BackgroundColor','white');
 cd ../viz
 
 %% Electrostatic Energy
 Plot1D_EsEnergy;
 cd ../Figures
-hgexport(gcf,'EsEnergy.eps');
+exportgraphics(gcf,'EsEnergy.eps','BackgroundColor','white');
 cd ../viz
 
 %% Field Evolution
@@ -43,7 +43,7 @@ cd ../viz
 %% Field Evolution (cont.)
 Plot1D_Fields;
 cd ../Figures
-hgexport(1,'InitiationRequirements.eps')
+hgexport(1,'InitiationRequirements.eps');
 hgexport(2,'phi.eps');
 hgexport(3,'E.eps');
 cd ../viz
@@ -51,24 +51,24 @@ cd ../viz
 %% Field Evolution (cont.)
 Plot2D_Fields3x3;
 cd ../Figures
-hgexport(gcf,'FieldSpaceEvolution.eps');
+exportgraphics(gcf,'FieldSpaceEvolution.eps','BackgroundColor','white');
 cd ../viz
 
 %% Fieldlines
 Plot2D_FieldLines('~');
 cd ../Figures
-hgexport(gcf,'FieldLines.eps');
+exportgraphics(gcf,'FieldLines.eps','BackgroundColor','white');
 cd ../viz
 
 %% LMA
 LMA_main;
 cd ../Figures
-hgexport(gcf,'LMA.eps');
+exportgraphics(gcf,'LMA.eps','BackgroundColor','white');
 cd ../viz
 
 %% Charged cloud structure
 Plot3D_CloudDistribution;
 cd ../Figures
-hgexport(gcf,'CloudDistribution.eps');
+exportgraphics(gcf,'CloudDistribution.eps','BackgroundColor','white');
 cd ../viz
 
