@@ -98,7 +98,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     colormap(cmap);
     colorbar;
     % Adds the legend to the plot:
-    legend('boxoff');
+    legend('Location','best','Box','off');
     ax = gca;
     ax.Colorbar.Title.String = "nC/m^3";
     ax.Color;
