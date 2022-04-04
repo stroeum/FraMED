@@ -6,16 +6,16 @@
 % Author: Annelisa Esparza                                                %
 % Contact: aesparza2014@my.fit.edu                                        %
 % Added Date: February 22, 2022                                           %
-% Last Update: N/A                                                        %
+% Last Update: April 4, 2022 - Updated to account for an alpha value.     %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function customColorMap = createRedBlueColorMap(neutralcolor)
+function customColorMap = createRedBlueColorMap(neutralcolor,alphavalue)
     customColorMap = zeros([101,3]);
     customColorMap(51,:) = [0.75 0.75 0.75];
     if strcmp(neutralcolor,'white') == 1 || strcmp(neutralcolor,'White') == 1
         % Version 1: blue to white to red
-        increasing_value = linspace(0,1,50);
-        decreasing_value = linspace(1,0,50);
+        increasing_value = linspace((1-alphavalue),1,50);
+        decreasing_value = linspace(1,(1-alphavalue),50);
         steady_value = ones([50,1]);
         customColorMap(1:50,1) = increasing_value;
         customColorMap(1:50,2) = increasing_value;

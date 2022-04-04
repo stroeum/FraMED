@@ -65,7 +65,7 @@ hold on;
 axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
 % Calls the new function that automatically recognizes charge regions:
-plottingChargeRegions('white',0.03,rho,X,Y,Z,x,y,z);
+plottingChargeRegions('white',0.5,rho,X,Y,Z);
 
 % Represents the neutrally charged (grounded) surface:
 P.x = [L.x 0 0 L.x]*1e-3;
