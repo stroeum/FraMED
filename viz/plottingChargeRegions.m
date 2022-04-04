@@ -66,7 +66,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                     else
                         p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
                     end
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',0.75,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',0.5,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
                     isonormals(Xval,Yval,Zval,rhoData.data,p1);
                     drawnow
                 elseif location == 2
@@ -77,12 +77,12 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                     else
                         p2 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
                     end
-                    set(p2,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',0.75,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
+                    set(p2,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',0.5,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
                     isonormals(Xval,Yval,Zval,rhoData.data,p2);
                     drawnow
                 elseif location == 3
                     p3 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)));
-                    set(p3,'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',0.75,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
+                    set(p3,'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',0.5,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
                     isonormals(Xval,Yval,Zval,rhoData.data,p3);
                     drawnow
                 end
