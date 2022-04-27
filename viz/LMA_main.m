@@ -139,6 +139,8 @@ elseif strcmp(Figure.Output,'Plot')
 end
 
 %% Plot Save
+exportgraphics(gcf, '../Figures/PNGs/LMA_Final.png','BackgroundColor','white','Resolution',300);
+
 f1 = figure;
 sf1_new = copyobj(sf1,f1);
 set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','FontSize',8);
