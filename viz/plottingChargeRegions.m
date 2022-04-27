@@ -1,4 +1,4 @@
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+ % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % File Name: plottingChargeRegions.m                                      %
 % Purpose: Visualizes the charged cloud structure with custom color map.  %
 %          Outputs a figure to the screen but does not save it to a file  %
@@ -66,7 +66,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
             [included, location] = ismember(uniqueRhos(j),trueUniqueRhos);
             % If so, add it to the legend:
             if included == 1
-                if rhoDataOG.max<uniqueRhos(location)
+                if uniqueRhos(location)>0
                     p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
                 else
                     p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
