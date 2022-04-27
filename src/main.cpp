@@ -79,6 +79,10 @@ int main()
     if(Var::isNewRun) {
         file = IO::openFile((char *)"summary.txt", "w");
         IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
+        /* FOLLOWING SECTION ASSIGNS RESPECTIVE VALUES */
+        /*
+        file = IO::openFile((char *)"summary.txt", "w");
+        IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
         
         IO::print(file, "..: Reading grid size (N).\n");
         Var::N.init(41,41,71);
@@ -99,10 +103,8 @@ int main()
         IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
         
         Var::z_shift = Var::z_gnd;                                                            // _m Vertical displacement of the cloud
-        Var::y_shift = 0e3;                                                            // _m Horizontal influence of a windshear
-        
-        //    We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
-        /* FOLLOWING SECTION ASSIGNS RESPECTIVE VALUES */
+        Var::y_shift = 0e3;  
+
         ListDouble alt=IO::read((char*)("EPIC/z.dat" ));
         IO::print(file, "..: altitude successfully read\n");
         ListDouble ng =IO::read((char*)("EPIC/ng.dat"));
@@ -112,27 +114,48 @@ int main()
         Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1);
         Var::Ec.init(.1e+5,.1e+5,-.1e+5, Var::z_gnd,Var::d,Var::N,1);
         Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1);
+        */
 
-        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM FILES */
-        /*
-        ListDouble alt=IO::read((char*)("EPIC/Venus_z.dat" ));
+        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM FILES */ 
+        ListDouble alt=IO::read((char*)("EPIC/Venus_z.dat"));
         IO::print(file, "..: altitude successfully read\n");
         ListDouble ng =IO::read((char*)("EPIC/Venus_ng.dat"));
         IO::print(file, "..: density successfully read\n");
+
+        ListDouble::iterator alt_tracker = alt.begin();
+        IO::print(file, "..: Reading ground altitude (z_gnd)\n");
+        Var::z_gnd   = *alt_tracker;
+        advance(alt_tracker,(alt.size()-1));
+        IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
+
+        IO::print(file, "..: Reading grid size (N).\n");
+        Var::N.init(41,41,alt.size());
+        IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
+
+        IO::print(file, "..: Reading domain size (L)\n");
+        Var::L.init(12e+3,12e+3,(*alt_tracker-Var::z_gnd));
+        IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
+
+        IO::print(file, "..: Reading grid resolution (d)\n");
+        Var::d.init(Var::L,Var::N);
+        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
+        InitMatrices(Var::N);
+
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,		(char*)("../EPIC/Venus_Ek_Vm.dat"));
+        IO::read(Var::Ec.initiation,		(char*)("../EPIC/Venus_E_initiation_Vm.dat"));
         IO::print(file, "..: initiation successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../EPIC/Venus_Ek_positive_Vm.dat"));
+        IO::read(Var::Ec.positive,		(char*)("../EPIC/Venus_Eth_positive_Vm.dat"));
         IO::print(file, "..: positive successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../EPIC/Venus_Ek_negative_Vm.dat"));
+        IO::read(Var::Ec.negative,		(char*)("../EPIC/Venus_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative successfully read\n");
-        */  
 
         Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N,1,  alt,  ng);							// _V/m Voltage drop in positive, negative channels
         IO::print(file, "..: voltage drop successfully read\n");
-        
         IO::print(file, "..: Critical fields read (Ec,Eth+,Eth-,Vd+,Vd-)\n");
 
+        Var::z_shift = Var::z_gnd;                                                      // _m Vertical displacement of the cloud
+        Var::y_shift = 0e3;                                                             // _m Horizontal influence of a windshear
+        //    We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
         IO::print(file, "..: Reading initiation point (InitPoint)\n");
         Var::InitX    = Var::L.x/2;
         Var::InitY    = Var::L.y/2;
@@ -295,12 +318,12 @@ int main()
             IO::print(file, "..: Setting charge layers\n");
             // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
             /* UPPER VENUSIAN CLOUD REGION, 53-70 km */
-            Var::Q =    475.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 55.0e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    50.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 55.0e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
             /* MIDDLE VENUSIAN CLOUD REGION, 49-52 km */
-            Var::Q =    -500.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 50.5e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    -75.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 50.5e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
 
