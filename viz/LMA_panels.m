@@ -53,7 +53,7 @@ h.tz.position(1)     = h.xy.position(1);
 h.tz.position(2)     = h.xz.position(2)+h.xz.position(4)+Figure.vspace(3);
 
 % Plot of empty panels %
-h.fig=figure('units','inches','outerposition',[0 0 Figure.Width Figure.Length]);
+h.fig=figure('units','inches','outerposition',[0 0 Figure.Width Figure.Length],'Resize','off');
 h.xy.fig = subplot('Position',[0 0 1 1]);
 set(h.xy.fig,'Units','inches','Position',h.xy.position);
 h.yz.fig = subplot('Position',[1 1 1 .1]);
