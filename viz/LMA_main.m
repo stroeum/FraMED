@@ -1,13 +1,21 @@
 % LMA main %
 close all
 clearvars
+clear -global
 clc
 beep  off
 global d Init Links N Nb z_gnd
 global alt_hist FocusArea Font Ground
 
+% Preparing subdirectories:
 if ~exist('../Figures', 'dir')
     mkdir('../Figures')
+end
+if ~exist('../Figures/PNGs', 'dir')
+    mkdir('../Figures/PNGs')
+end
+if ~exist('../Figures/Videos', 'dir')
+    mkdir('../Figures/Videos')
 end
 
 %% Initialisation %%
@@ -118,7 +126,7 @@ LMA_initiation
 
 %% Plot discharge tree branches %%
 if strcmp(Figure.Output,'Movie')
-    vFile = VideoWriter('../Figures/LMA','MPEG-4');
+    vFile = VideoWriter('../Figures/Videos/LMA','MPEG-4');
     open(vFile);
 end
 LMA_tree
@@ -133,19 +141,24 @@ end
 %% Plot Save
 f1 = figure;
 sf1_new = copyobj(sf1,f1);
-set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','FontSize',8);
+xlabel('x (km)');
+ylabel('z (km)');
 axis image
-exportgraphics(f1, '../Figures/xz.png','BackgroundColor','white')
+exportgraphics(f1, '../Figures/PNGs/xz.png','BackgroundColor','white','Resolution',300);
 
 f2 = figure;
 sf2_new = copyobj(sf2,f2);
-set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','FontSize',8);
+xlabel('z (km)');
+ylabel('y (km)');
 axis image
-exportgraphics(f2, '../Figures/yz.png','BackgroundColor','white')
+exportgraphics(f2, '../Figures/PNGs/yz.png','BackgroundColor','white','Resolution',300);
 
 f3 = figure;
 sf3_new = copyobj(sf3,f3);
-set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out');
+set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','FontSize',8);
+xlabel('x (km)');
+ylabel('y (km)');
 axis image
-exportgraphics(f3, '../Figures/xy.png','BackgroundColor','white')
-
+exportgraphics(f3, '../Figures/PNGs/xy.png','BackgroundColor','white','Resolution',300);
