@@ -4,9 +4,13 @@ clearvars
 clf
 clc
 if ~exist('../Figures', 'dir')
-    mkdir('../Figures')
+    mkdir('../Figures');
 end
-cd ../results/
+if ~exist('../Figures/Videos','dir')
+    mkdir('../Figures/Videos');
+end
+cd ../results
+
 % Load data files
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
@@ -66,7 +70,7 @@ end
 % Set movie recording
 is.Rec = 1; % input('Record the movie? (1: yes, else: no)\n>> ');
 if (is.Rec == 1)
-    Movie = VideoWriter('../Figures/lightning','MPEG-4');
+    Movie = VideoWriter('../Figures/Videos/lightning','MPEG-4');
     open(Movie);
 end
 % Draw the tree

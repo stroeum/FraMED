@@ -14,10 +14,7 @@ close all
 clearvars
 clc
 clf
-if ~exist('../Figures', 'dir')
-    mkdir('../Figures')
-end
-cd ../results/
+cd ../results
 
 %% Load data files
 load('dxyz.dat',             '-ascii');
