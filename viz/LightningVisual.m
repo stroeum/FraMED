@@ -76,7 +76,7 @@ end
 % Draw the tree
 figure(1);
 
-set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/3,'Color','white');
+set(gcf,'Position',[0,0,1000,1000]);
 hold on;
 grid on;
 
@@ -85,7 +85,7 @@ axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight 
 %axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
 % Plots the cloud structure with the defined function below:
-plottingChargeRegions('white',0.5,rho,X,Y,Z);
+plottingChargeRegions('white',0.4,rho,X,Y,Z);
 
 % Represents the neutrally charged (grounded) surface:
 P.x = [L.x 0 0 L.x]*1e-3;
@@ -106,9 +106,7 @@ for ii=1:Links.Nb
         'Color',color(ii,:),'HandleVisibility','off');
     %     axis equal
     box on
-    title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',12,'FontWeight','bold');
-    set(gca,'FontSize',10);
-    view([33 10])
+    title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
     frame = getframe(gcf);
     if(is.Rec == 1)
         writeVideo(Movie,frame);
