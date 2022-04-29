@@ -88,8 +88,6 @@ cd ../../viz
 Plot3D_CloudDistribution;
 cd ../Figures/EPSs
 exportgraphics(gcf,'CloudDistribution.eps','BackgroundColor','white');
-cd ../PNGs
-exportgraphics(gcf,'CloudDistribution.png','BackgroundColor','white','Resolution',300);
 cd ../../viz
 
 %% Lightning visualization
