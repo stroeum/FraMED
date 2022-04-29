@@ -1,12 +1,12 @@
- % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % File Name: plottingChargeRegions.m                                      %
 % Purpose: Visualizes the charged cloud structure with custom color map.  %
 %          Outputs a figure to the screen but does not save it to a file  %
-%          automatically.                                                 %
+%          automatically. LaTeX-ified April 29, 2022.                     %
 % Author: Annelisa Esparza                                                %
 % Contact: aesparza2014@my.fit.edu                                        %
 % Added Date: February 22, 2022                                           %
-% Last Update: April 4, 2022                                              %
+% Last Update: April 29, 2022                                             %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval)
@@ -71,7 +71,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                 else
                     p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
                 end
-                set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density \approx ',num2str(trueUniqueRhos(location)),' nC/m^3']);
+                set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
                 isonormals(Xval,Yval,Zval,rhoData.data,p1);
                 drawnow
             else
@@ -85,15 +85,22 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     caxis([-max(abs(uniqueRhos)) max(abs(uniqueRhos))]);
     colormap(cmap);
     colorbar;
+    c = colorbar;
+    c.Label.String = 'Charge Density (nC/m$^3$)';
+    c.Label.Interpreter = 'latex';
+    c.Label.FontSize = 20;
+    c.TickLabelInterpreter = 'latex';
+    
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Location','best','Box','off');
+    [~,h_legend]=legend('Location','east','Box','off','FontSize',20,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
-    ax.Colorbar.Title.String = "nC/m^3";
-    ax.Color;
-    xlabel('x-position (km)');
-    ylabel('y-position (km)');
-    zlabel('z-position (km)');
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = 16;
+    xlabel('$x$-position (km)','Interpreter','latex','FontSize',24);
+    ylabel('$y$-position (km)','Interpreter','latex','FontSize',24);
+    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
     grid on
+    view(33,10)
 end
