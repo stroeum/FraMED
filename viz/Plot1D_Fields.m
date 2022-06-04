@@ -3,6 +3,14 @@ close all
 clc
 
 %% Compile and Run C++ code
+cd ../Figures
+if ~exist('PNGs', 'dir')
+    mkdir('PNGs')
+end
+
+if ~exist('EPSs', 'dir')
+    mkdir('EPSs')
+end
 cd ../results
 
 %% Plot results
@@ -27,6 +35,8 @@ if length(EthNegative)~=length(EzNumBF)
     fprintf('\nMismatching data set sizes, ensure simulation parameters are correctly executed.\n');
     return;
 end
+
+% Initiation requirements plot:
 figure;
 subplot(121)
 hold on
@@ -79,43 +89,48 @@ set(gca,'XMinorTick','on','YMinorTick','on')
 grid on
 box on
 hold off
+exportgraphics(gcf,'../Figures/PNGs/InitiationRequirements.png','BackgroundColor','White','Resolution',300);
 
-
+% Potential before and after flash plot:
 linewidth = 1;
 figure;
-set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
+%set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
 hold on
 plot(phiNumBF(:)*1e-6, z*1e-3, 'b-','LineWidth',linewidth)
 plot(phiNumAF(:)*1e-6, z*1e-3, 'b--','LineWidth',linewidth)
 plot([1.1*min(phiNumBF(:)*1e-6) 1.1*max(phiNumBF(:)*1e-6)],[z_gnd,z_gnd]*1e-3,'k','LineWidth',linewidth);
 hold off
 axis([1.1*min(phiNumBF(:)*1e-6) 1.1*max(phiNumBF(:)*1e-6) 0 (Lz+z_gnd)*1e-3]);
-xlabel('\phi (MV)','FontSize',16);
-ylabel('Altitude (km)','FontSize',16);
+xlabel('$\phi$ (MV)','FontSize',18,'Interpreter','latex');
+ylabel('Altitude (km)','FontSize',18,'Interpreter','latex');
 set(gca,'FontSize',14);
 set(gca,'XMinorTick','on','YMinorTick','on')
 box on
 % title('E_z and \phi  before the flash [BF] and after [AF]');
-grid on
+grid on;
+hold off
+exportgraphics(gcf,'../Figures/PNGs/phi.png','BackgroundColor','White','Resolution',300);
 
+% Electric field thresholds plot:
 figure;
-set(gcf,'Units','inches','OuterPosition', [60 60 60 60]/6)
+set(gcf,'Position',[0,0,800,1000]);
 hold on
-plot(EzNumBF(:)*1e-5, z*1e-3, 'r-','LineWidth',linewidth)
-% plot(EzNumAF(:)*1e-5, z*1e-3, 'r--','LineWidth',linewidth)
-plot(EthNegative(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth)
-plot(EthPositive(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth)
-% plot([1.25*min(EthNegative*1e-5) -1.25*min(EthNegative*1e-5)],[z_gnd,z_gnd]*1e-3,'k','LineWidth',linewidth);
+plot(EzNumBF(:)*1e-5, z*1e-3, 'r-','LineWidth',linewidth,'DisplayName','Electric Field')
+plot(EthNegative(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'HandleVisibility','off')
+plot(EthPositive(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'DisplayName','Propagation Threshold')
+plot(2*EthNegative(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'DisplayName','Initiation Threshold')
+plot(2*EthPositive(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'HandleVisibility','off')
 hold off
 axis([1.25*min(EthNegative*1e-5) -1.25*min(EthNegative*1e-5) 0 (Lz+z_gnd)*1e-3]);
-% ylim([100 300])
-xlabel('Ez (kV/cm)','FontSize',16);
-ylabel('Altitude (km)','FontSize',16);
-set(gca,'FontSize',14);
-set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out')
+legend('Interpreter','latex','FontSize',16,'location','south')
+set(gca,'FontSize',16);
+set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
 box on
-% title('E_z and \phi  before the flash [BF] and after [AF]');
+title('Electric Field Thresholds','Interpreter','latex','FontSize',28);
+xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
+ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
 grid on
+exportgraphics(gcf,'../Figures/PNGs/E.png','BackgroundColor','White','Resolution',300);
 
 fprintf('Average field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
 
