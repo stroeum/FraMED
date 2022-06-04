@@ -44,7 +44,7 @@ int main()
     Var::isBndXingPossible		= false;                                            // Channel is allowed to cross boundaries: Y/N
     Var::isChannelEquipotential	= true;                                             // Channel potential ensure charges neutrality: Y/N
     Var::isFlashAccoutedInBC 	= false;                                            // Channel charge is accounted for in  BC: Y/N
-    Var::isInitiationPossible	= false;                                            // Init. possible in domain after charge load: Y/N
+    Var::isInitiationPossible	= true;                                            // Init. possible in domain after charge load: Y/N
     Var::isLinkXingPossible		= false;                                            // Channels crosses are allowed: Y/N
     Var::isRsDeveloped			= true;                                             // Return stroke development: Y/N
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
@@ -129,7 +129,7 @@ int main()
         IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
 
         IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(41,41,alt.size());
+        Var::N.init(61,61,alt.size());
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
@@ -159,7 +159,7 @@ int main()
         IO::print(file, "..: Reading initiation point (InitPoint)\n");
         Var::InitX    = Var::L.x/2;
         Var::InitY    = Var::L.y/2;
-        Var::InitZ    = 53e3+Var::z_gnd;
+        Var::InitZ    = 52e3+Var::z_gnd;
         Var::InitR    = 0e3;
         Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         // Initiation point with coordinates expressed as i,j,k and not x,y,z
@@ -318,12 +318,12 @@ int main()
             IO::print(file, "..: Setting charge layers\n");
             // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
             /* UPPER VENUSIAN CLOUD REGION, 53-70 km */
-            Var::Q =    50.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 55.0e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    55.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 55.0e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
             /* MIDDLE VENUSIAN CLOUD REGION, 49-52 km */
-            Var::Q =    -75.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 50.5e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    -55.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 50.5e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
 
@@ -549,7 +549,7 @@ int main()
     IO::print(file,	"ii:\t Threshold Overshoot  : " + to_string(Var::ThresholdOvershoot*100) + " %\n");
     IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
     IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-    IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " m, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
+    IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
     
     IO::print(file,	"ii:\t El.Stat. Energy before channel propagation    : " + to_string(Var::Eps_bf)        + " J\n");
     IO::print(file,	"ii:\t El.Stat. Energy after  channel propagation    : " + to_string(Var::Eps_af)        + " J\n");
