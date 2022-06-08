@@ -117,9 +117,9 @@ int main()
         */
 
         /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM FILES */ 
-        ListDouble alt=IO::read((char*)("EPIC/Venus_z.dat"));
+        ListDouble alt=IO::read((char*)("EPIC/Mars_z.dat"));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("EPIC/Venus_ng.dat"));
+        ListDouble ng =IO::read((char*)("EPIC/Mars_ng.dat"));
         IO::print(file, "..: density successfully read\n");
 
         ListDouble::iterator alt_tracker = alt.begin();
@@ -133,7 +133,7 @@ int main()
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(12e+3,12e+3,(*alt_tracker-Var::z_gnd));
+        Var::L.init(3e+3,3e+3,(*alt_tracker-Var::z_gnd));
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
 
         IO::print(file, "..: Reading grid resolution (d)\n");
@@ -142,11 +142,11 @@ int main()
         InitMatrices(Var::N);
 
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,		(char*)("../EPIC/Venus_E_initiation_Vm.dat"));
+        IO::read(Var::Ec.initiation,		(char*)("../EPIC/Mars_E_initiation_Vm.dat"));
         IO::print(file, "..: initiation successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../EPIC/Venus_Eth_positive_Vm.dat"));
+        IO::read(Var::Ec.positive,		(char*)("../EPIC/Mars_Eth_positive_Vm.dat"));
         IO::print(file, "..: positive successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../EPIC/Venus_Eth_negative_Vm.dat"));
+        IO::read(Var::Ec.negative,		(char*)("../EPIC/Mars_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative successfully read\n");
 
         Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N,1,  alt,  ng);							// _V/m Voltage drop in positive, negative channels
@@ -159,7 +159,7 @@ int main()
         IO::print(file, "..: Reading initiation point (InitPoint)\n");
         Var::InitX    = Var::L.x/2;
         Var::InitY    = Var::L.y/2;
-        Var::InitZ    = 52e3+Var::z_gnd;
+        Var::InitZ    = 0.55e3+Var::z_gnd;
         Var::InitR    = 0e3;
         Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         // Initiation point with coordinates expressed as i,j,k and not x,y,z
@@ -318,15 +318,16 @@ int main()
             IO::print(file, "..: Setting charge layers\n");
             // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
             /* UPPER VENUSIAN CLOUD REGION, 53-70 km */
-            Var::Q =    55.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 55.0e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    -0.024;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 0.8e+3+Var::z_shift; Var::Rq1 = 0.5e+3;	Var::Rq3 = 0.4e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
             /* MIDDLE VENUSIAN CLOUD REGION, 49-52 km */
-            Var::Q =    -55.0;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 50.5e+3+Var::z_shift; Var::Rq1 = 3.0e+3;	Var::Rq3 = 1.5e+3;
+            Var::Q =    0.006;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 0.2e+3+Var::z_shift; Var::Rq1 = 0.4e+3;	Var::Rq3 = 0.5e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
-
+            
+            
             /* ALTERNATIVE CHARGE LAYER SHAPES */
             //Var::C.ellipsoid(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3, Var::d,Var::N);
             //Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
@@ -593,5 +594,4 @@ void InitMatrices(SizeGrid N)
     Var::Un.init(N.x,N.y,N.z);									// Map of occupied grid points
     Var::phiNum.init(N.z);													// _V	Total electric potential on a vertical axis in the center of simulation domain
     Var::EzNum.init(N.z);													// _V/m	Total electric field on a vertical axis in the center of simulation domain
-    
 }
