@@ -19,7 +19,7 @@ cd ../results
 %% Load data files
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
-rho.data = load('rhoAmb.dat','-ascii');
+rho.data = load('rho3d2500.dat','-ascii');
 gnd.alt  = load('z_gnd.dat', '-ascii');
 
 %% Derive main parameters
@@ -55,12 +55,12 @@ rho.min = min(min(min(rho.data)));
 gnd.color = [.75 .75 .75]; % light gray for neutral charges
 % Draw the tree
 figure(1);
-set(gcf,'Position',[0,0,1000,1000]);
+set(gcf,'Position',[0,0,800,600]);
 hold on;
 
 % Sets bounds for the axes (comment out if clouds get cut off):
 %axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
-axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
+%axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
 % Calls the new function that automatically recognizes charge regions:
 plottingChargeRegions('white',0.4,rho,X,Y,Z);
@@ -69,12 +69,15 @@ plottingChargeRegions('white',0.4,rho,X,Y,Z);
 P.x = [L.x 0 0 L.x]*1e-3;
 P.y = [L.y L.y 0 0]*1e-3;
 P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
-patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName','Ground');    
-exportgraphics(gcf,'../Figures/PNGs/CloudDistribution.png','BackgroundColor','white','Resolution',300);
+patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName','Ground');  
+axis equal
+axis([0 L.x 0 L.y 25000 55000]*1e-3)
+%axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
+exportgraphics(gcf,'../Figures/PNGs/CloudDistribution_After.png','BackgroundColor','white','Resolution',300);
 % view([90,0]) 
 % camlight; lighting gouraud
 
-%% Additional functions:
+%% Additional functionave:
 function [AA] = ConvertTo3d(A,B)
     [M, N] = size(A);
     AA = zeros(B');

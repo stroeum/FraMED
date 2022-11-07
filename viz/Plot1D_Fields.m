@@ -21,7 +21,7 @@ EzNumBF     = load('EnumBF.dat');
 phiNumBF    = load('phiNumBF.dat');
 EzNumAF     = load('EnumAF.dat');
 phiNumAF    = load('phiNumAF.dat');
-% Einitiation = load('Einitiation.dat');
+Einitiation = load('Einitiation.dat');
 EthPositive = load('EthPositive.dat');
 EthNegative = load('EthNegative.dat');
 z_gnd       = load('z_gnd.dat');
@@ -67,7 +67,7 @@ hold off
 subplot(122)
 hold on
 plot(...
-    EzNumAF(:),z*1e-3,'r-.',...
+    EzNumAF(:)*10^-9,z*1e-3,'r-.',...
     1/1000*phiNumAF(:), z*1e-3, 'b-',...
     EthNegative(:),z*1e-3, 'g--',...
     EthPositive(:),z*1e-3, 'g--'...
@@ -113,16 +113,16 @@ exportgraphics(gcf,'../Figures/PNGs/phi.png','BackgroundColor','White','Resoluti
 
 % Electric field thresholds plot:
 figure;
-set(gcf,'Position',[0,0,800,1000]);
+set(gcf,'Position',[0,0,600,1000]);
 hold on
 plot(EzNumBF(:)*1e-5, z*1e-3, 'r-','LineWidth',linewidth,'DisplayName','Electric Field')
 plot(EthNegative(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'HandleVisibility','off')
 plot(EthPositive(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'DisplayName','Propagation Threshold')
-plot(2*EthNegative(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'DisplayName','Initiation Threshold')
-plot(2*EthPositive(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'HandleVisibility','off')
+plot(Einitiation(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'DisplayName','Initiation Threshold')
+plot(-Einitiation(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'HandleVisibility','off')
 hold off
-axis([1.25*min(EthNegative*1e-5) -1.25*min(EthNegative*1e-5) 0 (Lz+z_gnd)*1e-3]);
-legend('Interpreter','latex','FontSize',16,'location','south')
+axis([-1.25*max(Einitiation*1e-5) 1.25*max(Einitiation*1e-5) 0 (Lz+z_gnd)*1e-3]);
+legend('Interpreter','latex','FontSize',16,'location','northeast')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
 box on
@@ -130,8 +130,8 @@ title('Electric Field Thresholds','Interpreter','latex','FontSize',28);
 xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
 ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
 grid on
-exportgraphics(gcf,'../Figures/PNGs/E.png','BackgroundColor','White','Resolution',300);
-
+exportgraphics(gcf,'../Figures/PNGs/E_Threshold.png','BackgroundColor','White','Resolution',300);
+%xlim([-1000000,1000000])
 fprintf('Average field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
 
 % figure;

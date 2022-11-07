@@ -36,7 +36,8 @@ fprintf('Data loaded\n')
 
 %% Fix plot parameters
 
-Color = ['r' 'b' 'r' 'b'];
+%Color = ['r' 'b' 'r' 'b'];
+Color = ['b' 'r' 'b'];
 NbChargeLayers = size(ChargeLayers);
 NbChargeLayers = NbChargeLayers(1);
 ChargeLayersLineStyle  = '-';
@@ -46,16 +47,15 @@ ChargeLayersLineWidth  = 1;
 x        = (0:Nx-1)'*dx*1e-3;
 y        = (0:Ny-1)'*dy*1e-3;
 z        = ((0:Nz-1)'*dz+z_gnd)*1e-3;
-[y,z]    = meshgrid(y,z);
+[y,z1]    = meshgrid(y,z);
+[x,z2]    = meshgrid(x,z);
 
 %% Plot
 figure;
 hold on
 %set(gcf,'Units','inches','OuterPosition', [10 10 20 30]/3)
-axis([min(y(:)) max(y(:)) min(z(:)) max(z(:))]);
-
-
-streamslice(y,z,Ey2D,Ez2D,10,'arrows');
+axis([min(y(:)) max(y(:)) min(z1(:)) max(z1(:))]);
+streamslice(y,z1,Ey2D,Ez2D,10,'arrows');
 % quiver(y,z,Ey2D',Ez2D');
 set(findobj('Type','line'),'Color','k')
 plot([min(y(:)) max(y(:))], [z_gnd z_gnd]*1e-3,'k');
@@ -70,10 +70,15 @@ for ii=1:NbChargeLayers
 end
 
 hold off
-xlabel('y (km)','FontSize',12);
-ylabel('z (km)','FontSize',12);
-set(gca,'FontSize',10);
+xlabel('$y$ (km)','Interpreter','latex','FontSize',16);
+ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
+set(gca,'FontSize',10,'TickLabelInterpreter','latex');
+%title(['Field Lines of ',objectName],'Interpreter','latex','FontSize',18);
+    
 axis xy
 axis image
 box on
+cd ../Figures/PNGs
+exportgraphics(gcf,'FieldLines.png','BackgroundColor','white','Resolution',300);
+cd ../../viz
 end 
