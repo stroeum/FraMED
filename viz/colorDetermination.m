@@ -10,7 +10,7 @@
 
 function [colorIndex,colorRGB] = colorDetermination(currentValue,maxValue,colorMap)
     % Index of RGB triplet (range of 1-101, 51 is neutral/grounded):
-    colorIndex = round((currentValue/abs(maxValue))*50)+51;
+    colorIndex = round((currentValue/abs(maxValue))*((length(colorMap(:,1))-1)/2))+(((length(colorMap(:,1))-1)/2)+1);
     % RGB triplet value:
     colorRGB = colorMap(colorIndex,:);
 end
