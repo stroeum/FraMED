@@ -15,7 +15,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
-    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/10^4));    
+    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^4)));    
     rhoData.data = round(rhoDataOG.data,-tol);
     uniqueRhos = unique(nonzeros(rhoData.data));
     rhoData.max = max(uniqueRhos);
@@ -32,27 +32,34 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
             testinglocation(testloc) = testloop;
         end
     end
+
     % Copies data to a nearby height without overwriting pre-existing data:
     for testloop2 = 1:1:length(uniqueRhos)
         if testingvalues(testloop2)==1
-            if unique(rhoData.data(:,:,testinglocation(testloop2)-1))==0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))==0
+            if max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))==0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))==0
                 rhoData.data(:,:,testinglocation(testloop2)-1)=rhoData.data(:,:,testinglocation(testloop2));
-            elseif unique(rhoData.data(:,:,testinglocation(testloop2)-1))~=0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))==0
+            elseif max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))~=0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))==0
                 rhoData.data(:,:,testinglocation(testloop2)+1)=rhoData.data(:,:,testinglocation(testloop2));
-            elseif unique(rhoData.data(:,:,testinglocation(testloop2)-1))==0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))~=0
+            elseif max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))==0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))~=0
                 rhoData.data(:,:,testinglocation(testloop2)-1)=rhoData.data(:,:,testinglocation(testloop2));
             end
         end
     end
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
+    middle = (((length(rgbValues(:,1))-1)/2)+1);
+    midRange = floor(((length(rgbValues(:,1))-1)/10))-1;
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
         [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs(uniqueRhos)),rgbValues);
-        if nullInd == 51
+        %if nullInd == (((length(rgbValues(:,1))-1)/2)+1)
+        if nullInd <= (middle+round(midRange/2)) && nullInd >= (middle-round(midRange/2))
             trueUniqueRhos(i)=[];
         end
     end
+    max_rho_value = max(trueUniqueRhos);
+    min_rho_value = min(trueUniqueRhos);
+    %fprintf(['Maximum density is ',num2str(max(trueUniqueRhos)),'\nMinimum density is ',num2str(min(trueUniqueRhos)),'\nLength of unique densities is ',num2str(length(trueUniqueRhos))]);
     % Sets 
     view([33 10]);
     % Plots isocharge regions in a representative color:
@@ -60,22 +67,45 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     colorVertices = zeros([length(uniqueRhos),3]);
     for j = length(uniqueRhos):-1:1
         [colorIndices(j),colorVertices(j,:)] = colorDetermination(uniqueRhos(j),max(abs(uniqueRhos)),rgbValues);
+        
         % If the region is not neutrally charged:
-        if colorIndices(j) ~= 51
+        if colorIndices(j) ~= (((length(rgbValues(:,1))-1)/2)+1)
             % Is the current value a 'truly unique' value?
             [included, location] = ismember(uniqueRhos(j),trueUniqueRhos);
             % If so, add it to the legend:
             if included == 1
-                if uniqueRhos(location)>0
-                    p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
+                %fprintf(['\n\n***included == 1***\nuniqueRhos(j) = ',num2str(uniqueRhos(j)),'\ntrueUniqueRhos(location) = ',num2str(trueUniqueRhos(location)),'\nuniqueRhos(location) = ',num2str(uniqueRhos(location))]);
+                if trueUniqueRhos(location)>0
+                    p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-trueUniqueRhos(location)));
                 else
-                    p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
+                    p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,trueUniqueRhos(location)));
                 end
-                set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
-                isonormals(Xval,Yval,Zval,rhoData.data,p1);
-                drawnow
+                if length(trueUniqueRhos)>3
+                    if colorIndices(j) <= (middle+midRange) && colorIndices(j) >= (middle-midRange)
+                        chosenAlpha = alphaValue/3;
+                    else
+                        chosenAlpha = alphaValue;
+                    end
+                    if uniqueRhos(location) == max_rho_value && min_rho_value > 0
+                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \leq \rho \leq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        drawnow
+                    elseif uniqueRhos(location) == min_rho_value && max_rho_value < 0
+                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \geq \rho \geq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        drawnow
+                    else
+                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','off');
+                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        drawnow
+                    end
+                else
+                    set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                    isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                    drawnow
+                end
             else
-                patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)),'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',alphaValue,'HandleVisibility','off'); % set the color, mesh and transparency level of the surface
+                %patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)),'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',alphaValue,'HandleVisibility','off'); % set the color, mesh and transparency level of the surface
             end
         end
     end
@@ -92,15 +122,15 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Location','east','Box','off','FontSize',20,'Interpreter','latex');
+    [~,h_legend]=legend('Location','southoutside','Box','off','FontSize',28,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
     ax.FontSize = 16;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',24);
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',24);
-    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
+    xlabel('$x$-position (km)','Interpreter','latex','FontSize',20);
+    ylabel('$y$-position (km)','Interpreter','latex','FontSize',20);
+    zlabel('$z$-position (km)','Interpreter','latex','FontSize',20);
     grid on
     view(33,10)
 end
