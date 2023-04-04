@@ -5,20 +5,20 @@ clf
 clc
 
 % User-Based Settings:
-objectName = 'Titan';       % Name of object being visualized
-is.Rec = 0;                 % Record the movie? (1: yes, else: no)
-updateChargeDensity = 0;    % Update charge distribution coloring every saved timestep (1: yes, else: no)
-highResolution = 0;         % will save image as 51M pixel image if set to 1, use for posters only!
+objectName = 'Jupiter';         % Name of planetary body being visualized
+objectType = 'Streamer';        % Type of discharge simulated
+is.Rec = 0;                     % Record the movie? (1: yes, else: no)
+is.updateChargeDensity = 0;     % Update charge distribution coloring every saved timestep (1: yes, else: no)
+is.highResolution = 0;          % will save image as 51M pixel image if set to 1, use for posters only!
 
 % Settings to ensure proper directory referencing:
-if ~exist('../Figures', 'dir')
-    mkdir('../Figures');
+videoPath = ['../Figures/',objectName,'/',objectType,'/Videos'];
+imagePath = ['../Figures/',objectName,'/',objectType,'/PNGs'];
+if ~exist(videoPath,'dir')
+    mkdir(videoPath);
 end
-if ~exist('../Figures/Videos','dir')
-    mkdir('../Figures/Videos');
-end
-if ~exist('../Figures/PNGs','dir')
-    mkdir('../Figures/PNGs');
+if ~exist(imagePath,'dir')
+    mkdir(imagePath);
 end
 cd ../results
 
@@ -80,7 +80,7 @@ if (is.BW == 1)
 end
 % Set movie recording
 if (is.Rec == 1)
-    Movie = VideoWriter('../Figures/Videos/lightning','MPEG-4');
+    Movie = VideoWriter([videoPath,'/',objectName,'_',objectType,'Video'],'MPEG-4');
     open(Movie);
 end
 % Draw the tree
@@ -121,7 +121,7 @@ for ii=1:Links.Nb
         if ii == 1
             plottingChargeRegions('white',0.25,rho,X,Y,Z);
         else
-            if updateChargeDensity == 1
+            if is.updateChargeDensity == 1
                 allPatches = findall(gcf,'type','patch');
                 delete(allPatches);
                 rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],           '-ascii');
@@ -165,7 +165,7 @@ for ii=1:Links.Nb
     zticklabels({'46','50','54','58','62','66','70'});
     %}
     box on
-    title(['Lightning discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
+    title([objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
     if(is.Rec == 1)
         set(gcf,'Position',[0,0,800,1000]); 
         set(gcf,'Resize','off')
@@ -173,7 +173,7 @@ for ii=1:Links.Nb
         writeVideo(Movie,frame);
     end
 end
-fprintf('\nLightning has propagated %.2f meters\n',distance);
+fprintf(['\n',objectType,' has propagated %.2f meters\n',distance]);
 pause
 %camlight; lighting gouraud
 
@@ -185,15 +185,16 @@ if (is.Rec == 1)
     writeVideo(Movie,frame);
     close(Movie);
 end
-title(['Simulated Lightning Discharge: ',objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');
+title(['Simulated ',objectType,' Discharge: ',objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');
 set(gcf,'Position',[0,0,800,1000]); 
 set(gcf,'Resize','off')
 % If the 'export_fig' function is assigned to the pathtool:
-if exist('export_fig') == 2 && highResolution == 1
-    export_fig ../Figures/PNGs/Lightning.png -transparent -m8
+if exist('export_fig') == 2 && is.highResolution == 1
+    highResSaveFile = [imagePath,'/',objectName,'_',objectType,'_HighRes.png'];
+    export_fig ../Figures/HighRes_Discharge.png -transparent -m8
 else
-    exportgraphics(gcf,['../Figures/PNGs/',objectName,'_Lightning.png'],'Resolution',600);
-    exportgraphics(gcf,['../Figures/PNGs/',objectName,'_Lightning.eps'],'Resolution',600);
+    exportgraphics(gcf,[imagePath,'/',objectName,'_',objectType,'.png'],'Resolution',600);
+    exportgraphics(gcf,[imagePath,'/',objectName,'_',objectType,'.eps'],'Resolution',600);
 end
     
 function [AA] = ConvertTo3d(A,B)
