@@ -121,7 +121,7 @@ bool Tree::Initiate(FILE * file, const int InitiationType, Point& InitiationPoin
         exit(3);
     }
     /* Display coordinates of initiation point */
-    IO::print(file, "++:\t Discharge initated at [" + to_string(InitiationPoint.i*Var::d.x/1e3) + " km, " + to_string(InitiationPoint.j*Var::d.y/1e3) + " km, " + to_string((InitiationPoint.k*Var::d.z+Var::z_gnd)/1e3) + " km]\n");
+    IO::print(file, "++:\t Discharge initiated at [" + to_string(InitiationPoint.i*Var::d.x/1e3) + " km, " + to_string(InitiationPoint.j*Var::d.y/1e3) + " km, " + to_string((InitiationPoint.k*Var::d.z+Var::z_gnd)/1e3) + " km]\n");
     //	SOR.Solve(d,N,Un,phi);
     
     /* Derive field and potential before discharge along the central vertical axis */
