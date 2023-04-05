@@ -15,7 +15,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
-    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^4)));    
+    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    
     rhoData.data = round(rhoDataOG.data,-tol);
     uniqueRhos = unique(nonzeros(rhoData.data));
     rhoData.max = max(uniqueRhos);
@@ -122,7 +122,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Location','southoutside','Box','off','FontSize',28,'Interpreter','latex');
+    [~,h_legend]=legend('Location','north','Box','off','FontSize',18,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
