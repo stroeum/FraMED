@@ -1,7 +1,7 @@
 %% Load datas
 close all
-clearvars
-clc
+clearvars -except sims
+
 
 %% Compile
 % cd ..

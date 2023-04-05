@@ -1,6 +1,6 @@
 function []=Ellipsoid(xq,yq,zq,a,b,c,color,NbRad)
 % close all
-% clear all
+% clearvars -except sims
 % clc
 % xq = 1;
 % yq = 1;

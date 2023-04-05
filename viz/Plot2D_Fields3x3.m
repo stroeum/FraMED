@@ -1,7 +1,24 @@
 close all
-clearvars
-clc
+clearvars -except sims
 beep  off
+
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs')
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
+    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+    sims.objectType = input(prompt2,'s');
+    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+        sims.objectType = input(prompt2,'s');
+    end
+
+    % Settings to ensure proper directory referencing:
+    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+    if ~exist(sims.pathPNGs,'dir')
+        mkdir(sims.pathPNGs);
+    end
+end 
+fprintf('\n*** Executing Plot2D_Fields3x3.m script. ***\n');
 
 cd ../results/
 %% Load
@@ -15,7 +32,7 @@ dxyz        = load('dxyz.dat')*1e-3;
 Nxyz        = load('Nxyz.dat');
 z_gnd       = load('z_gnd.dat')*1e-3;
 
-%% Derive main params
+%% Derive main sims
 Nx = Nxyz(1);
 Ny = Nxyz(2);
 Nz = Nxyz(3);
@@ -45,7 +62,7 @@ EyAF(Nz)= 0;
 
 %% Plot
 close all
-clc
+
 
 ii = [floor((Nx+1)*1/4) (Nx+1)*2/4 ceil((Nx+1)*3/4)];
 jj = [floor((Ny+1)*1/4) (Ny+1)*2/4 ceil((Ny+1)*3/4)];
@@ -84,6 +101,7 @@ for nn=1:3
         pp = pp+1;
     end
 end
+exportgraphics(gcf,[sims.pathPNGs,'/FieldSpaceEvolution_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 clear mm nn pp ii jj kk
 cd ../viz/
 

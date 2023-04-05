@@ -10,8 +10,8 @@
 % boundaries.
 
 close all
-clear all
-clc
+clearvars -except sims
+
 beep  off
 cd ../results/
 %% Load relevant data

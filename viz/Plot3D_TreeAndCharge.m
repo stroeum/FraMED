@@ -1,7 +1,7 @@
 function []=Plot3D_TreeAndCharge()
 close all
-clearvars
-clc
+clearvars -except sims
+
 
 figure;
 global Charges NbLayers

@@ -2,9 +2,9 @@ function []=Plot3D_Fields()
 % Plot an axisymmetric view of the electric field at the center of the 
 % domain prior to the flash
 
-clearvars
+clearvars -except sims
 close all
-clc
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

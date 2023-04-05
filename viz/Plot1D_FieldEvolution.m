@@ -1,7 +1,7 @@
 %% Initialize procedure
 close all
-clearvars
-clc
+clearvars -except sims
+
 
 cd ../results/
 
@@ -13,6 +13,14 @@ EthPositive = load('EthPositive.dat')*1e-5;
 EthNegative = load('EthNegative.dat')*1e-5;
 phi         = load('TotalPotential.dat')*1e-6;
 z_gnd       = load('z_gnd.dat');
+
+if isempty(phi)
+    fprintf('\n*** Plot1D_FieldEvolution.m cannot be executed with current TotalPotential.dat file. ***\n');
+    cd ../viz
+    return
+else
+    fprintf('\n*** Executing Plot1D_FieldEvolution.m script. ***\n');
+end
 
 %% Calculate the parameters
 dz = dxyz(3);                  % _m

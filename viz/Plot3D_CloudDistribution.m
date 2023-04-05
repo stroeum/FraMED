@@ -11,15 +11,55 @@
 
 %% Initiate
 close all
-clearvars
-clc
+clearvars -except sims
+
 clf
 cd ../results
+fprintf('\n*** Executing Plot3D_CloudDistribution.m script. ***\n');
+
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
+    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+    sims.objectType = input(prompt2,'s');
+    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+        sims.objectType = input(prompt2,'s');
+    end
+
+    % Settings to ensure proper directory referencing:
+    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+    if ~exist(sims.pathPNGs,'dir')
+        mkdir(sims.pathPNGs);
+    end
+    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
+    if ~exist(sims.pathVideos,'dir')
+        mkdir(sims.pathVideos);
+    end
+end 
+
+promptSaveAfter = '\nWould you like to save an image of the charge layer distributions after the discharge has occurred? (Y / N)\n-->';
+saveAfter = input(promptSaveAfter,'s');    
+while ~strcmp(saveAfter,'Y') && ~strcmp(saveAfter,'N')
+    fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+    saveAfter = input(promptSaveAfter,'s');
+end
 
 %% Load data files
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
-rho.data = load('rho3d2500.dat','-ascii');
+if strcmp(saveAfter,'Y')
+    prompt_fileNum = '\nWhich iteration save file would you like to read-in?\nInput example: rhoAmb3d2500.dat\n-->';
+    iterationFile = input(prompt_fileNum,'s');
+    while ~exist(['../results/',iterationFile],'file')
+        fprintf(['\t*** File ''',iterationFile,''' does not exist in the ''results'' directory. Please try again. ***\n']);
+        iterationFile = input(prompt_fileNum,'s');
+    end
+    rho.data = load(interationFile,'-ascii'); % After discharge
+else
+    fprintf('\tUsing charge layer data from before discharge occurs.\n');
+    rho.data = load('rhoAmb.dat','-ascii'); % Before discharge
+end
 gnd.alt  = load('z_gnd.dat', '-ascii');
 
 %% Derive main parameters
@@ -53,14 +93,9 @@ rho.min = min(min(min(rho.data)));
 %% Plotting figure:
 % Map ColorScale
 gnd.color = [.75 .75 .75]; % light gray for neutral charges
-% Draw the tree
 figure(1);
 set(gcf,'Position',[0,0,800,600]);
 hold on;
-
-% Sets bounds for the axes (comment out if clouds get cut off):
-%axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
-%axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
 % Calls the new function that automatically recognizes charge regions:
 plottingChargeRegions('white',0.4,rho,X,Y,Z);
@@ -71,11 +106,18 @@ P.y = [L.y L.y 0 0]*1e-3;
 P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
 patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName','Ground');  
 axis equal
-axis([0 L.x 0 L.y 25000 55000]*1e-3)
-%axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
-exportgraphics(gcf,'../Figures/PNGs/CloudDistribution_After.png','BackgroundColor','white','Resolution',300);
-% view([90,0]) 
-% camlight; lighting gouraud
+view([33,5]) 
+
+% Sets bounds for the axes (comment out if clouds get cut off):
+%axis([0 L.x 0 L.y 15000 55000]*1e-3)                % Cropped view
+axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)  % Full span 
+
+%% Save figure as file:
+if strcmp(saveAfter,'Y')
+    exportgraphics(gcf,[sims.pathPNGs,'/CloudDistribution_After_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);  % Before discharge
+else
+    exportgraphics(gcf,[sims.pathPNGs,'/CloudDistribution_Before_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);   % After discharge
+end
 
 %% Additional functionave:
 function [AA] = ConvertTo3d(A,B)

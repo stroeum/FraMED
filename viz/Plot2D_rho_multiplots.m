@@ -1,6 +1,6 @@
 close all
-clearvars
-clc
+clearvars -except sims
+
 choice = 0;
 cd ../results/
 dxyz        = load('dxyz.dat');

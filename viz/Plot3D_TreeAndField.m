@@ -1,7 +1,7 @@
 function []=Plot3D_TreeAndField()
 close all
-clearvars
-clc
+clearvars -except sims
+
 
 figure;
 %-------------------------------------------------------------------------%

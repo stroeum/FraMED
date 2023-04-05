@@ -1,7 +1,7 @@
 %% Initialization
 close all
-clearvars
-clc
+clearvars -except sims
+
 
 cd ../results
 

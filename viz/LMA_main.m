@@ -1,22 +1,33 @@
 % LMA main %
 close all
-clearvars
+clearvars -except sims
 clear -global
-clc
+
 beep  off
 global d Init Links N Nb z_gnd
 global alt_hist FocusArea Font Ground
 
 % Preparing subdirectories:
-if ~exist('../Figures', 'dir')
-    mkdir('../Figures')
-end
-if ~exist('../Figures/PNGs', 'dir')
-    mkdir('../Figures/PNGs')
-end
-if ~exist('../Figures/Videos', 'dir')
-    mkdir('../Figures/Videos')
-end
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
+    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+    sims.objectType = input(prompt2,'s');
+    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+        sims.objectType = input(prompt2,'s');
+    end
+
+    % Settings to ensure proper directory referencing:
+    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+    if ~exist(sims.pathPNGs,'dir')
+        mkdir(sims.pathPNGs);
+    end
+    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
+    if ~exist(sims.pathVideos,'dir')
+        mkdir(sims.pathVideos);
+    end
+end 
 
 %% Initialisation %%
 % !rm -rf *.avi *.eps
@@ -96,6 +107,13 @@ h.tz.label.spacing.y = h.xy.label.spacing.y;
 
 %% Load parameters %%
 LMA_load
+if isempty(Links.data)
+    fprintf('\n*** LMA_main.m cannot be executed with current EstablishedLinks.dat file. ***\n');
+    cd ../viz
+    return
+else
+    fprintf('\n*** Executing LMA_main.m script. ***\n');
+end
 
 %% Create color scheme %%
 LMA_color
@@ -126,7 +144,7 @@ LMA_initiation
 
 %% Plot discharge tree branches %%
 if strcmp(Figure.Output,'Movie')
-    vFile = VideoWriter('../Figures/Videos/LMA','MPEG-4');
+    vFile = VideoWriter([sims.pathVideos,'/LMA'],'MPEG-4');
     open(vFile);
 end
 LMA_tree
@@ -139,7 +157,7 @@ elseif strcmp(Figure.Output,'Plot')
 end
 
 %% Plot Save
-exportgraphics(gcf, '../Figures/PNGs/LMA_Final.png','BackgroundColor','white','Resolution',300);
+exportgraphics(gcf, [sims.pathPNGs,'/LMA_Final_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 f1 = figure;
 sf1_new = copyobj(sf1,f1);
@@ -147,7 +165,7 @@ set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('x (km)');
 ylabel('z (km)');
 axis image
-exportgraphics(f1, '../Figures/PNGs/xz.png','BackgroundColor','white','Resolution',300);
+exportgraphics(f1, [sims.pathPNGs,'/xz_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 f2 = figure;
 sf2_new = copyobj(sf2,f2);
@@ -155,7 +173,7 @@ set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('z (km)');
 ylabel('y (km)');
 axis image
-exportgraphics(f2, '../Figures/PNGs/yz.png','BackgroundColor','white','Resolution',300);
+exportgraphics(f2, [sims.pathPNGs,'/yz_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 f3 = figure;
 sf3_new = copyobj(sf3,f3);
@@ -163,4 +181,4 @@ set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('x (km)');
 ylabel('y (km)');
 axis image
-exportgraphics(f3, '../Figures/PNGs/xy.png','BackgroundColor','white','Resolution',300);
+exportgraphics(f3, [sims.pathPNGs,'/xy_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);

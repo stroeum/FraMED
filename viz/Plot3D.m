@@ -1,7 +1,7 @@
 function []= Plot3D()
 close all
-clearvars
-clc
+clearvars -except sims
+
 if ~exist('../Figures', 'dir')
     mkdir('../Figures')
 end

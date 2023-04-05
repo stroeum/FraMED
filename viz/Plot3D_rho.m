@@ -1,9 +1,9 @@
 function []=Plot3D_rho()
 % Plot an axisymmetric view of the charge layers assumed cylindrical at the
 % center of the domain prior to the flash.
-clearvars
+clearvars -except sims
 close all
-clc
+
 global Charges NbLayers
 
 %-------------------------------------------------------------------------%
@@ -92,9 +92,9 @@ end
 end
 
 % function []=main()
-% clear all
+% clearvars -except sims
 % close all
-% clc
+% 
 % 
 % ChargeLayers = load('ChargeLayers.dat');
 % dxyz         = load('dxyz.dat');

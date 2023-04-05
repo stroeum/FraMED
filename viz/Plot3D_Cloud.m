@@ -1,8 +1,8 @@
 function []=Plot3D_Cloud()
 beep  off
 close all
-clearvars
-clc
+clearvars -except sims
+
 % figure(1);
 %-------------------------------------------------------------------------%
 % Load data files                                                         %

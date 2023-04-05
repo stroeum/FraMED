@@ -1,7 +1,7 @@
 function []=Plot1D_rho()
-clear all
+clearvars -except sims
 close all
-clc
+
 global Charges NbLayers
 
 cd ../results/

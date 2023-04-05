@@ -1,16 +1,28 @@
-clearvars
+clearvars -except sims
 close all
-clc
+
 
 %% Compile and Run C++ code
-cd ../Figures
-if ~exist('PNGs', 'dir')
-    mkdir('PNGs')
-end
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
+    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+    sims.objectType = input(prompt2,'s');
+    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+        sims.objectType = input(prompt2,'s');
+    end
 
-if ~exist('EPSs', 'dir')
-    mkdir('EPSs')
-end
+    % Settings to ensure proper directory referencing:
+    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+    if ~exist(sims.pathPNGs,'dir')
+        mkdir(sims.pathPNGs);
+    end
+    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
+    if ~exist(sims.pathVideos,'dir')
+        mkdir(sims.pathVideos);
+    end
+end 
 cd ../results
 
 %% Plot results
@@ -32,8 +44,11 @@ Lz = (Nz-1)*dz;
 z  = (0:Nz-1)*dz+z_gnd;
 clear dxyz Nxyz
 if length(EthNegative)~=length(EzNumBF)
-    fprintf('\nMismatching data set sizes, ensure simulation parameters are correctly executed.\n');
-    return;
+    fprintf('\n*** Plot1D_Fields.m cannot be executed with current EthNegative.dat and EnumBF.dat files.\n');
+    cd ../viz
+    return
+else
+    fprintf('\n*** Executing Plot1D_Fields.m script. ***\n');
 end
 
 % Initiation requirements plot:
@@ -89,7 +104,7 @@ set(gca,'XMinorTick','on','YMinorTick','on')
 grid on
 box on
 hold off
-exportgraphics(gcf,'../Figures/PNGs/InitiationRequirements.png','BackgroundColor','White','Resolution',300);
+exportgraphics(gcf,[sims.pathPNGs,'/InitiationRequirements_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 % Potential before and after flash plot:
 linewidth = 1;
@@ -109,7 +124,7 @@ box on
 % title('E_z and \phi  before the flash [BF] and after [AF]');
 grid on;
 hold off
-exportgraphics(gcf,'../Figures/PNGs/phi.png','BackgroundColor','White','Resolution',300);
+exportgraphics(gcf,[sims.pathPNGs,'/phi_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 % Electric field thresholds plot:
 figure;
@@ -130,15 +145,8 @@ title('Electric Field Thresholds','Interpreter','latex','FontSize',28);
 xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
 ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
 grid on
-exportgraphics(gcf,'../Figures/PNGs/E_Threshold.png','BackgroundColor','White','Resolution',300);
+exportgraphics(gcf,[sims.pathPNGs,'/E_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 %xlim([-1000000,1000000])
-fprintf('Average field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
-
-% figure;
-% load('DiP.dat')
-% load('MonoP.dat')
-% load('MultiP.dat')
-% plot(phiNumBF*1e-6,z*1e-3,'k', DiP*1e-6,z*1e-3,'r--', MonoP*1e-6,z*1e-3,'g-.',MultiP*1e-6,z*1e-3,'b:')
-
+fprintf('\tAverage field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
 
 cd ../viz

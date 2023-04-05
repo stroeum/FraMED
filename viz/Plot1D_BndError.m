@@ -1,6 +1,6 @@
 close all
-clear all
-clc
+clearvars -except sims
+
 beep  off
 cd ../results
 load BndError.dat

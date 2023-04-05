@@ -1,25 +1,29 @@
 % Initiate
 close all
-clearvars
+clearvars -except sims
 clf
-clc
 
-% User-Based Settings:
-objectName = 'Jupiter';         % Name of planetary body being visualized
-objectType = 'Streamer';        % Type of discharge simulated
-is.Rec = 0;                     % Record the movie? (1: yes, else: no)
-is.updateChargeDensity = 0;     % Update charge distribution coloring every saved timestep (1: yes, else: no)
-is.highResolution = 0;          % will save image as 51M pixel image if set to 1, use for posters only!
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
+    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+    sims.objectType = input(prompt2,'s');
+    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+        fprintf('\tNot an acceptable input. Please enter Streamer or Leader.\n');
+        sims.objectType = input(prompt2,'s');
+    end
 
-% Settings to ensure proper directory referencing:
-videoPath = ['../Figures/',objectName,'/',objectType,'/Videos'];
-imagePath = ['../Figures/',objectName,'/',objectType,'/PNGs'];
-if ~exist(videoPath,'dir')
-    mkdir(videoPath);
-end
-if ~exist(imagePath,'dir')
-    mkdir(imagePath);
-end
+    % Settings to ensure proper directory referencing:
+    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+    if ~exist(sims.pathPNGs,'dir')
+        mkdir(sims.pathPNGs);
+    end
+    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
+    if ~exist(sims.pathVideos,'dir')
+        mkdir(sims.pathVideos);
+    end
+end 
+
 cd ../results
 
 % Load data files
@@ -29,6 +33,33 @@ load('InitPoint.dat',        '-ascii');
 rho.data = load('rhoAmb.dat',           '-ascii');
 Links.ID = load('EstablishedLinks.dat', '-ascii');
 gnd.alt  = load('z_gnd.dat',            '-ascii');
+
+if isempty(Links.ID)
+    fprintf('\n*** LightningVisual.m cannot be executed with current EstablishedLinks.dat file. ***\n');
+    cd ../viz
+    return
+else
+    fprintf('\n*** Executing LightningVisual.m script. ***\n');
+    % User-Based Settings:
+    prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
+    is.Rec = input(prompt_Rec,'s');                    
+    while ~strcmp(is.Rec,'Y') && ~strcmp(is.Rec,'N')
+        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+        is.Rec = input(prompt_Rec,'s');
+    end
+    prompt_updateChargeDensity = '\nWould you like to update the charge distribution coloring for every saved timestep? (Y / N)\n-->';
+    is.updateChargeDensity = input(prompt_updateChargeDensity,'s');                    
+    while ~strcmp(is.updateChargeDensity,'Y') && ~strcmp(is.updateChargeDensity,'N')
+        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+        is.updateChargeDensity = input(prompt_updateChargeDensity,'s');
+    end
+    prompt_highResolution = '\nWould you like to save the final image as a very high resolution image? (Y / N)\nWARNING: Only recommended for preparing posters.\n-->';
+    is.highResolution = input(prompt_highResolution,'s');                    
+    while ~strcmp(is.highResolution,'Y') && ~strcmp(is.highResolution,'N')
+        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+        is.highResolution = input(prompt_highResolution,'s');
+    end
+end
 
 % Derive main parameters
 Links.Nb = size(Links.ID);
@@ -79,8 +110,8 @@ if (is.BW == 1)
     end
 end
 % Set movie recording
-if (is.Rec == 1)
-    Movie = VideoWriter([videoPath,'/',objectName,'_',objectType,'Video'],'MPEG-4');
+if (strcmp(is.Rec,'Y') == 1)
+    Movie = VideoWriter([sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'],'MPEG-4');
     open(Movie);
 end
 % Draw the tree
@@ -121,7 +152,7 @@ for ii=1:Links.Nb
         if ii == 1
             plottingChargeRegions('white',0.25,rho,X,Y,Z);
         else
-            if is.updateChargeDensity == 1
+            if strcmp(is.updateChargeDensity,'Y') == 1
                 allPatches = findall(gcf,'type','patch');
                 delete(allPatches);
                 rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],           '-ascii');
@@ -165,36 +196,34 @@ for ii=1:Links.Nb
     zticklabels({'46','50','54','58','62','66','70'});
     %}
     box on
-    title([objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
-    if(is.Rec == 1)
+    title([sims.objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
+    if(strcmp(is.Rec,'Y') == 1)
         set(gcf,'Position',[0,0,800,1000]); 
         set(gcf,'Resize','off')
         frame = getframe(gcf);
         writeVideo(Movie,frame);
     end
 end
-fprintf(['\n',objectType,' has propagated %.2f meters\n',distance]);
+fprintf(['\n\t',sims.objectType,' has propagated %.2f meters\n',distance]);
 pause
 %camlight; lighting gouraud
 
 
 hold off;
 % Record the movie
-if (is.Rec == 1)
+if (strcmp(is.Rec,'Y') == 1)
     frame = getframe(gcf);
     writeVideo(Movie,frame);
     close(Movie);
 end
-title(['Simulated ',objectType,' Discharge: ',objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');
+title(['Simulated ',sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');
 set(gcf,'Position',[0,0,800,1000]); 
 set(gcf,'Resize','off')
 % If the 'export_fig' function is assigned to the pathtool:
-if exist('export_fig') == 2 && is.highResolution == 1
-    highResSaveFile = [imagePath,'/',objectName,'_',objectType,'_HighRes.png'];
+if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
     export_fig ../Figures/HighRes_Discharge.png -transparent -m8
 else
-    exportgraphics(gcf,[imagePath,'/',objectName,'_',objectType,'.png'],'Resolution',600);
-    exportgraphics(gcf,[imagePath,'/',objectName,'_',objectType,'.eps'],'Resolution',600);
+    exportgraphics(gcf,[sims.pathPNGs,'/Lightning_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',600);
 end
     
 function [AA] = ConvertTo3d(A,B)

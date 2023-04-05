@@ -1,6 +1,6 @@
 close all
-clearvars
-clc
+clearvars -except sims
+
 beep  off
 
 %% Load relevant data %%
