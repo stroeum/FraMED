@@ -228,8 +228,10 @@ void Tree::Grow(FILE * file, bool AddNew)
             }
         if(Var::isChannelEquipotential==false)
         {
+			
             BC::Update(Var::isFlashAccoutedInBC,Var::BCtype,Var::phi,Var::rhoAmbMin,Var::rhoAmbMax,Var::d,Var::N);
             Var::SOR.Solve(Var::d,Var::N,Var::Un,Var::phi);
+			Var::phi_cha	= Var::phi-Var::phi_amb;
         };
         if(Var::isChannelEquipotential==true)
         {
@@ -332,14 +334,18 @@ void Tree::Grow(FILE * file, bool AddNew)
                 foo::GlobalE(Var::phi, Var::d, Var::N, _CntLinks); //NB: This also stores all components of Ex,Ey,Ez.
             }
             
-            pp = foo::DipoleMoment(Var::QchannelPlus,Var::phi_cha,Var::Un,Var::L,Var::d,Var::N);
-            Var::DischargeDipoleMoment.push_back(pp);
-            Var::CarriedCharge.push_back(Var::QchannelPlus);
-            Var::EsEnergy.push_back(_EsEnergyTmp);
-            Var::TotalEfield.push_back(_TotalEfieldTmp);
-            Var::TotalPotential.push_back(_TotalPotentialTmp);
         };
         
+		/* Update and export results */
+		pp = foo::DipoleMoment(Var::QchannelPlus,Var::phi_cha,Var::Un,Var::L,Var::d,Var::N);
+		Var::DischargeDipoleMoment.push_back(pp);
+		Var::CarriedCharge.push_back(Var::QchannelPlus);
+		if(Var::isChannelEquipotential==true){
+			Var::EsEnergy.push_back(_EsEnergyTmp);
+			Var::TotalEfield.push_back(_TotalEfieldTmp);
+			Var::TotalPotential.push_back(_TotalPotentialTmp);
+		}
+
         /* Write interim results after every tenth link is added. */
         if((_CntLinks % Var::step3d) == 0)
             Tree::StoreData(file);
