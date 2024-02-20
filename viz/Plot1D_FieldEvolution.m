@@ -14,7 +14,7 @@ EthNegative = load('EthNegative.dat')*1e-5;
 phi         = load('TotalPotential.dat')*1e-6;
 z_gnd       = load('z_gnd.dat');
 
-if isempty(phi)
+if isempty(phi) || size(phi,1) == 1
     fprintf('\n*** Plot1D_FieldEvolution.m cannot be executed with current TotalPotential.dat file. ***\n');
     cd ../viz
     return

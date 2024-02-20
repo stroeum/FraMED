@@ -25,7 +25,7 @@ cd ../results/
 set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
 
 phio = load('ChannelPotentials.dat')*1e-6;
-if isempty(phio)
+if isempty(phio) || (0:size(phio)-1)' == 0
     fprintf('\n*** Plot1D_ChannelPotential.m cannot be executed with current ChannelPotentials.dat file. ***\n');
     cd ../viz
     return

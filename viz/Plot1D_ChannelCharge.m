@@ -21,7 +21,7 @@ end
 
 cd ../results
 Q = load('CarriedCharge.dat');
-if isempty(Q)
+if isempty(Q) || (size(Q,1)-1) == 0
     fprintf('\n*** Plot1D_ChannelCharge.m cannot be executed with current CarriedCharge.dat file. ***\n');
     cd ../viz
     return

@@ -25,7 +25,7 @@ end
 
 cd ../results/
 p = load('DischargeDipoleMoment.dat')*1e-3; % convert to C/km
-if isempty(p)
+if isempty(p) || (size(p,1)-1) == 0
     fprintf('\n*** Plot1D_DipoleMoment.m cannot be executed with current DischargeDipoleMoment.dat file. ***\n');
     cd ../viz
     return
@@ -67,6 +67,7 @@ axis([0 max(step) min(min(p)) max(max(p))]);
 box on
 grid on
 hold off
+pause
 exportgraphics(gcf,[sims.pathPNGs,'/DipoleMoment_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 cd ../viz/
