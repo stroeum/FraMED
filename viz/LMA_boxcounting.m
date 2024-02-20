@@ -23,7 +23,6 @@ if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideo
         mkdir(sims.pathVideos);
     end
 end 
-exportgraphics(gcf,[sims.pathPNGs,'/FieldLines_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 if ~exist(sim.pathPNGs, 'dir')
     fprintf('Files required do not exist.');
