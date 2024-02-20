@@ -2,11 +2,12 @@
 % File Name: plottingChargeRegions.m                                      %
 % Purpose: Visualizes the charged cloud structure with custom color map.  %
 %          Outputs a figure to the screen but does not save it to a file  %
-%          automatically. LaTeX-ified April 29, 2022.                     %
+%          automatically. LaTeX-ified April 29, 2022. Changed view angle  %
+%          and several notations on February 20, 2024.                    %
 % Author: Annelisa Esparza                                                %
 % Contact: aesparza2014@my.fit.edu                                        %
 % Added Date: February 22, 2022                                           %
-% Last Update: April 29, 2022                                             %
+% Last Update: February 20, 2024                                          %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval)
@@ -61,7 +62,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     min_rho_value = min(trueUniqueRhos);
     %fprintf(['Maximum density is ',num2str(max(trueUniqueRhos)),'\nMinimum density is ',num2str(min(trueUniqueRhos)),'\nLength of unique densities is ',num2str(length(trueUniqueRhos))]);
     % Sets 
-    view([33 10]);
+    view(-45,9);
     % Plots isocharge regions in a representative color:
     colorIndices = zeros([length(uniqueRhos),1]);
     colorVertices = zeros([length(uniqueRhos),3]);
@@ -118,7 +119,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     c = colorbar;
     c.Label.String = 'Charge Density (nC/m$^3$)';
     c.Label.Interpreter = 'latex';
-    c.Label.FontSize = 20;
+    c.Label.FontSize = 24;
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
@@ -127,10 +128,10 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
-    ax.FontSize = 16;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',20);
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',20);
-    zlabel('$z$-position (km)','Interpreter','latex','FontSize',20);
+    ax.FontSize = 20;
+    xlabel('$x$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
+    ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
+    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
     grid on
-    view(33,10)
+    view(-45,9)
 end

@@ -1,6 +1,9 @@
 clearvars -except sims
 close all
 
+% For formatting exported image size:
+positionWidth = 600;
+positionHeight = 800;
 
 %% Compile and Run C++ code
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
@@ -127,8 +130,10 @@ hold off
 exportgraphics(gcf,[sims.pathPNGs,'/phi_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 
 % Electric field thresholds plot:
-figure;
-set(gcf,'Position',[0,0,600,1000]);
+fig = figure;
+%set(gcf,'Position',[0,0,600,1000]);
+set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+set(gcf,'Resize','off')
 hold on
 plot(EzNumBF(:)*1e-5, z*1e-3, 'r-','LineWidth',linewidth,'DisplayName','Electric Field')
 plot(EthNegative(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'HandleVisibility','off')
@@ -145,6 +150,7 @@ title('Electric Field Thresholds','Interpreter','latex','FontSize',28);
 xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
 ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
 grid on
+set(fig,'Position',[0,0,positionWidth,positionHeight]);
 exportgraphics(gcf,[sims.pathPNGs,'/E_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 %xlim([-1000000,1000000])
 fprintf('\tAverage field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));

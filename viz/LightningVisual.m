@@ -3,6 +3,14 @@ close all
 clearvars -except sims
 clf
 
+% For formatting exported image size:
+%% Streamer
+%positionWidth = 600;
+%positionHeight = 1200;
+% Leader
+positionWidth = 800;
+positionHeight = 800;
+
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
     sims.objectName = input(prompt1,'s');
@@ -59,6 +67,12 @@ else
         fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
         is.highResolution = input(prompt_highResolution,'s');
     end
+    prompt_Grounded = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
+    is.Grounded = input(prompt_Grounded,'s');                    
+    while ~strcmp(is.Grounded,'FS') && ~strcmp(is.Grounded,'G')
+        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
+        is.Grounded = input(prompt_Grounded,'s');
+    end
 end
 
 % Derive main parameters
@@ -112,11 +126,19 @@ end
 % Set movie recording
 if (strcmp(is.Rec,'Y') == 1)
     Movie = VideoWriter([sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'],'MPEG-4');
+    if Links.Nb <= 60
+        Movie.FrameRate = 1;
+    elseif Links.Nb > 60 && Links.Nb <= 1000
+        Movie.FrameRate = round(Links.Nb/30);
+    else
+        Movie.FrameRate = round(Links.Nb/60);
+    end
+    Movie.Quality = 100;
     open(Movie);
 end
 % Draw the tree
 figure(1);
-set(gcf,'Position',[0,0,800,1000]);
+set(gcf,'Position',[0,0,positionWidth,positionHeight]);
 set(gcf,'Resize','off')
 hold on;
 grid on;
@@ -136,10 +158,12 @@ set(legend,'Position',[0.225 0.7 .5 .0375],'box','off')
 set(gcf,'Resize','off')
 
 % Represents the neutrally charged (grounded) surface:
-P.x = [L.x 0 0 L.x]*1e-3;
-P.y = [L.y L.y 0 0]*1e-3;
-P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
-patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
+if strcmp(is.Grounded,'G')
+    P.x = [L.x 0 0 L.x]*1e-3;
+    P.y = [L.y L.y 0 0]*1e-3;
+    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
+    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
+end
 
 % Initialize distance traveled for lightning links:
 distance = 0;
@@ -151,6 +175,7 @@ for ii=1:Links.Nb
     if mod((ii-1),100) == 0
         if ii == 1
             plottingChargeRegions('white',0.25,rho,X,Y,Z);
+            pause
         else
             if strcmp(is.updateChargeDensity,'Y') == 1
                 allPatches = findall(gcf,'type','patch');
@@ -172,6 +197,25 @@ for ii=1:Links.Nb
     x2 = Links.ID(ii,4)*d.x;
     y2 = Links.ID(ii,5)*d.y;
     z2 = Links.ID(ii,6)*d.z+gnd.alt;
+
+    % Keeps track of initiation height and min/max propagation height:
+    if ii == 1
+        initHeight = z1;
+        if z1 > z2
+            maxHeight = z1;
+            minHeight = z2;
+        else
+            maxHeight = z2;
+            minHeight = z1;
+        end
+    else
+        if z2 > maxHeight
+            maxHeight = z2;
+        end
+        if z2 < minHeight
+            minHeight = z2;
+        end
+    end
     
     % Summing lightning link to overall distance of link traveled (m):
     distance = distance + sqrt(((x2-x1)^2) + ((y2-y1)^2) + ((z2-z1)^2));
@@ -184,7 +228,7 @@ for ii=1:Links.Nb
         'Color',color(ii,:),'HandleVisibility','off');
     
     % Formatting axes:
-    set(gcf,'Position',[0,0,800,1000]);
+    set(gcf,'Position',[0,0,positionWidth,positionHeight]);
     set(gcf,'Resize','off')
     %axis equal
     %{
@@ -198,16 +242,17 @@ for ii=1:Links.Nb
     box on
     title([sims.objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
     if(strcmp(is.Rec,'Y') == 1)
-        set(gcf,'Position',[0,0,800,1000]); 
+        set(gcf,'Position',[0,0,positionWidth,positionHeight]); 
         set(gcf,'Resize','off')
         frame = getframe(gcf);
         writeVideo(Movie,frame);
     end
 end
-fprintf(['\n\t',sims.objectType,' has propagated %.2f meters\n',distance]);
-pause
+fprintf(['\n\t',sims.objectType,' reaches minimum of ',num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n']);
+fprintf(['\n\t',sims.objectType,' initiated at ',num2str(initHeight,'%.2f'),' meters\n']);
+fprintf(['\n\t',sims.objectType,' reaches maximum of ',num2str(maxHeight,'%.2f'),' meters (',num2str(maxHeight-initHeight,'%+.2f'),' meters)\n']);
+fprintf(['\n\t',sims.objectType,' has propagated a total of ',num2str(distance,'%.2f'),' meters\n']);
 %camlight; lighting gouraud
-
 
 hold off;
 % Record the movie
@@ -216,12 +261,18 @@ if (strcmp(is.Rec,'Y') == 1)
     writeVideo(Movie,frame);
     close(Movie);
 end
-title(['Simulated ',sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');
-set(gcf,'Position',[0,0,800,1000]); 
+%title('(b)','Interpreter','latex','FontSize',32,'Units','normalized');
+%titleInfo = get(gca,'title');
+%set(titleInfo,'Position', [((titleInfo.Extent(3))-(((titleInfo.Parent.InnerPosition(1)/titleInfo.Parent.InnerPosition(3)))/titleInfo.Parent.Position(3))-(titleInfo.Parent.Position(1)/titleInfo.Parent.OuterPosition(3))) 1.004 0]);
+title(['Simulated ', sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');    
+set(gcf,'Position',[0,0,positionWidth,positionHeight]); 
 set(gcf,'Resize','off')
 % If the 'export_fig' function is assigned to the pathtool:
 if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
-    export_fig ../Figures/HighRes_Discharge.png -transparent -m8
+    currentFolder = pwd;
+    cd(sims.pathPNGs);
+    export_fig HighRes_Discharge.png -transparent -m8
+    cd(currentFolder);
 else
     exportgraphics(gcf,[sims.pathPNGs,'/Lightning_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',600);
 end
