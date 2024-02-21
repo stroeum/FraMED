@@ -17,9 +17,9 @@ Charge::Charge(double QQ, double XXq, double YYq, double ZZq, double RRq1, doubl
 
 bool Charge::init(char * filename, SizeGrid& _N)
 {
-    cout<<filename<<endl;
+    cout<<"Attempting to read "<<filename<<endl;
 	FILE * file = fopen (filename, "r");
-    cout<<filename<<endl;
+    cout<<"...file successfully read in.\n"<<endl;
 	char	tmp_c, tmp_cc;
 	string	tmp_s;
 	double	tmp_d;
