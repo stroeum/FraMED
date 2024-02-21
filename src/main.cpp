@@ -34,9 +34,9 @@ int main()
     
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
-    Var::BCtype					= OPEN_BC;                                          // Boundary conditions
-    Var::LoadingType            = SET_CHARGES;                                    // Charge loading type
-    Var::InitiationType			= RANDOM;                                    // Initiation type
+    Var::BCtype					= FREE_SPACE;                                       // Boundary conditions
+    Var::LoadingType            = FROM_FILE;                                        // Charge loading type
+    Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
     
     Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
@@ -78,12 +78,15 @@ int main()
 
     if(Var::isNewRun) {
         file = IO::openFile((char *)"summary.txt", "w");
-        IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
-        /* FOLLOWING SECTION ASSIGNS RESPECTIVE VALUES */
-        /*
-        file = IO::openFile((char *)"summary.txt", "w");
-        IO::print(file,"ii: Starting new equipotential lightning discharge simulation\n");
         
+        if(Var::isChannelEquipotential){
+            IO::print(file,"ii: Starting new equipotential leader discharge simulation\n");
+        }else{
+            IO::print(file,"ii: Starting new non-equipotential streamer discharge simulation\n");
+        }
+
+        /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */
+        /*
         IO::print(file, "..: Reading grid size (N).\n");
         Var::N.init(41,41,71);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
@@ -109,61 +112,85 @@ int main()
         IO::print(file, "..: altitude successfully read\n");
         ListDouble ng =IO::read((char*)("EPIC/ng.dat"));
         IO::print(file, "..: density successfully read\n");
-        IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
-        Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1);
-        Var::Ec.init(.1e+5,.1e+5,-.1e+5, Var::z_gnd,Var::d,Var::N,1);
-        Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1);
-        */
 
-        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM FILES */ 
-        ListDouble alt=IO::read((char*)("EPIC/Mars_z.dat"));
+        IO::print(file, "..: Assigning critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
+        Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
+        if(Var::isChannelEquipotential){
+            Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1); // No voltage drop for equipotential leader runs
+        }else{
+            Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for streamer runs
+        }
+        */ 
+        /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
+
+        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
+        /**/
+        cout<<"ii: Reading in files from atmos-models directory..."<<endl;
+
+        CMatrix1D M;
+        IO::print(file, "..: Reading grid size (N).\n");
+        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Nxyz.dat");
+        Var::N.x = M[0];
+        Var::N.y = M[1];
+        Var::N.z = M[2];
+        IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
+        InitMatrices(Var::N);
+
+        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
+
+        IO::print(file, "..: Reading grid resolution (d)\n");
+        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Dxyz.dat");
+        Var::L.init((Var::N.x-1)*M[0],(Var::N.y-1)*M[1],(Var::N.z-1)*M[2]);
+        Var::d.init(Var::L,Var::N);
+        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
+        
+        IO::print(file, "..: Calculating domain size (L)\n");
+        Var::L.init((Var::N.x-1)*Var::d.x,(Var::N.y-1)*Var::d.y,(Var::N.z-1)*Var::d.z);
+        IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
+        
+        ListDouble alt=IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_z.dat" ));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("EPIC/Mars_ng.dat"));
+        ListDouble ng =IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_ng.dat"));
         IO::print(file, "..: density successfully read\n");
 
-        ListDouble::iterator alt_tracker = alt.begin();
         IO::print(file, "..: Reading ground altitude (z_gnd)\n");
+        ListDouble::iterator alt_tracker = alt.begin();
         Var::z_gnd   = *alt_tracker;
         advance(alt_tracker,(alt.size()-1));
         IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
 
-        IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(61,61,alt.size());
-        IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
-
-        IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(3e+3,3e+3,(*alt_tracker-Var::z_gnd));
-        IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
-
-        IO::print(file, "..: Reading grid resolution (d)\n");
-        Var::d.init(Var::L,Var::N);
-        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-        InitMatrices(Var::N);
-
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,		(char*)("../EPIC/Mars_E_initiation_Vm.dat"));
-        IO::print(file, "..: initiation successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../EPIC/Mars_Eth_positive_Vm.dat"));
-        IO::print(file, "..: positive successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../EPIC/Mars_Eth_negative_Vm.dat"));
-        IO::print(file, "..: negative successfully read\n");
+        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_E_initiation_Vm.dat"));
+        IO::print(file, "..: initiation threshold successfully read\n");
+        IO::read(Var::Ec.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_positive_Vm.dat"));
+        IO::print(file, "..: positive propagation threshold successfully read\n");
+        IO::read(Var::Ec.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_negative_Vm.dat"));
+        IO::print(file, "..: negative propagation threshold successfully read\n");
+        /**/
+        /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
-        Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N,1,  alt,  ng);							// _V/m Voltage drop in positive, negative channels
-        IO::print(file, "..: voltage drop successfully read\n");
-        IO::print(file, "..: Critical fields read (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-
-        Var::z_shift = Var::z_gnd;                                                      // _m Vertical displacement of the cloud
-        Var::y_shift = 0e3;                                                             // _m Horizontal influence of a windshear
-        //    We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
-        IO::print(file, "..: Reading initiation point (InitPoint)\n");
-        Var::InitX    = Var::L.x/2;
-        Var::InitY    = Var::L.y/2;
-        Var::InitZ    = 0.55e3+Var::z_gnd;
-        Var::InitR    = 0e3;
-        Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
-        // Initiation point with coordinates expressed as i,j,k and not x,y,z
-        IO::print(file, "ii: Discharge initiated at: [" + to_string(Var::InitX/1e3) + " " + to_string(Var::InitY/1e3) + " " + to_string(Var::InitZ/1e3) + "] km; Radius of init. region: " + to_string(Var::InitR/1e3) + "km\n");
+        // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
+        if(Var::isChannelEquipotential){
+            Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for equipotential leader runs
+        }else{
+            IO::read(Var::Vd.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_positive_Vm.dat"));
+            IO::print(file, "..: positive voltage drop successfully read\n");
+            IO::read(Var::Vd.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_negative_Vm.dat"));
+            IO::print(file, "..: negative voltage drop successfully read\n");// Assigned voltage drop for streamer runs
+        }
+        
+        // Checks whether the initiation point is preset
+        if(Var::InitiationType == AT_PREDEF_POS){ // Will need to alter values based on desired initiation point:
+            Var::InitX	= Var::L.x/2;													// X-coordinate of initiation point (in meters)
+            Var::InitY	= Var::L.y/2;													// Y-coordinate of initiation point (in meters)
+            Var::InitZ	= 93.0e3;                                                       // Z-coordinate of initiation point (in meters)
+            Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
+        }else{ // Arbitrarily defined, no changes needed
+            Var::InitX	= Var::L.x/2;													// Center of x-domain
+            Var::InitY	= Var::L.y/2;													// Center of y-domain
+            Var::InitZ	= Var::L.z/2;                                                   // Center of z-domain
+            Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
+        }
     } else {
         file = IO::openFile((char *)"summary.txt", "a");
         IO::print(file,"ii: Resuming previous discharge simulation\n");
@@ -171,13 +198,13 @@ int main()
         IO::print(file, "..: Reading grid size (N).\n");
         IO::read(Var::N,(char *)"Nxyz.dat");
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
-        
-        InitMatrices(Var::N);
-        
+         
         IO::print(file, "..: Reading grid resolution (d)\n");
         IO::read(Var::d,(char *)"dxyz.dat");
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-        
+        InitMatrices(Var::N);
+       
+
         IO::print(file, "..: Calculating domain size (L)\n");
         Var::L.init((Var::N.x-1)*Var::d.x,(Var::N.y-1)*Var::d.y,(Var::N.z-1)*Var::d.z);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
@@ -316,17 +343,16 @@ int main()
     if(Var::isNewRun){
         if (Var::LoadingType == SET_CHARGES) {
             IO::print(file, "..: Setting charge layers\n");
-            // Q (C) Charge content; Xq,Yq,Zq (m) Charge center coordinate; R,H (m) Size of the charge center //
-            /* UPPER VENUSIAN CLOUD REGION, 53-70 km */
-            Var::Q =    -0.024;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 0.8e+3+Var::z_shift; Var::Rq1 = 0.5e+3;	Var::Rq3 = 0.4e+3;
+            // Q (Coulombs) Charge content; Xq,Yq,Zq (meters) Charge center coordinate; R,H (meters) Size of the charge center //
+            /* Example of a cylindrical +20 Coulomb charge layer, centered in the xy-plane between altitudes of 54-70 km */
+            Var::Q =    20;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 62e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 16e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
-            /* MIDDLE VENUSIAN CLOUD REGION, 49-52 km */
-            Var::Q =    0.006;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 0.2e+3+Var::z_shift; Var::Rq1 = 0.4e+3;	Var::Rq3 = 0.5e+3;
+            /* Example of a secondary cylindrical -15 Coulomb charge layer, centered in the xy-plane between altitudes of 45-51 km */
+            Var::Q =    -15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 48e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 6e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
-            
             
             /* ALTERNATIVE CHARGE LAYER SHAPES */
             //Var::C.ellipsoid(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3, Var::d,Var::N);
@@ -385,71 +411,11 @@ int main()
             
             IO::print(file, "++: Finished setting potential!\n");
         } else if(Var::LoadingType == FROM_FILE) {
-            cout<<"ii: EPIC"<<endl;
-
-            CMatrix1D M;
-
-            Var::C.init((char*)"EPIC/rhoAmb.dat", Var::N);
+            IO::print(file, "..: Loading charge layers\n");
+            Var::C.init((char*)"atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_rhoAmb.dat",Var::N);
             Var::ChargeCfg.push_back(Var::C);
             Var::phiNum.init(Var::N.z);                                                    // _V    Total electric potential on a vertical axis in the center of simulation domain
             Var::EzNum.init(Var::N.z);
-            IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
- 
-            IO::print(file, "..: Reading grid resolution (d)\n");
-            IO::read(M,(char*)"../EPIC/Dxyz.dat");
-            Var::d.x = M[0];
-            Var::d.y = M[1];
-            Var::d.z = M[2];
-            IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-            
-            IO::print(file, "..: Reading ground altitude (z_gnd)\n");
-            IO::read(M,(char*)"../EPIC/z_gnd.dat");
-            Var::z_gnd = M[0];
-            IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
-            
-            IO::print(file, "..: Calculating domain size (L)\n");
-            Var::L.init((Var::N.x-1)*Var::d.x,(Var::N.y-1)*Var::d.y,(Var::N.z-1)*Var::d.z);
-            IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
-            
-            //		for(int ii=0; ii<Var::N.x ; ii++) for(int jj=0; jj<Var::N.y ; jj++) for(int kk=0; kk<Var::N.z ; kk++)
-            //			Var::C.rho[ii][jj][kk] *= 1e9;
-
-            //Var::L.init(Var::N.x*Var::d.x,	Var::N.y*Var::d.y,	Var::L.z);				// _m	Size of the simulation domain
-            
-            ListDouble alt=IO::read((char*)("EPIC/z.dat" ));
-            ListDouble ng =IO::read((char*)("EPIC/ng.dat"));
-
-            
-            //	We assume that the first link is somehow established, then only the propagation threshold needs to be exceeded to develop the flash.
-            Var::Ec.init(9.510503e5,9.510503e5,-9.510503e5, Var::z_gnd,Var::d,Var::N,1,  alt,  ng);			// _V/m Initiation-, Positive channel propagation-, Negative channel propagation-threshold
-            Var::Vd.init(0e+5,-0e+5, Var::z_gnd,Var::d,Var::N,1,  alt,  ng);							// _V/m Voltage drop in positive, negative channels
-
-            Var::InitX	= Var::L.x/2;													// _m X-coordinate of initiation point
-            Var::InitY	= Var::L.y/2;													// _m Y-coordinate of initiation point
-            Var::InitZ	= 9.25e3;														// _m Z-coordinate of initiation point
-            
-            Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
-            // Initiation point with coordinates expressed as i,j,k and not x,y,z
-            /*
-             IO::write(Var::C.rho, "rho.dat");
-             IO::write(Var::z_gnd, "z_gnd.dat");
-             IO::write(Var::d.x, Var::d.y, Var::d.z, "dxyz.dat");
-             IO::write(Var::N.x, Var::N.y, Var::N.z, "Nxyz.dat");
-             
-             CMatrix1D rrho3D(Var::N.x*Var::N.y*Var::N.z);
-             int nn = 0;
-             for(int kk=0 ; kk<Var::N.z ; kk++) for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
-             {
-             rrho3D[nn]		= Var::C.rho[ii][jj][kk]*1e9; //_nC
-             nn++;
-             };
-             IO::write(rrho3D,"rho3d0.dat");
-             */
-            // Endof Charge center parameters //
-            
-            
-            IO::print(file, "..: Loading charge layers\n");
-            
             Var::C.reset(Var::d,Var::N);
             
             printf("ii:\t Charge layers are as follows:\n");
