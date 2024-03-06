@@ -38,9 +38,10 @@ cd ../results
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
 load('InitPoint.dat',        '-ascii');
-rho.data = load('rhoAmb.dat',           '-ascii');
-Links.ID = load('EstablishedLinks.dat', '-ascii');
-gnd.alt  = load('z_gnd.dat',            '-ascii');
+rho.data  = load('rhoAmb.dat',           '-ascii');
+Links.ID  = load('EstablishedLinks.dat', '-ascii');
+gnd.alt   = load('z_gnd.dat',            '-ascii');
+stepsaves = abs(load('step3d.dat',       '-ascii'));
 
 if isempty(Links.ID)
     fprintf('\n*** LightningVisual.m cannot be executed with current EstablishedLinks.dat file. ***\n');
@@ -172,7 +173,7 @@ for ii=1:Links.Nb
     %     if(rem(ii,10)==0)
     %         %         pause;
     %     end
-    if mod((ii-1),100) == 0
+    if mod((ii-1),stepsaves) == 0
         if ii == 1
             plottingChargeRegions('white',0.25,rho,X,Y,Z);
             pause
