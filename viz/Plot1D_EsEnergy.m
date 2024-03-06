@@ -21,7 +21,7 @@ end
 
 cd ../results/
 Es = load('EsEnergy.dat')*1e-9;
-if isempty(Es) || (0:size(Es)-1)' == 0
+if isempty(Es) || size(Es,1)-1 == 0
     fprintf('\n*** Plot1D_EsEnergy.m cannot be executed with current EsEnergy.dat file. ***\n');
     cd ../viz
     return
@@ -30,7 +30,7 @@ else
 end
 cd ../viz
 %DischargeDipoleMoment
-step = (0:size(Es)-1)';
+step = (0:size(Es,1)-1)';
 
 set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
 

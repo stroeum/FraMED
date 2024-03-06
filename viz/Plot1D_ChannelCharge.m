@@ -28,7 +28,7 @@ if isempty(Q) || (size(Q,1)-1) == 0
 else
     fprintf('\n*** Executing Plot1D_ChannelCharge.m script. ***\n');
 end
-step = (0:size(Q)-1)';
+step = (0:size(Q,1)-1)';
 
 set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
 
