@@ -227,20 +227,19 @@ end
 
 %-------------------------------------------------------------------------%
 function [AA] = ConvertTo3d(A,B)
-Nx = B(1);
-Ny = B(2);
-Nz = B(3);
-AA = zeros(Nx,Ny,Nz);
-size(AA)
-m = 1;
-for k=1:Nz
-    for i=1:Nx
-        for j=1:Ny
-            AA(i,j,k) = A(m);
-            m = m + 1;
+    [M, N] = size(A);
+    AA = zeros(B');
+    for m=1:M
+        for n=1:N
+            ii = rem(m,B(1));
+            if(ii==0)
+                ii = B(1);
+            end
+            jj = n;
+            kk = (m-ii)/B(1)+1;
+            AA(ii,jj,kk) = A(m,n);
         end
     end
-end
 end
 
 
