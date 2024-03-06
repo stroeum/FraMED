@@ -6,9 +6,9 @@ function [] = Plot2D_FieldLines(num,sims)
         prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
         sims.objectType = input(prompt2,'s');
         while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-        sims.objectType = input(prompt2,'s');
-    end
+            fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+            sims.objectType = input(prompt2,'s');
+        end
     
         % Settings to ensure proper directory referencing:
         sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
@@ -21,7 +21,7 @@ function [] = Plot2D_FieldLines(num,sims)
     dxyz         = load('dxyz.dat');
     Nxyz         = load('Nxyz.dat');
     
-    if num=='~'
+    if ~exist('num','var') || num=='~'
         Ex2D         = load('Ex2d.dat');
         Ey2D         = load('Ey2d.dat');
         Ez2D         = load('Ez2d.dat');
