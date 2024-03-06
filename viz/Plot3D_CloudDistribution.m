@@ -61,7 +61,7 @@ if strcmp(saveAfter,'Y')
         fprintf(['\t*** File ''',iterationFile,''' does not exist in the ''results'' directory. Please try again. ***\n']);
         iterationFile = input(prompt_fileNum,'s');
     end
-    rho.data = load(interationFile,'-ascii'); % After discharge
+    rho.data = load(['../results/',iterationFile],'-ascii'); % After discharge
 else
     fprintf('\tUsing charge layer data from before discharge occurs.\n');
     rho.data = load('rhoAmb.dat','-ascii'); % Before discharge
@@ -114,7 +114,6 @@ if strcmp(is.Grounded,'G')
     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
 end
 axis equal
-view([33,5]) 
 
 % Sets bounds for the axes (comment out if clouds get cut off):
 %axis([0 L.x 0 L.y 15000 55000]*1e-3)                % Cropped view
