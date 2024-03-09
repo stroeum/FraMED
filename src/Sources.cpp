@@ -31,25 +31,27 @@ bool Charge::init(char * filename, SizeGrid& _N)
 	Un.init(_N.x,_N.y,_N.z);
 	rho.init(_N.x,_N.y,_N.z);
 
+	/* // Removed since we are provided the dimenions N
 	_N.x = 0;	_N.y = 0;	_N.z = 0;
 	while((tmp_c=fgetc(file)) != EOF)
 	{
 		if(tmp_c == ' ')
-			_N.z++;
+			_N.y++;
 		if(tmp_c == '\n')
 		{
-			_N.y++;
+			_N.x++;
 			tmp_cc = fgetc(file);
 			if(tmp_cc == '\n' && tmp_cc !=EOF)
-				_N.x++;
+				_N.z++;
 		}
 	}
+	_N.z  = _N.x/_N.z;
 	_N.x  = _N.y/_N.x;
-	_N.y  = _N.z/_N.y;
-	_N.z /= _N.x*_N.y;
+	_N.y /= _N.z*_N.x;
     cout<<_N.x<<" "<<_N.y<<" "<<_N.z<<endl;
 
 	rewind(file);
+	*/
 	rho.init(_N.x,_N.y,_N.z);
 	Un.init(_N.x,_N.y,_N.z);
 	int ii(0),jj(0),kk(0);

@@ -49,6 +49,7 @@ x = (0:Nx-1)'*dx;       % _m
 y = (0:Ny-1)'*dy;       % _m
 z = (0:Nz-1)'*dz+z_gnd; % _m
 clear dxyz
+cd ../viz/
 
 %% Convert
 ExAF3D  = ConvertTo3d(ExAF3D,Nxyz);
@@ -103,20 +104,3 @@ for nn=1:3
 end
 exportgraphics(gcf,[sims.pathPNGs,'/FieldSpaceEvolution_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
 clear mm nn pp ii jj kk
-cd ../viz/
-
-function [AA] = ConvertTo3d(A,B)
-    [M, N] = size(A);
-    AA = zeros(B');
-    for m=1:M
-        for n=1:N
-            ii = rem(m,B(1));
-            if(ii==0)
-                ii = B(1);
-            end
-            jj = n;
-            kk = (m-ii)/B(1)+1;
-            AA(ii,jj,kk) = A(m,n);
-        end
-    end
-end

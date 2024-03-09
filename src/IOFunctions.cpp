@@ -101,59 +101,54 @@ SizeGrid IO::read(CMatrix3D & M, char * ffile)
     fp = openFile(ffile, "r");
     char	tmp_c, tmp_cc;
     string	tmp_s;
+    double tmp_d;
     SizeGrid N;
     
     N.x = 0;	N.y = 0;	N.z = 0;
     while((tmp_c=fgetc(fp)) != EOF)
-    {
-        if(tmp_c == ' ')
-            N.z++;
-        if(tmp_c == '\n')
-        {
-            N.y++;
-            tmp_cc = fgetc(fp);
-            if(tmp_cc == '\n' && tmp_cc !=EOF)
-                N.x++;
-        }
-    }
-    N.x  = N.y/N.x;
-    N.y  = N.z/N.y;
-    N.z /= N.x*N.y;
-    M.init(N.x,N.y,N.z);
+	{
+		if(tmp_c == ' ')
+			N.y++;
+		if(tmp_c == '\n')
+		{
+			N.x++;
+			tmp_cc = fgetc(fp);
+			if(tmp_cc == '\n' && tmp_cc !=EOF)
+				N.z++;
+		}
+	}
+	N.z  = N.x/N.z;
+	N.x  = N.y/N.x;
+	N.y /= N.z*N.x;
+    cout<<N.x<<" "<<N.y<<" "<<N.z<<endl;
     
     rewind(fp);
     
     int ii(0),jj(0),kk(0);
 
-    char *  line        = NULL;
-    size_t  line_length = 0;
-    ssize_t nread;
-    fp = openFile(ffile, "r");
-    int nn(0);
-    
-    if(fp){
-        kk = 0;
-        ii = -1;
-        while ((nread = getline(&line, &line_length, fp)) != -1) {
-            if(nread > 1) {
-                ii++;
-            }
-            if(nread == 1) {
-                kk++;
-                ii=-1;
-            }
-            istringstream iss(line);
-            string word;
-            
-            while(iss >> word) {
-                nn++;
-                M[ii][jj][kk] = atof(word.c_str());
-                jj++;
-            }
-            jj=0;
-        }
-    }
-    free(line);
+    while((tmp_c=fgetc(fp)) != EOF)
+	{
+		tmp_s += tmp_c;
+		if(tmp_c == ' ')
+		{
+			tmp_d = atof(tmp_s.c_str());
+			M[ii][jj][kk] = tmp_d*1e-9;
+			jj++;
+			tmp_s = "";
+		}
+		if(tmp_c == '\n')
+		{
+			ii++;
+			jj=0;
+			tmp_cc = fgetc(fp);
+			if(tmp_cc == '\n' && tmp_cc !=EOF)
+			{
+				ii=0;
+				jj=0;
+				kk++;
+			}
+		}
+	}
     fclose(fp);
     return N;
 }

@@ -1,6 +1,6 @@
 % Initiate
 close all
-clearvars -except sims
+clearvars -except sims is
 clf
 
 % For formatting exported image size:
@@ -100,11 +100,11 @@ S.i = round(S.x/d.x);
 S.j = round(S.y/d.y);
 S.k = round(S.z/d.z);
 
-rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
-
 clear dxyz
 clear InitPoint
 cd ../viz
+
+rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
 
 % Linear spaces for the three position dimensions:
 x = ((0:(N.x-1))*d.x)*1e-3;
@@ -276,20 +276,4 @@ if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
     cd(currentFolder);
 else
     exportgraphics(gcf,[sims.pathPNGs,'/Lightning_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',600);
-end
-    
-function [AA] = ConvertTo3d(A,B)
-    [M, N] = size(A);
-    AA = zeros(B');
-    for m=1:M
-        for n=1:N
-            ii = rem(m,B(1));
-            if(ii==0)
-                ii = B(1);
-            end
-            jj = n;
-            kk = (m-ii)/B(1)+1;
-            AA(ii,jj,kk) = A(m,n);
-        end
-    end
 end

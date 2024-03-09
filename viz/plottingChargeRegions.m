@@ -77,9 +77,9 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
             if included == 1
                 %fprintf(['\n\n***included == 1***\nuniqueRhos(j) = ',num2str(uniqueRhos(j)),'\ntrueUniqueRhos(location) = ',num2str(trueUniqueRhos(location)),'\nuniqueRhos(location) = ',num2str(uniqueRhos(location))]);
                 if trueUniqueRhos(location)>0
-                    p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-trueUniqueRhos(location)));
+                    p1 = patch(isosurface(Xval,Yval,Zval,-1*pagetranspose(rhoData.data),-trueUniqueRhos(location)));
                 else
-                    p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,trueUniqueRhos(location)));
+                    p1 = patch(isosurface(Xval,Yval,Zval,pagetranspose(rhoData.data),trueUniqueRhos(location)));
                 end
                 if length(trueUniqueRhos)>3
                     if colorIndices(j) <= (middle+midRange) && colorIndices(j) >= (middle-midRange)
@@ -89,24 +89,24 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                     end
                     if uniqueRhos(location) == max_rho_value && min_rho_value > 0
                         set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \leq \rho \leq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
-                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                         drawnow
                     elseif uniqueRhos(location) == min_rho_value && max_rho_value < 0
                         set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \geq \rho \geq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
-                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                         drawnow
                     else
                         set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','off');
-                        isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                        isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                         drawnow
                     end
                 else
                     set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
-                    isonormals(Xval,Yval,Zval,rhoData.data,p1);
+                    isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                     drawnow
                 end
             else
-                %patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(j)),'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',alphaValue,'HandleVisibility','off'); % set the color, mesh and transparency level of the surface
+                %patch(isosurface(Xval,Yval,Zval,pagetranspose(rhoData.data),uniqueRhos(j)),'FaceColor',colorVertices(j,:),'EdgeColor',colorVertices(j,:),'FaceAlpha',alphaValue,'HandleVisibility','off'); % set the color, mesh and transparency level of the surface
             end
         end
     end
