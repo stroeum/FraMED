@@ -31,6 +31,10 @@ if ~exist(sims.pathVideos, 'dir')
     mkdir(sims.pathVideos)
 end
 
+%% Runtime Results
+Plot1D_RuntimeResults;
+exportgraphics(gcf,[sims.pathEPSs,'/RuntimeResults.eps'],'BackgroundColor','white');
+
 %% Charge Transfer
 Plot1D_ChannelCharge;
 exportgraphics(gcf,[sims.pathEPSs,'/ChargeTransfer.eps'],'BackgroundColor','white');
