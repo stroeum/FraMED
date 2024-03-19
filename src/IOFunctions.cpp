@@ -13,7 +13,7 @@ void IO::read(int& nn, char * fname)
     fp = openFile(fname, "r");
     double _d(0);
     if(fp) fscanf(fp,"%lf\n", &_d);
-    nn=(int)_d;
+    nn=fabs((int)_d);
     fclose(fp);
 }
 
