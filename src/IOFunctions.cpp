@@ -131,7 +131,7 @@ SizeGrid IO::read(CMatrix3D & M, char * ffile)
 		if(tmp_c == ' ')
 		{
 			tmp_d = atof(tmp_s.c_str());
-			M[ii][jj][kk] = tmp_d*1e-9;
+			M[ii][jj][kk] = tmp_d;
 			jj++;
 			tmp_s = "";
 		}
