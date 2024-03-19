@@ -117,8 +117,7 @@ SizeGrid IO::read(CMatrix3D & M, char * ffile)
 				N.z++;
 		}
 	}
-	N.z  = N.x/N.z;
-	N.x  = N.y/N.x;
+	N.x  = N.x/N.z;
 	N.y /= N.z*N.x;
     cout<<N.x<<" "<<N.y<<" "<<N.z<<endl;
     
