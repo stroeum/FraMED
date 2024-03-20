@@ -79,50 +79,50 @@ links.array = (1:1:links.tracker)';
 clf
 tiledlayout(2,2, 'Padding', 'tight', 'TileSpacing', 'compact','Position',[0 0 800 600], 'PositionConstraint','outerposition'); 
 
-% Plot number of candidates:
+% Plot number of candidates (row 1, column 1):
 nexttile
 hold on
 plot(links.array,Candidates.values);
 set(gca,'FontSize',10,'XLim',[0 links.tracker],'YLim',[0 (max(Candidates.values))],'TickLabelInterpreter','latex');
 xlabel('Step number','Interpreter','latex','FontSize',16);
 ylabel('Number of candidate nodes','Interpreter','latex','FontSize',16);
-legend(['Minimum candidates: ',num2str(Candidates.min),' nodes (step ',num2str(Candidates.minIndex),')',newline,'Maximum candidates: ',num2str(Candidates.max),' nodes (step ',num2str(Candidates.maxIndex),')'],'Interpreter','latex','location','best')
+legend(['Minimum candidates: ',num2str(Candidates.min),' nodes (step ',num2str(Candidates.minIndex),')',newline,'Maximum candidates: ',num2str(Candidates.max),' nodes (step ',num2str(Candidates.maxIndex),')'],'Interpreter','latex','location','best', 'box','off','FontSize',10)
 box on
 hold off
 
-% Plot candidate overreach percentages:
+% Plot candidate overreach percentages (row 1, column 2):
 nexttile
 hold on
 plot(links.array,Overreach.values);
 set(gca,'FontSize',10,'XLim',[0 links.tracker],'YLim',[0 (max(Overreach.values))],'TickLabelInterpreter','latex','YAxisLocation','right');
 xlabel('Step number','Interpreter','latex','FontSize',16);
 ylabel('Maximum candidate overreach (\%)','Interpreter','latex','FontSize',16);
-legend(['Minimum overreach: ',num2str(Overreach.min,'%f'),'\% (step ',num2str(Overreach.minIndex),')',newline,'Maximum overreach: ',num2str(Overreach.max,'%f'),'\% (step ',num2str(Overreach.maxIndex),')'],'Interpreter','latex','location','best')
+legend(['Minimum overreach: ',num2str(Overreach.min,'%f'),'\% (step ',num2str(Overreach.minIndex),')',newline,'Maximum overreach: ',num2str(Overreach.max,'%f'),'\% (step ',num2str(Overreach.maxIndex),')'],'Interpreter','latex','location','best', 'box','off','FontSize',10)
 box on
 hold off
 
-% Plot runtime for addition of new link:
+% Plot runtime for addition of new link (row 2, column 1):
 nexttile
 hold on
 plot(links.array,LinkRuntime.values);
 set(gca,'FontSize',10,'XLim',[0 links.tracker],'YLim',[0 (max(LinkRuntime.values))],'TickLabelInterpreter','latex','XAxisLocation','top');
 ylabel('Runtime for link addition (s)','Interpreter','latex','FontSize',16);
-legend(sprintf(['Minimum link runtime: ',num2str(LinkRuntime.min,'%f'),' seconds (step ',num2str(LinkRuntime.minIndex),')',newline,'Maximum link runtime: ',num2str(LinkRuntime.max,'%f'),' seconds (step ',num2str(LinkRuntime.maxIndex),')']),'Interpreter','latex','location','best')
+legend(sprintf(['Minimum link runtime: ',num2str(LinkRuntime.min,'%f'),' seconds (step ',num2str(LinkRuntime.minIndex),')',newline,'Maximum link runtime: ',num2str(LinkRuntime.max,'%f'),' seconds (step ',num2str(LinkRuntime.maxIndex),')']),'Interpreter','latex','location','best', 'box','off','FontSize',10)
 box on
 hold off
 
-% Plot runtime for Q_minimization:
+% Plot runtime for Q_minimization (row 2, column 2):
 nexttile
 hold on
 plot(links.array,QMinimization.values);
 set(gca,'FontSize',10,'XLim',[0 links.tracker],'YLim',[0 (max(QMinimization.values))],'TickLabelInterpreter','latex','YAxisLocation','right','XAxisLocation','top');
 ylabel('Runtime for $Q_\mathrm{minimization}$ (s)','Interpreter','latex','FontSize',16);
-legend(['Minimum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.min,'%f'),' seconds (step ',num2str(QMinimization.minIndex),')',newline,'Maximum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.max,'%f'),' seconds (step ',num2str(QMinimization.maxIndex),')'],'Interpreter','latex','location','best')
+legend(['Minimum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.min,'%f'),' seconds (step ',num2str(QMinimization.minIndex),')',newline,'Maximum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.max,'%f'),' seconds (step ',num2str(QMinimization.maxIndex),')'],'Interpreter','latex','location','best', 'box','off','FontSize',10)
 box on
 hold off
 
 % Format title:
-sgtitle(['(',sims.objectName,'): ',sims.objectType,' discharge runtime results'],'Interpreter','latex','FontSize',24);
+sgtitle(['(',sims.objectName,'): ',sims.objectType,' discharge runtime results over ',num2str(links.tracker),' steps'],'Interpreter','latex','FontSize',24);
 set(gcf,'Position',[0,0,800,600]);
 set(gcf,'Resize','off');
 
