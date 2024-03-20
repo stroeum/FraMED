@@ -115,6 +115,12 @@ clear dxyz
 clear InitPoint
 cd ../viz
 
+positionWidth = 1000;
+positionHeight = round((positionWidth/4.5)*(((max(z)/max(x))+(max(z)/max(y)))/2),-1);
+if positionHeight < 1000
+    positionWidth = round((1000*positionWidth/positionHeight),-1);
+    positionHeight = 1000;
+end
 rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
 
 [X,Y,Z] = meshgrid(x,y,z);
@@ -148,6 +154,8 @@ end
 % Draw the tree
 subplot(1,3,2)
 hold on;
+set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+set(gcf,'Resize','off');
 grid on;
 
 % Plots the cloud structure with the defined function below:
@@ -166,15 +174,9 @@ end
 hold off
         
 % Initialize distance traveled for lightning links:
-positionWidth = 1000;
-positionHeight = round(positionWidth/((1+(sqrt(2)/2))*(max(x)+max(y))/max(z)),-1);
 distance = 0;
 % For-loop to plot lightning discharge links:
 for ii=1:Links.Nb
-    if ii > 1
-        return
-    end
-    
     if mod((ii-1),stepsaves) == 0
         % Determines the 2D electric field values for the step:
         E = consolidateEfield((ii-1),vals,Nxyz);
@@ -348,6 +350,8 @@ for ii=1:Links.Nb
         exportgraphics(gcf,[sims.pathPNGs,'/LightningFields_',num2str(ii-1),'_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',600);
     end
     if(strcmp(is.Rec,'Y') == 1)
+        set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+        set(gcf,'Resize','off');
         frame = getframe(gcf);
         writeVideo(Movie,frame);
     end
@@ -359,6 +363,8 @@ fprintf(['\n\t',sims.objectType,' has propagated a total of ',num2str(distance,'
 hold off;
 % Record the movie
 if (strcmp(is.Rec,'Y') == 1)
+    set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+    set(gcf,'Resize','off');
     frame = getframe(gcf);
     writeVideo(Movie,frame);
     close(Movie);
