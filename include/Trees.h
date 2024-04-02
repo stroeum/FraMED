@@ -33,7 +33,7 @@ public:
 						   CriticalFields& Ec, VoltageDrops& Vd,
 						   const Point& InitiationPoint, ListLink& EstablishedLinks,
 						   bool isBndXingPossible, bool isRsDeveloped,
-						   bool isLinkXingPossible, bool isChannelEquipotential);
+						   bool isLinkXingPossible, bool isQMinimized);
 
 	/******************************************************************************/
 

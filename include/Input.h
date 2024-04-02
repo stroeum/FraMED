@@ -87,14 +87,15 @@ public:
 	static	bool					AddNew;											// Channel is allowed to propagate: Y/N
 	static	bool					isBCerrorCalculated;							// Error at the boundary is calculated at each step: Y/N
 	static	bool					isBndXingPossible;								// Channel is allowed to cross boundaries: Y/N
-	static	bool					isChannelEquipotential;							// Channel potential is adapted to ensure charge neutrality: Y/N
+	static	bool					isQMinimized;							        // Channel potential is adapted to ensure charge neutrality: Y/N
 	static	bool					isEsEnergyCalculated;							// Electrostatic energy is calculated: Y/N
 	static	bool					isFlashAccoutedInBC;							// Channel charge is accounted for in derivation of BC: Y/N
 	static	bool					isInitiationPossible;							// Initiation is possible in the simulation domain after charge load: Y/N
 	static	bool					isLinkXingPossible;								// Channels crosses are allowed: Y/N
 	static	bool					isRsDeveloped;									// Return stroke development: Y/N
     static  bool                    isNewRun;                                       // Check if the run is a new run or a resumed simulation
-    
+    static	bool					isVoltageDropped;							    // Is there a voltage drop to account for: Y/N
+
 	static	Charge					C;												// Charge center
     static  Potential               V;                                              // Potential
 	static	SorSolution				SOR;											// Parameters of SOR algorithms

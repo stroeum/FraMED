@@ -42,14 +42,15 @@ int main()
     // = 0 3-D values never calculated
     Var::AddNew					= true;                                             // Channel is allowed to propagate: Y/N
     Var::isBndXingPossible		= false;                                            // Channel is allowed to cross boundaries: Y/N
-    Var::isChannelEquipotential	= true;                                             // Channel potential ensure charges neutrality: Y/N
+    Var::isQMinimized	        = true;                                             // Channel potential ensure charges neutrality: Y/N
     Var::isFlashAccoutedInBC 	= false;                                            // Channel charge is accounted for in  BC: Y/N
-    Var::isInitiationPossible	= true;                                            // Init. possible in domain after charge load: Y/N
+    Var::isInitiationPossible	= true;                                             // Init. possible in domain after charge load: Y/N
     Var::isLinkXingPossible		= false;                                            // Channels crosses are allowed: Y/N
     Var::isRsDeveloped			= true;                                             // Return stroke development: Y/N
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
-    Var::isEsEnergyCalculated	= true;                                            // Electrostatic energy calculated at each step: Y/N
-    Var::isBCerrorCalculated	= true;                                            // Error at boundary is calculated at each step: Y/N
+    Var::isEsEnergyCalculated	= true;                                             // Electrostatic energy calculated at each step: Y/N
+    Var::isBCerrorCalculated	= true;                                             // Error at boundary is calculated at each step: Y/N
+    Var::isVoltageDropped       = true;                                             // Is there a voltage drop (i.e. streamer case): Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
     
@@ -79,10 +80,10 @@ int main()
     if(Var::isNewRun) {
         file = IO::openFile((char *)"summary.txt", "w");
         
-        if(Var::isChannelEquipotential){
-            IO::print(file,"ii: Starting new equipotential leader discharge simulation\n");
+        if(Var::isVoltageDropped){
+            IO::print(file,"ii: Starting new streamer discharge simulation\n");
         }else{
-            IO::print(file,"ii: Starting new non-equipotential streamer discharge simulation\n");
+            IO::print(file,"ii: Starting new leader discharge simulation\n");
         }
 
         /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */
@@ -115,10 +116,10 @@ int main()
 
         IO::print(file, "..: Assigning critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
         Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
-        if(Var::isChannelEquipotential){
-            Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1); // No voltage drop for equipotential leader runs
-        }else{
+        if(Var::isVoltageDropped){
             Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for streamer runs
+        }else{
+            Var::Vd.init(0.0e+5,-0.0e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for leader runs
         }
         */ 
         /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
@@ -129,7 +130,7 @@ int main()
 
         CMatrix1D M;
         IO::print(file, "..: Reading grid size (N).\n");
-        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Nxyz.dat");
+        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Nxyz.dat");
         Var::N.x = M[0];
         Var::N.y = M[1];
         Var::N.z = M[2];
@@ -139,7 +140,7 @@ int main()
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading grid resolution (d)\n");
-        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Dxyz.dat");
+        IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Dxyz.dat");
         Var::L.init((Var::N.x-1)*M[0],(Var::N.y-1)*M[1],(Var::N.z-1)*M[2]);
         Var::d.init(Var::L,Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
@@ -148,9 +149,9 @@ int main()
         Var::L.init((Var::N.x-1)*Var::d.x,(Var::N.y-1)*Var::d.y,(Var::N.z-1)*Var::d.z);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
         
-        ListDouble alt=IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_z.dat" ));
+        ListDouble alt=IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_z.dat" ));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_ng.dat"));
+        ListDouble ng =IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_ng.dat"));
         IO::print(file, "..: density successfully read\n");
 
         IO::print(file, "..: Reading ground altitude (z_gnd)\n");
@@ -160,30 +161,30 @@ int main()
         IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
 
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_E_initiation_Vm.dat"));
+        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_E_initiation_Vm.dat"));
         IO::print(file, "..: initiation threshold successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_positive_Vm.dat"));
+        IO::read(Var::Ec.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_positive_Vm.dat"));
         IO::print(file, "..: positive propagation threshold successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_negative_Vm.dat"));
+        IO::read(Var::Ec.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative propagation threshold successfully read\n");
         /**/
         /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
         // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
-        if(Var::isChannelEquipotential){
-            Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for equipotential leader runs
-        }else{
-            IO::read(Var::Vd.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_positive_Vm.dat"));
+        if(Var::isVoltageDropped){
+            IO::read(Var::Vd.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_positive_Vm.dat"));
             IO::print(file, "..: positive voltage drop successfully read\n");
-            IO::read(Var::Vd.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_Eth_negative_Vm.dat"));
+            IO::read(Var::Vd.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_negative_Vm.dat"));
             IO::print(file, "..: negative voltage drop successfully read\n");// Assigned voltage drop for streamer runs
+        }else{
+            Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for leader runs
         }
         
         // Checks whether the initiation point is preset
         if(Var::InitiationType == AT_PREDEF_POS){ // Will need to alter values based on desired initiation point:
             Var::InitX	= Var::L.x/2;													// X-coordinate of initiation point (in meters)
             Var::InitY	= Var::L.y/2;													// Y-coordinate of initiation point (in meters)
-            Var::InitZ	= 93.0e3;                                                       // Z-coordinate of initiation point (in meters)
+            Var::InitZ	= 225.0e3;                                                       // Z-coordinate of initiation point (in meters)
             Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         }else{ // Arbitrarily defined, no changes needed
             Var::InitX	= Var::L.x/2;													// Center of x-domain
@@ -412,7 +413,7 @@ int main()
             IO::print(file, "++: Finished setting potential!\n");
         } else if(Var::LoadingType == FROM_FILE) {
             IO::print(file, "..: Loading charge layers\n");
-            Var::C.init((char*)"atmos-models/EPIC/Jupiter/Jet/leader_1xsolar_rhoAmb.dat",Var::N);
+            Var::C.init((char*)"atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_rhoAmb.dat",Var::N);
             Var::ChargeCfg.push_back(Var::C);
             Var::phiNum.init(Var::N.z);                                                    // _V    Total electric potential on a vertical axis in the center of simulation domain
             Var::EzNum.init(Var::N.z);

@@ -63,13 +63,14 @@ bool					Var::isInitiationPrevented;									// Only simulate cloud electrical s
 bool					Var::AddNew;												// Channel is allowed to propagate: Y/N
 bool					Var::isBCerrorCalculated;									// Error at the boundary is calculated at each step: Y/N
 bool					Var::isBndXingPossible;										// Channel is allowed to cross boundaries: Y/N
-bool					Var::isChannelEquipotential;								// Channel potential is adapted to ensure charge neutrality: Y/N
+bool					Var::isQMinimized;								            // Channel potential is adapted to ensure charge neutrality: Y/N
 bool					Var::isEsEnergyCalculated;									// Electrostatic energy is calculated: Y/N
 bool					Var::isFlashAccoutedInBC;									// Channel charge is accounted for in derivation of BC: Y/N
-bool					Var::isInitiationPossible;									// Initiation is possible in the simulation domain after charge load: Y/N
+bool					Var::isInitiationPossible;									// Initiation is possible in the simulation domain aipfter charge load: Y/N
 bool					Var::isLinkXingPossible;									// Channels crosses are allowed: Y/N
 bool					Var::isRsDeveloped;											// Return stroke development: Y/N
 bool                    Var::isNewRun;                                              // Check if the run is a new run or a resumed simulation
+bool                    Var::isVoltageDropped;                                      // Is there a voltage drop to account for?
 
 Charge					Var::C;														// Charge center
 Potential               Var::V;                                                     // Potential center

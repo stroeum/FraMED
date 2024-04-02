@@ -216,7 +216,7 @@ void Tree::Grow(FILE * file, bool AddNew)
     {
         AddNew	= Tree::AddNewLink(file,Var::d,Var::N,Var::Un,Var::phi, Var::Ec,Var::Vd, Var::InitiationPoint,Var::EstablishedLinks,
                                    Var::isBndXingPossible,  Var::isRsDeveloped,
-                                   Var::isLinkXingPossible, Var::isChannelEquipotential);
+                                   Var::isLinkXingPossible, Var::isQMinimized);
         
         /* Check Connection to the ground */
         _isGndConnected = false;
@@ -226,14 +226,14 @@ void Tree::Grow(FILE * file, bool AddNew)
                 _isGndConnected = true;
                 break;
             }
-        if(Var::isChannelEquipotential==false)
+        if(Var::isQMinimized==false)
         {
 			
             BC::Update(Var::isFlashAccoutedInBC,Var::BCtype,Var::phi,Var::rhoAmbMin,Var::rhoAmbMax,Var::d,Var::N);
             Var::SOR.Solve(Var::d,Var::N,Var::Un,Var::phi);
 			Var::phi_cha	= Var::phi-Var::phi_amb;
         };
-        if(Var::isChannelEquipotential==true)
+        if(Var::isQMinimized==true)
         {
             if(_isGndConnected == false)
             {
@@ -340,7 +340,7 @@ void Tree::Grow(FILE * file, bool AddNew)
 		pp = foo::DipoleMoment(Var::QchannelPlus,Var::phi_cha,Var::Un,Var::L,Var::d,Var::N);
 		Var::DischargeDipoleMoment.push_back(pp);
 		Var::CarriedCharge.push_back(Var::QchannelPlus);
-		if(Var::isChannelEquipotential==true){
+		if(Var::isQMinimized==true){
 			Var::EsEnergy.push_back(_EsEnergyTmp);
 			Var::TotalEfield.push_back(_TotalEfieldTmp);
 			Var::TotalPotential.push_back(_TotalPotentialTmp);
@@ -568,7 +568,7 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
 				CriticalFields& EEc, VoltageDrops& VVd,
 				const Point& InitiationPoint, ListLink& EEstablishedLinks,
 				bool iisBndXingPossible,  bool iisRsDeveloped,
-				bool iisLinkXingPossible, bool iisChannelEquipotential)
+				bool iisLinkXingPossible, bool iisQMinimized)
 {
 	clock_t		_StartTime = clock();
 	clock_t		_EndTime;
@@ -905,7 +905,7 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
 	/**********************************************************************************/
 	UUn[_ChosenLink.end.i][_ChosenLink.end.j][_ChosenLink.end.k] =
 		UUn[_ChosenLink.start.i][_ChosenLink.start.j][_ChosenLink.start.k];
-	if (iisChannelEquipotential == true)
+	if (iisQMinimized == true)
 	{
 		// The two following lines are not important since potential is rederived
 		// afterwards to account for potential drop and overall neutrality in command
@@ -914,7 +914,7 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
 //		_phi[_ChosenLink.end.i][_ChosenLink.end.j][_ChosenLink.end.k] =
 //		_phi[_ChosenLink.start.i][_ChosenLink.start.j][_ChosenLink.start.k];
 	}
-	else if (iisChannelEquipotential == false)
+	else if (iisQMinimized == false)
 	{
 		_phi[_ChosenLink.end.i][_ChosenLink.end.j][_ChosenLink.end.k] =
 		_phi[_ChosenLink.start.i][_ChosenLink.start.j][_ChosenLink.start.k] -
