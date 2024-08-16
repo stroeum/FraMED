@@ -119,7 +119,7 @@ int main()
         if(Var::isVoltageDropped){
             Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for streamer runs
         }else{
-            Var::Vd.init(0.0e+5,-0.0e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for leader runs
+            Var::Vd.init(0.0e+5,-0.0e+5, Var::z_gnd,Var::d,Var::N,0); // Assigned voltage drop for leader runs
         }
         */ 
         /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
