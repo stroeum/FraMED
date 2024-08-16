@@ -23,11 +23,9 @@
 		3F492AB32BFE631A0046523F /* SizeGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A182BFE631A0046523F /* SizeGrid.cpp */; };
 		3F492AB42BFE631A0046523F /* SorSolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A192BFE631A0046523F /* SorSolution.cpp */; };
 		3F492AB52BFE631A0046523F /* Sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A1A2BFE631A0046523F /* Sources.cpp */; };
-		3F492AB62BFE631A0046523F /* Swap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A1B2BFE631A0046523F /* Swap.cpp */; };
 		3F492AB72BFE631A0046523F /* Trees.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A1C2BFE631A0046523F /* Trees.cpp */; };
 		3F492AB82BFE631A0046523F /* UsefulFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A1D2BFE631A0046523F /* UsefulFunctions.cpp */; };
 		3F492AB92BFE631A0046523F /* VoltageDrops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F492A1E2BFE631A0046523F /* VoltageDrops.cpp */; };
-		3F492AF82BFE65CE0046523F /* xFraMED in Copy Files */ = {isa = PBXBuildFile; fileRef = 3F4AA8AB2BFE6277001A7372 /* xFraMED */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,7 +35,6 @@
 			dstPath = $SRCROOT;
 			dstSubfolderSpec = 0;
 			files = (
-				3F492AF82BFE65CE0046523F /* xFraMED in Copy Files */,
 			);
 			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,7 +58,6 @@
 		3F492A032BFE631A0046523F /* SizeGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SizeGrid.h; sourceTree = "<group>"; };
 		3F492A042BFE631A0046523F /* SorSolution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SorSolution.h; sourceTree = "<group>"; };
 		3F492A052BFE631A0046523F /* Sources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sources.h; sourceTree = "<group>"; };
-		3F492A062BFE631A0046523F /* Swap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Swap.h; sourceTree = "<group>"; };
 		3F492A072BFE631A0046523F /* Trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Trees.h; sourceTree = "<group>"; };
 		3F492A082BFE631A0046523F /* UsefulFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsefulFunctions.h; sourceTree = "<group>"; };
 		3F492A092BFE631A0046523F /* VoltageDrops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoltageDrops.h; sourceTree = "<group>"; };
@@ -81,7 +77,6 @@
 		3F492A182BFE631A0046523F /* SizeGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SizeGrid.cpp; sourceTree = "<group>"; };
 		3F492A192BFE631A0046523F /* SorSolution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SorSolution.cpp; sourceTree = "<group>"; };
 		3F492A1A2BFE631A0046523F /* Sources.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sources.cpp; sourceTree = "<group>"; };
-		3F492A1B2BFE631A0046523F /* Swap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Swap.cpp; sourceTree = "<group>"; };
 		3F492A1C2BFE631A0046523F /* Trees.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Trees.cpp; sourceTree = "<group>"; };
 		3F492A1D2BFE631A0046523F /* UsefulFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UsefulFunctions.cpp; sourceTree = "<group>"; };
 		3F492A1E2BFE631A0046523F /* VoltageDrops.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoltageDrops.cpp; sourceTree = "<group>"; };
@@ -207,7 +202,9 @@
 		3F492AA22BFE631A0046523F /* ReadMe general.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "ReadMe general.txt"; sourceTree = "<group>"; };
 		3F492AA32BFE631A0046523F /* ReadMe REU.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "ReadMe REU.txt"; sourceTree = "<group>"; };
 		3F492AA42BFE631A0046523F /* Setting Up a FraMED Simulation.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Setting Up a FraMED Simulation.pdf"; sourceTree = "<group>"; };
-		3F4AA8AB2BFE6277001A7372 /* xFraMED */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xFraMED; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F4AA8AB2BFE6277001A7372 /* xFraMED */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; name = xFraMED; path = "/Users/jeremy/Documents/Academic/0-Projects/1-FraMED/FraMED/xFraMED"; sourceTree = "<absolute>"; };
+		3F77C86D2C63EEC300D934E4 /* xFraMED.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = xFraMED.xcconfig; sourceTree = "<group>"; };
+		3F77C8712C6AABBF00D934E4 /* xFraMED.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = xFraMED.profdata; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,7 +237,6 @@
 				3F492A032BFE631A0046523F /* SizeGrid.h */,
 				3F492A042BFE631A0046523F /* SorSolution.h */,
 				3F492A052BFE631A0046523F /* Sources.h */,
-				3F492A062BFE631A0046523F /* Swap.h */,
 				3F492A072BFE631A0046523F /* Trees.h */,
 				3F492A082BFE631A0046523F /* UsefulFunctions.h */,
 				3F492A092BFE631A0046523F /* VoltageDrops.h */,
@@ -267,7 +263,6 @@
 				3F492A182BFE631A0046523F /* SizeGrid.cpp */,
 				3F492A192BFE631A0046523F /* SorSolution.cpp */,
 				3F492A1A2BFE631A0046523F /* Sources.cpp */,
-				3F492A1B2BFE631A0046523F /* Swap.cpp */,
 				3F492A1C2BFE631A0046523F /* Trees.cpp */,
 				3F492A1D2BFE631A0046523F /* UsefulFunctions.cpp */,
 				3F492A1E2BFE631A0046523F /* VoltageDrops.cpp */,
@@ -490,6 +485,7 @@
 		3F4AA8A22BFE6277001A7372 = {
 			isa = PBXGroup;
 			children = (
+				3F77C86D2C63EEC300D934E4 /* xFraMED.xcconfig */,
 				3F492A602BFE631A0046523F /* atmos-models */,
 				3F492AA52BFE631A0046523F /* doc */,
 				3F492A0A2BFE631A0046523F /* include */,
@@ -498,16 +494,17 @@
 				3F492A612BFE631A0046523F /* README.md */,
 				3F492A1F2BFE631A0046523F /* src */,
 				3F492A9E2BFE631A0046523F /* viz */,
-				3F4AA8AC2BFE6277001A7372 /* Products */,
+				3F77C8722C6AABBF00D934E4 /* OptimizationProfiles */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
-		3F4AA8AC2BFE6277001A7372 /* Products */ = {
+		3F77C8722C6AABBF00D934E4 /* OptimizationProfiles */ = {
 			isa = PBXGroup;
 			children = (
-				3F4AA8AB2BFE6277001A7372 /* xFraMED */,
+				3F77C8712C6AABBF00D934E4 /* xFraMED.profdata */,
 			);
-			name = Products;
+			path = OptimizationProfiles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -553,7 +550,7 @@
 				Base,
 			);
 			mainGroup = 3F4AA8A22BFE6277001A7372;
-			productRefGroup = 3F4AA8AC2BFE6277001A7372 /* Products */;
+			productRefGroup = 3F4AA8A22BFE6277001A7372;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -583,7 +580,6 @@
 				3F492AAA2BFE631A0046523F /* Input.cpp in Sources */,
 				3F492AAD2BFE631A0046523F /* main.cpp in Sources */,
 				3F492AB72BFE631A0046523F /* Trees.cpp in Sources */,
-				3F492AB62BFE631A0046523F /* Swap.cpp in Sources */,
 				3F492AAC2BFE631A0046523F /* Links.cpp in Sources */,
 				3F492AB82BFE631A0046523F /* UsefulFunctions.cpp in Sources */,
 				3F492AB92BFE631A0046523F /* VoltageDrops.cpp in Sources */,
@@ -595,6 +591,7 @@
 /* Begin XCBuildConfiguration section */
 		3F4AA8B02BFE6277001A7372 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3F77C86D2C63EEC300D934E4 /* xFraMED.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -627,6 +624,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -688,6 +686,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -711,7 +710,9 @@
 		3F4AA8B32BFE6277001A7372 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = KB22EGXEQA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -721,7 +722,9 @@
 		3F4AA8B42BFE6277001A7372 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = KB22EGXEQA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -738,7 +741,7 @@
 				3F4AA8B12BFE6277001A7372 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3F4AA8B22BFE6277001A7372 /* Build configuration list for PBXNativeTarget "xFraMED" */ = {
 			isa = XCConfigurationList;
@@ -747,7 +750,7 @@
 				3F4AA8B42BFE6277001A7372 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

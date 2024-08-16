@@ -22,11 +22,6 @@ typedef list<double> ListDouble;
 typedef list<int> ListInt;
 typedef	list<CMatrix1D> ListCMatrix1D;
 
-/*DEFINE CONSTANTS*****************************************************************/
-#define	eta 1.0
-/**********************************************************************************/
-
-
 /*GLOBAL VARIABLES DECLARATION*****************************************************/
 class Var
 {

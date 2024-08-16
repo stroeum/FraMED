@@ -174,7 +174,7 @@ void Tree::Grow(FILE * file, bool AddNew)
         if(Var::isEsEnergyCalculated == true && Var::step3d == 0)
             for(int jj=0 ; jj<Var::N.y ; jj++)
                 for(int ii=0 ; ii<Var::N.x ; ii++)
-                    _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+                    _EsEnergyTmp += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
         if(Var::isEsEnergyCalculated == false && Var::step3d != 0)
             for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
             {
@@ -184,7 +184,7 @@ void Tree::Grow(FILE * file, bool AddNew)
         if(Var::isEsEnergyCalculated == true && Var::step3d != 0)
             for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
             {
-                _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+                _EsEnergyTmp += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
                 _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
                 nn++;
             };
@@ -212,7 +212,7 @@ void Tree::Grow(FILE * file, bool AddNew)
     
     
     _CntLinks = Var::NumLinks;
-    while(AddNew==true && _CntLinks>=0 )//&& _CntLinks<55)
+    while(AddNew==true && _CntLinks>=0 && _CntLinks<5)
     {
         AddNew	= Tree::AddNewLink(file,Var::d,Var::N,Var::Un,Var::phi, Var::Ec,Var::Vd, Var::InitiationPoint,Var::EstablishedLinks,
                                    Var::isBndXingPossible,  Var::isRsDeveloped,
@@ -296,9 +296,9 @@ void Tree::Grow(FILE * file, bool AddNew)
             _EsEnergyTmp = 0;
             if(Var::step3d != 0 && _CntLinks%Var::step3d==0)
             {
-                sprintf(_strRho3D,"rho3d%d.dat", _CntLinks);
-                sprintf(_strPhi3D,"phi3d%d.dat", _CntLinks);
-                sprintf(_strUn3D ,"Un3d%d.dat" , _CntLinks);
+                snprintf(_strRho3D,50,"rho3d%d.dat", _CntLinks);
+                snprintf(_strPhi3D,50,"phi3d%d.dat", _CntLinks);
+                snprintf(_strUn3D ,50,"Un3d%d.dat" , _CntLinks);
                 nn          = 0;
             }
             for(int kk=0 ; kk<Var::N.z ; kk++)
@@ -307,7 +307,7 @@ void Tree::Grow(FILE * file, bool AddNew)
                 _TotalPotentialTmp[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
                 if(Var::isEsEnergyCalculated == true && Var::step3d == 0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
-                        _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+                        _EsEnergyTmp += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
                 if(Var::isEsEnergyCalculated == false && Var::step3d != 0 && _CntLinks%Var::step3d==0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
@@ -317,7 +317,7 @@ void Tree::Grow(FILE * file, bool AddNew)
                 if(Var::isEsEnergyCalculated == true && Var::step3d != 0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
-                        _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+                        _EsEnergyTmp += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
                         if(_CntLinks%Var::step3d==0)
                         {
                             _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
@@ -532,7 +532,8 @@ void Tree::StoreData(FILE * file)
     //IO::write(Var::E,				(char*)"E.dat");
     
     // Store the list of Established Links //
-    IO::write(Var::EstablishedLinks,(char*)"EstablishedLinks.dat");
+//    IO::write(Var::EstablishedLinks,(char*)"EstablishedLinks.dat");
+	IO::write(Var::EstablishedLinks, Var::phi_amb,Var::phi_cha, (char*)"EstablishedLinks.dat");
 }
 /**************************************************************************************/
 
@@ -806,9 +807,9 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
 	for (it1 = _ListOfCandidates.begin() ; it1 != _ListOfCandidates.end() ; it1++)
 	{
 		if( (*it1).efield >= EEc.positive[(*it1).end.k] )
-			(*it1).proba = pow(fabs((*it1).efield -EEc.positive[(*it1).end.k]),eta);
+			(*it1).proba = pow(fabs((*it1).efield -EEc.positive[(*it1).end.k]),PMC.eta);
 		else if ( (*it1).efield <= EEc.negative[(*it1).end.k] )
-			(*it1).proba = pow(fabs((*it1).efield -EEc.negative[(*it1).end.k]),eta);
+			(*it1).proba = pow(fabs((*it1).efield -EEc.negative[(*it1).end.k]),PMC.eta);
 		else{
 			IO::print(file, "ee:\t This link should not exist. There is an error in the code!!!\n");
             IO::print(file, "ee:\t Bad link encountered\n");
@@ -1012,7 +1013,10 @@ double Tree::Qchannel(const double VV,
 
 	pphi_cha[InitiationPoint.i][InitiationPoint.j][InitiationPoint.k]	= VV - pphi_amb[InitiationPoint.i][InitiationPoint.j][InitiationPoint.k];
 	for(it=EEstablishedLinks.begin() ; it!= EEstablishedLinks.end() ; it++)
+	{
 		pphi_cha[it->end.i][it->end.j][it->end.k]	= VV - it->deltaV - pphi_amb[it->end.i][it->end.j][it->end.k];
+		it->efield=-((pphi_amb[it->end.i][it->end.j][it->end.k]+pphi_cha[it->end.i][it->end.j][it->end.k])-(pphi_amb[it->start.i][it->start.j][it->start.k]+pphi_cha[it->start.i][it->start.j][it->start.k]))/it->l;
+	}
 
 	P1.init(pphi_cha,UUn);
 	SSOR.init(pphi_cha, eepsilon,MMaxStep, _d, _N, P1, UUn);
@@ -1048,8 +1052,8 @@ double Tree::fMinSearch(FILE * file, const double VV, const double QQchannelPlus
 
 		if(CCl > CCr)
 		{
-			Swap::DBL(CCl,CCr);
-			Swap::DBL(QQl,QQr);
+			swap(CCl,CCr);
+			swap(QQl,QQr);
 		}
 
 //		while(fabs(2*(CCr-CCl)/(CCr+CCl))>eepsilon)
@@ -1123,8 +1127,8 @@ double Tree::fMinSearch(FILE * file, const double VV, const double QQchannelPlus
 			// Step 1: Order //
 			if(f1 > f2)
 			{
-				Swap::DBL(x1,x2);
-				Swap::DBL(f1,f2);
+				swap(x1,x2);
+				swap(f1,f2);
 			}
 			// Step 2: Reflect //
 			xr = 2.*x1-x2;

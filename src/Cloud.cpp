@@ -33,7 +33,7 @@ void Cloud::LoadTripole(FILE * file, const double II1, const double II2, const d
         rr_tmp	= Cloud::EoverEk(TTr, _OverShotEc);
         rr_r	= (rr_tmp>=1)*1+(rr_tmp<1)*-1;
         
-        if(TTl > TTr) {Swap::DBL(TTl,TTr); Swap::INT(rr_l,rr_l);}
+        if(TTl > TTr) {swap(TTl,TTr); swap(rr_l,rr_l);}
         while(fabs(2*(TTr-TTl)/(TTr+TTl))>Var::epsilon)
             //	while(rr_r>1e-5)
         {

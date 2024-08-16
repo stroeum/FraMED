@@ -7,6 +7,7 @@
 #define USEFULFUNCTIONS_H
 #include "Input.h"
 #include "IOFunctions.h"
+#include <algorithm> 
 class foo
 {
 public:

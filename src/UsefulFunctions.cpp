@@ -41,9 +41,9 @@ CMatrix3D foo::GlobalE(const CMatrix3D& phi,const ResGrid& d, const SizeGrid& N,
     char		_strEx3D[50];
     char		_strEy3D[50];
     char		_strEz3D[50];
-    sprintf(_strEx3D,"Ex3d%d.dat", nn);
-    sprintf(_strEy3D,"Ey3d%d.dat", nn);
-    sprintf(_strEz3D,"Ez3d%d.dat", nn);
+    snprintf(_strEx3D,50,"Ex3d%d.dat", nn);
+    snprintf(_strEy3D,50,"Ey3d%d.dat", nn);
+    snprintf(_strEz3D,50,"Ez3d%d.dat", nn);
 
 	for(int ii=0 ; ii<N.x ; ii++) for(int jj=0 ; jj<N.y ; jj++) for(int kk=0 ; kk<N.z ; kk++)
 	{
@@ -256,8 +256,8 @@ CMatrix1D foo::eFieldFlux(const CMatrix3D& phi, const ResGrid& d, const SizeGrid
 		 if(kk == N.z-1)	eFlux[0] +=  Eijk(ii,jj,kk,phi,d,N)[3]*d.x*d.y;
 		 */
 	};
-	eFlux[1]*= eps0; eFlux[2]*= eps0; eFlux[3]*= eps0;
-	eFlux[4]*= eps0; eFlux[5]*= eps0;	eFlux[6]*= eps0;
+	eFlux[1]*= PMC.eps0; eFlux[2]*= PMC.eps0; eFlux[3]*= PMC.eps0;
+	eFlux[4]*= PMC.eps0; eFlux[5]*= PMC.eps0;	eFlux[6]*= PMC.eps0;
 	eFlux[0] = eFlux[1] + eFlux[2] + eFlux[3] + eFlux[4] + eFlux[5] + eFlux[6];
 	return eFlux;
 }
@@ -285,7 +285,7 @@ double foo::rhoijk(int ii, int jj, int kk, const CMatrix3D& phi, const ResGrid& 
 	if (kk == N.z-1)		d2z = (phi( ii , jj , kk )-2*phi( ii , jj ,kk-1)+phi( ii , jj ,kk-2))/(2*pow(d.z,2));
 
 	if(ii!=0 && ii!=N.x-1 && jj!=0 && jj!=N.y-1 && kk!=0 && kk!=N.z-1)
-		return  -eps0*(d2x+d2y+d2z);
+		return  -PMC.eps0*(d2x+d2y+d2z);
 	else
 		return 0;
 }

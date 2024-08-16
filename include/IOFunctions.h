@@ -15,6 +15,7 @@ public:
 
     static ListDouble read(char *);
 	static void write(ListLink&,						char *);
+	static void write(ListLink&, CMatrix3D, CMatrix3D,	char *);
 	static void write(double,							char *);
 	static void write(int,int, int,						char *);
 	static void write(double,double, double,			char *);

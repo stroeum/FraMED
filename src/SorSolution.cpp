@@ -26,7 +26,7 @@ void SorSolution::init(CMatrix3D& _phi, double eepsilon, int MMaxStep, ResGrid _
 	for(int  kk=0 ; kk<_N.z ; kk++) for(int  jj=0 ; jj<_N.y ; jj++) for(int  ii=0 ; ii<_N.x ; ii++)
 	{
 		if ( ii!=0 && ii!=_N.x-1 &&  jj!=0 &&  jj!=_N.y-1 &&  kk!=0 && kk!=_N.z-1)
-		{h[ii][jj][kk] = (-1/eps0)*CC.rho[ii][jj][kk]/gghat;}
+		{h[ii][jj][kk] = (-1/PMC.eps0)*CC.rho[ii][jj][kk]/gghat;}
 		else
 		{h[ii][jj][kk]	= 0;}
 		eErrDen += (UUn[ii][jj][kk]==0)*pow(h[ii][jj][kk],2);
@@ -37,7 +37,7 @@ void SorSolution::init(CMatrix3D& _phi, double eepsilon, int MMaxStep, ResGrid _
 	{
 		//printf("%d, %d, %d\n", ii, jj, kk);
 		if ( ii!=0 && ii!=_N.x-1 &&  jj!=0 &&  jj!=_N.y-1 &&  kk!=0 && kk!=_N.z-1)
-		{h[ii][jj][kk] /= -eps0*gghat;}
+		{h[ii][jj][kk] /= -PMC.eps0*gghat;}
 		else
 		{h[ii][jj][kk]	= 0;}
 		eErrDen += (UUn[ii][jj][kk]==0)*pow(h[ii][jj][kk],2);
@@ -110,7 +110,7 @@ void SorSolution::Solve(ResGrid _d, SizeGrid _N, const CMatrix3D& UUn, CMatrix3D
 	/* Solution 2: Fast asymetric solution.											  */
 	/**********************************************************************************/
 	double		rres	= 0;
-	double		rrb		= cos( M_PI / _N.max());
+	double		rrb		= cos( PMC.pi / _N.max());
 	double		wwb		= 2 / ( 1 + sqrt( 1 - pow(rrb,2) ) );
 	double		eErrNum = 0;						// Numerator of the Remaining Error
 	double		eErr	= 0;						// Remaining Error
