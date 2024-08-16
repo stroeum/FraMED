@@ -296,7 +296,7 @@ bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double aaq,
 	Type = "gaussian";
 	rho.init(_N.x,_N.y,_N.z);
 	Un.init(_N.x,_N.y,_N.z);
-	double rho0 = Q / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq2);
+	double rho0 = Q / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq2);
 	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
 		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*_d.x-Xq)/Rq1,2) + pow((jj*_d.y-Yq)/Rq2,2) + pow((kk*_d.z-Zq)/Rq3,2)));
 	return true;
@@ -309,7 +309,7 @@ bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llam
 	Type = "gaussian";
 	rho.init(_N.x,_N.y,_N.z);
 	Un.init(_N.x,_N.y,_N.z);
-	double rho0 = Q*(pow(aa,2)+pow(bb,2)) / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq3);
+	double rho0 = Q*(pow(aa,2)+pow(bb,2)) / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq3);
 	for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
 		rho[ii][jj][kk] = rho0 * exp(-(pow((ii*_d.x-Xq)/Rq1,2) + pow((aa*(jj*_d.y-Yq)+bb*(kk*_d.z-Zq))/Rq2,2) + pow((-bb*(jj*_d.y-Yq)+aa*(kk*_d.z-Zq))/Rq3,2)));
 	return true;
@@ -322,11 +322,11 @@ bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llam
 	 double xp,yp,zp;
 	 Charge::init(QQ, XXq,YYq,ZZq, llambda,mmu,nnu);
 	 Type	 = "gaussian";
-	 ttheta	*= M_PI/180;
-	 _phi	*= M_PI/180;
+	 ttheta	*= PMC.pi/180;
+	 _phi	*= PMC.pi/180;
 	 rho.init(_N.x,_N.y,_N.z);
 	 Un.init(_N.x,_N.y,_N.z);
-	 double rho0 = Q / (pow(M_PI, 1.5) * Rq1 * Rq2 * Rq3);
+	 double rho0 = Q / (pow(PMC.pi, 1.5) * Rq1 * Rq2 * Rq3);
 	 for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
 	 {
 		 xp =  cos(ttheta)*cos(_phi)*(ii*_d.x-XXq) + sin(_phi)*(jj*_d.y-YYq) - sin(ttheta)*cos(_phi)*(kk*_d.z-ZZq);
@@ -341,7 +341,7 @@ bool	Charge::gaussian(double QQ, double XXq, double YYq, double ZZq, double llam
 {
 	Charge::gaussian(QQ, XXq,YYq,ZZq, llambda,mmu,nnu, _d,_N);
 	Charge::rotate(XXq,YYq,ZZq,0,0,1,_phi,_d,_N);
-	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*M_PI/180),cos(_phi*M_PI/180),0,ttheta,_d,_N);
+	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*PMC.pi/180),cos(_phi*PMC.pi/180),0,ttheta,_d,_N);
 	return true;
 }
 
@@ -352,7 +352,7 @@ bool	Charge::disk(double QQ, double XXq,double YYq,double ZZq, double RR, double
 	Un.init(_N.x,_N.y,_N.z);
 	rho.init(_N.x,_N.y,_N.z);
 
-	double rho0 = Q / (M_PI * pow(Rq1,2) * Rq3);
+	double rho0 = Q / (PMC.pi * pow(Rq1,2) * Rq3);
 	double	ccptPoints	= 0;
 
 	/**********************************************************************************/
@@ -381,7 +381,7 @@ bool	Charge::ellipse(double QQ, double XXq,double YYq,double ZZq, double aa, dou
 	Un.init(_N.x,_N.y,_N.z);
 	rho.init(_N.x,_N.y,_N.z);
 
-	double rho0 = Q / (M_PI * Rq1*Rq2 * Rq3);
+	double rho0 = Q / (PMC.pi * Rq1*Rq2 * Rq3);
 	double	ccptPoints	= 0;
 
 	/**********************************************************************************/
@@ -410,7 +410,7 @@ bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, d
 	Un.init(_N.x,_N.y,_N.z);
 	rho.init(_N.x,_N.y,_N.z);
 
-	double rho0 = Q / (4/3 * M_PI * Rq1*Rq2*Rq3);
+	double rho0 = Q / (4/3 * PMC.pi * Rq1*Rq2*Rq3);
 	double	ccptPoints	= 0;
 	/**********************************************************************************/
 	/* This portion of code ensures that whatever the resolution, the charge carried  */
@@ -435,7 +435,7 @@ bool	Charge::ellipsoid(double QQ, double XXq,double YYq,double ZZq, double aa, d
 {
 	Charge::ellipsoid(QQ, XXq,YYq,ZZq, aa,bb,cc, _d,_N);
 	Charge::rotate(XXq,YYq,ZZq,0,0,1,_phi,_d,_N);
-	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*M_PI/180),cos(_phi*M_PI/180),0,ttheta,_d,_N);
+	Charge::rotate(XXq,YYq,ZZq,-sin(_phi*PMC.pi/180),cos(_phi*PMC.pi/180),0,ttheta,_d,_N);
 	return true;
 }
 
@@ -475,7 +475,7 @@ bool	Charge::sphere(double QQ, double XXq, double YYq, double ZZq, double RR, Re
 	Un.init(_N.x,_N.y,_N.z);
 	rho.init(_N.x,_N.y,_N.z);
 
-	double rho0 = Q / (4/3 * M_PI * pow(Rq1,3));
+	double rho0 = Q / (4/3 * PMC.pi * pow(Rq1,3));
 	double	ccptPoints	= 0;
 
 	/**********************************************************************************/
@@ -490,8 +490,8 @@ bool	Charge::sphere(double QQ, double XXq, double YYq, double ZZq, double RR, Re
 			ccptPoints++;
 	rho0 = Q/(ccptPoints*_d.x*_d.y*_d.z);
 	cout<<"Error on the volume due to the correction  : "<<
-		fabs(4/3 * M_PI * pow(Rq1,3) - ccptPoints*_d.x*_d.y*_d.z)
-		/(4/3 * M_PI * pow(Rq1,3)) *100<<" %"<<endl;
+		fabs(4/3 * PMC.pi * pow(Rq1,3) - ccptPoints*_d.x*_d.y*_d.z)
+		/(4/3 * PMC.pi * pow(Rq1,3)) *100<<" %"<<endl;
 	/**********************************************************************************/
 	/* Endof specified section														  */
 	/**********************************************************************************/
@@ -510,9 +510,9 @@ CMatrix1D	Charge::MonopoleAnalyticalSolution(	ResGrid _d, SizeGrid _N)
 	for(int kk=0 ; kk<_N.z ; kk++)
 	{
 		if(fabs(kk*_d.z-Zq)<=Rq1)
-			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
+			pphiAn[kk] = -Q/(4*PMC.eps0*PMC.pi)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
 		else
-			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq));
+			pphiAn[kk] = Q/(4*PMC.eps0*PMC.pi*fabs(kk*_d.z-Zq));
 	}
 	return pphiAn;
 }// Analytical solution: Monopole case
@@ -525,9 +525,9 @@ CMatrix1D	Charge::DipoleAnalyticalSolution(	ResGrid _d, SizeGrid _N)
 	for(int kk=0 ; kk<_N.z ; kk++)
 	{
 		if(fabs(kk*_d.z-Zq)<=Rq1)
-			pphiAn[kk] = -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1)) - Q/(4*eps0*M_PI*(kk*_d.z+Zq));
+			pphiAn[kk] = -Q/(4*PMC.eps0*PMC.pi)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1)) - Q/(4*PMC.eps0*PMC.pi*(kk*_d.z+Zq));
 		else
-			pphiAn[kk] = Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq))								  - Q/(4*eps0*M_PI*(kk*_d.z+Zq));
+			pphiAn[kk] = Q/(4*PMC.eps0*PMC.pi*fabs(kk*_d.z-Zq))								  - Q/(4*PMC.eps0*PMC.pi*(kk*_d.z+Zq));
 	}
 	return pphiAn;
 }// Analytical solution: Dipole case
@@ -562,9 +562,9 @@ CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid _d, SizeGrid _N)
 	for(int kk=0 ; kk<_N.z ; kk++)
 	{
 		if(fabs(kk*_d.z-Zq)<=Rq1)
-			pphiAn[kk] += -Q/(4*eps0*M_PI)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
+			pphiAn[kk] += -Q/(4*PMC.eps0*PMC.pi)*(pow(kk*_d.z-Zq,2)/(2*pow(Rq1,3)) -3/(2*Rq1));
 		else
-			pphiAn[kk] += Q/(4*eps0*M_PI*fabs(kk*_d.z-Zq));
+			pphiAn[kk] += Q/(4*PMC.eps0*PMC.pi*fabs(kk*_d.z-Zq));
 
 		z_GndImg = Zq; // Altitude of ground images			    //
 		z_IonImg = Zq; // Altitude of iono/electrosphere images //
@@ -576,8 +576,8 @@ CMatrix1D	Charge::MultipoleAnalyticalSolution(ResGrid _d, SizeGrid _N)
 			//			cout<<"m = "<<setw(3)<<mm<<"; z_Ion = "<<setw(8)<<z_Ion<<"; z_GndImg = "<<setw(8)<<z_GndImg<<"; z_IonImg = "<<setw(8)<<z_IonImg<<endl;
 
 			pphiAn[kk] += pow(-1.0,mm)*
-				(Q/(4*eps0*M_PI*fabs(kk*_d.z-z_GndImg)) +	// Ground Images
-				 Q/(4*eps0*M_PI*fabs(kk*_d.z-z_IonImg)) ); // Ionosphere Images
+				(Q/(4*PMC.eps0*PMC.pi*fabs(kk*_d.z-z_GndImg)) +	// Ground Images
+				 Q/(4*PMC.eps0*PMC.pi*fabs(kk*_d.z-z_IonImg)) ); // Ionosphere Images
 		};
 	}
 	return pphiAn;
@@ -637,7 +637,7 @@ bool Charge::rotate(double a, double b, double c, double u, double v, double w, 
 	int		ip_sup,	jp_sup,	kp_sup;
 	CMatrix3D rhop(_N.x,_N.y,_N.z);
 
-	theta *= M_PI/180;
+	theta *= PMC.pi/180;
 	for (int ii = 0; ii<_N.x ; ii++) for (int jj = 0 ; jj<_N.y ; jj++) for (int kk = 0 ; kk<_N.z ; kk++)
 		if (rho(ii,jj,kk)!=0) //If all the rotated points are on the mesh
 		{

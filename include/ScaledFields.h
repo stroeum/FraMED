@@ -2,7 +2,7 @@
  *  ScaledFields.h
  *  Created by Jeremy Riousset on 10/25/07.
  */
-
+// Define electric-field scalings, assume + and - fields. Critical fields add a third field.
 #ifndef SCALED_FIELDS_H
 #define SCALED_FIELDS_H
 
@@ -24,9 +24,11 @@ public:
 	ScaledFields(){};								// Default constructor
 	ScaledFields(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent); // Constructor surcharge
     ScaledFields(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent, list<double> alt, list<double> ng);
+	ScaledFields(double plus0, double minus0, double gnd_alt, double H, ResGrid _d, SizeGrid _N);
 	CMatrix1D getParams();							// Retrieve z_gnd, initiation0,positive0,Negative0
 	bool init(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent); // Initiate after declaration
     bool init(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent, list<double> alt, list<double> ng);
+	bool init(double plus0, double minus0, double gnd_alt, double H, ResGrid _d, SizeGrid _N);
 	~ScaledFields(){};								// Destructor
 };
 /**************************************************************************************/

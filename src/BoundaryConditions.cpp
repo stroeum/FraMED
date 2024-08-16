@@ -64,7 +64,7 @@ void BC::Apply(int _BCtype, CMatrix3D& _phi, CMatrix3D _rho, const ResGrid& _d, 
 					if(!(is == ii && js == jj && ks == kk))
 						if(fabs(_rho[is][js][ks]) > .01*_RhoMax)
 							_phi[ii][jj][kk] +=
-								_d.x*_d.y*_d.z/(4*M_PI*eps0) *
+								_d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 								(_rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk-ks)*_d.z,2 )) -
 								 _rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk+ks)*_d.z,2 )) );
 			};
@@ -121,13 +121,13 @@ void BC::Apply(int _BCtype, CMatrix3D& _phi, CMatrix3D _rho, const ResGrid& _d, 
 							k_GndImg = ks; // Altitude of ground images			   //
 							k_IonImg = ks; // Altitude of iono/electrosphere images //
 
-							_phi[ii][jj][kk] += _d.x*_d.y*_d.z/(4*M_PI*eps0) *
+							_phi[ii][jj][kk] += _d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 								( _rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- ks)*_d.z,2 ))); // Charge
 							for(int mm=1; mm<=M; mm++)
 							{
 								k_GndImg = k_GndImg - ( mm%2*2*ks + (mm-1)%2*2*(k_Ion-ks) );
 								k_IonImg = k_IonImg + ( (mm-1)%2*2*ks + mm%2*2*(k_Ion-ks) );
-								_phi[ii][jj][kk] += _d.x*_d.y*_d.z/(4*M_PI*eps0) * pow(-1.0,mm)*
+								_phi[ii][jj][kk] += _d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) * pow(-1.0,mm)*
 									(_rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- k_GndImg)*_d.z,2 )) +	// Ground Images
 									 _rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- k_IonImg)*_d.z,2 )) ); // Ionosphere Images
 							}
@@ -174,7 +174,7 @@ void BC::Apply(int _BCtype, CMatrix3D& _phi, CMatrix3D _rho, const ResGrid& _d, 
 					if(!(is == ii && js == jj && ks == kk))
 						if(fabs(_rho[is][js][ks]) > .01*_RhoMax)
 							_phi[ii][jj][kk] +=
-								_d.x*_d.y*_d.z/(4*M_PI*eps0) *
+								_d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 								_rho[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk-ks)*_d.z,2 ));
 			};
 	}
@@ -240,7 +240,7 @@ void BC::Update(bool iisFlashAccoutedForInBC, int _BCtype, CMatrix3D& pphi_cha, 
 							if(!(is == ii && js == jj && ks == kk))
 								if(fabs(rrho_cha[is][js][ks]) > .01*AAbsRhoAmbMax)
 									pphi_cha[ii][jj][kk] +=
-										_d.x*_d.y*_d.z/(4*M_PI*eps0) *
+										_d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 										(rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk-ks)*_d.z,2 )) -
 										 rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk+ks)*_d.z,2 )) );
 					};
@@ -297,13 +297,13 @@ void BC::Update(bool iisFlashAccoutedForInBC, int _BCtype, CMatrix3D& pphi_cha, 
 									k_GndImg = ks; // Altitude of ground images			   //
 									k_IonImg = ks; // Altitude of iono/electrosphere images //
 
-									pphi_cha[ii][jj][kk] += _d.x*_d.y*_d.z/(4*M_PI*eps0) *
+									pphi_cha[ii][jj][kk] += _d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 										( rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- ks)*_d.z,2 ))); // Charge
 									for(int mm=1; mm<=M; mm++)
 									{
 										k_GndImg = k_GndImg - ( mm%2*2*ks + (mm-1)%2*2*(k_Ion-ks) );
 										k_IonImg = k_IonImg + ( (mm-1)%2*2*ks + mm%2*2*(k_Ion-ks) );
-										pphi_cha[ii][jj][kk] += _d.x*_d.y*_d.z/(4*M_PI*eps0) * pow(-1.0,mm)*
+										pphi_cha[ii][jj][kk] += _d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) * pow(-1.0,mm)*
 											(rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- k_GndImg)*_d.z,2 )) +	// Ground Images
 											 rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk- k_IonImg)*_d.z,2 )) ); // Ionosphere Images
 									};
@@ -348,7 +348,7 @@ void BC::Update(bool iisFlashAccoutedForInBC, int _BCtype, CMatrix3D& pphi_cha, 
 							if(!(is == ii && js == jj && ks == kk))
 								if(fabs(rrho_cha[is][js][ks]) > .01*AAbsRhoAmbMax)
 									pphi_cha[ii][jj][kk] +=
-										_d.x*_d.y*_d.z/(4*M_PI*eps0) *
+										_d.x*_d.y*_d.z/(4*PMC.pi*PMC.eps0) *
 										rrho_cha[is][js][ks]/sqrt(pow( (ii-is)*_d.x,2 ) + pow( (jj-js)*_d.y,2 ) + pow( (kk-ks)*_d.z,2 ));
 					};
 				_EndTime = clock();

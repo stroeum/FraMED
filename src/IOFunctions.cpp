@@ -356,6 +356,27 @@ void IO::write(ListLink& LL, char * fname)
 	fclose(fp);
 }
 
+void IO::write(ListLink& LL, CMatrix3D phiAmb, CMatrix3D phiCha, char * fname)
+{
+	fp = openFile(fname, "w");
+	ListLink::iterator	it;
+
+	if(fp)
+		fprintf(fp,"  s.i   s.j   s.k   e.i   e.j   e.k            l            E           dV     s.phiAmb     e.phiAmb     s.phiCha     e.phiCha      p\n");
+
+		for (it=LL.begin() ; it!=LL.end() ; it++)
+			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %5.4f\n",
+					it->start.i, it->start.j, it->start.k,
+					it->end.i, it->end.j, it->end.k,
+					it->l, it->efield, it->deltaV,
+					phiAmb[it->start.i][it->start.j][it->start.k],
+					phiAmb[it->end.i][it->end.j][it->end.k],
+					phiCha[it->start.i][it->start.j][it->start.k],
+					phiCha[it->end.i][it->end.j][it->end.k],
+					it->proba );
+	fclose(fp);
+}
+
 void IO::write(CMatrix1D& MM, char * fname)
 {
 	formFileName(fname);

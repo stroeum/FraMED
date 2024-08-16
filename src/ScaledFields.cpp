@@ -10,6 +10,8 @@ ScaledFields::ScaledFields(double ppositive0, double nnegative0, double zz_gnd, 
 {ScaledFields(ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent);}
 ScaledFields::ScaledFields(double ppositive0, double nnegative0, double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent, list<double> alt, list<double> ng)
 {ScaledFields(ppositive0,nnegative0, zz_gnd, _d,_N, ScalingExponent,alt,ng);}
+ScaledFields::ScaledFields(double ppositive0, double nnegative0, double zz_gnd, double H, ResGrid _d, SizeGrid _N)
+{ScaledFields(ppositive0, nnegative0, zz_gnd, H, _d, _N);}
 
 CMatrix1D ScaledFields::getParams()
 {
@@ -41,7 +43,7 @@ bool ScaledFields::init(double ppositive0, double nnegative0,
 
 bool ScaledFields::init(double ppositive0, double nnegative0, double zz_gnd, ResGrid _d, SizeGrid _N, int ScalingExponent, list<double> alt, list<double> ng)
 {
-    z_gnd      = zz_gnd;
+    z_gnd     = zz_gnd;
     positive0 = ppositive0;
     negative0 = nnegative0;
     positive.init(_N.z);
@@ -57,3 +59,20 @@ bool ScaledFields::init(double ppositive0, double nnegative0, double zz_gnd, Res
     return true;
 }
 /**************************************************************************************/
+
+bool ScaledFields::init(double ppositive0, double nnegative0, double zz_gnd, double H, ResGrid _d, SizeGrid _N)
+{ // Linear scaling !!! for testing purposes only !!!
+	z_gnd		= zz_gnd;
+	positive0	= ppositive0;
+	negative0	= nnegative0;
+	positive.init(_N.z);
+	negative.init(_N.z);
+	
+	int kk_gnd = (int)round(z_gnd/_d.z);
+	for (int kk=0 ; kk<_N.z ; kk++)
+	{
+		positive[kk] = positive0*(kk+kk_gnd)*_d.z/H;
+		negative[kk] = negative0*(kk+kk_gnd)*_d.z/H;
+	}
+	return true;
+}

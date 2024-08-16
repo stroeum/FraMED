@@ -14,6 +14,8 @@ public:
 	VoltageDrops(){};
 	VoltageDrops(double plus0, double minus0, double gnd_alt, ResGrid d, SizeGrid N, int ScalingExponent) :
 		ScaledFields(plus0,minus0,gnd_alt,d,N,ScalingExponent){};
+	VoltageDrops(double plus0, double minus0, double gnd_alt, double H, ResGrid d, SizeGrid N) :
+		ScaledFields(plus0,minus0,gnd_alt,H,d,N){};
 	// Constructor
 	~VoltageDrops(){};								// Destructor
 };

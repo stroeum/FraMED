@@ -8,6 +8,8 @@
 #include "Cloud.h"
 #include "Input.h"
 #include <stdlib.h>
+#include <filesystem>
+namespace fs = std::filesystem;
 /**************************************************************************************/
 
 /**************************************************************************************/
@@ -35,7 +37,7 @@ int main()
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
     Var::BCtype					= FREE_SPACE;                                       // Boundary conditions
-    Var::LoadingType            = FROM_FILE;                                        // Charge loading type
+    Var::LoadingType            = SET_POTENTIAL;                                        // Charge loading type
     Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
     
     Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
@@ -64,17 +66,20 @@ int main()
      */
     
     char logName[200];
+	//string CWD(fs::current_path());
+	//CWD+="/results";
     IO::setPathName((char*)"results");
     IO::getPathName(logName);
-    strcat(logName, "/summary.txt");
+	strcat(logName, "/summary.txt");
 
-    if (access(logName, F_OK))
+	int flag=access(logName, F_OK);
+    if (flag==0) // Summary file exists, resume run.
     {
-        Var::isNewRun = true;
+		Var::isNewRun = false;
     }
-    else
+    else // Summary file does *NOT* exists, start new run.
     {
-        Var::isNewRun = false;
+		Var::isNewRun = true;
     }
 
     if(Var::isNewRun) {
@@ -87,7 +92,7 @@ int main()
         }
 
         /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */
-        /*
+        
         IO::print(file, "..: Reading grid size (N).\n");
         Var::N.init(41,41,71);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
@@ -109,23 +114,26 @@ int main()
         Var::z_shift = Var::z_gnd;                                                            // _m Vertical displacement of the cloud
         Var::y_shift = 0e3;  
 
-        ListDouble alt=IO::read((char*)("EPIC/z.dat" ));
+        ListDouble alt=IO::read((char*)("atmos-models/GRAMS/Earth/Earth_z.dat" ));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("EPIC/ng.dat"));
+        ListDouble ng =IO::read((char*)("atmos-models/GRAMS/Earth/Earth_ng.dat"));
         IO::print(file, "..: density successfully read\n");
 
         IO::print(file, "..: Assigning critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        Var::Ec.init(1*2.16e+5,1*2.16e+5,1*-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
+        Var::Ec.init(.5e+5,.5e+5,-.5e+5, Var::z_gnd,Var::d,Var::N,0);
         if(Var::isVoltageDropped){
-            Var::Vd.init(0.21e+5,-0.21e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for streamer runs
+            Var::Vd.init(0.5e+5,-0.5e+5, Var::z_gnd, Var::L.z, Var::d,Var::N); // Assigned voltage drop for streamer runs
+			//Var::Vd.init(0.5e+5,-0.5e+5, Var::z_gnd,Var::d,Var::N,0); // Assigned voltage drop for streamer runs
+
+			
         }else{
             Var::Vd.init(0.0e+5,-0.0e+5, Var::z_gnd,Var::d,Var::N,0); // Assigned voltage drop for leader runs
         }
-        */ 
+        
         /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
 
         /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
-        /**/
+        /*
         cout<<"ii: Reading in files from atmos-models directory..."<<endl;
 
         CMatrix1D M;
@@ -167,10 +175,11 @@ int main()
         IO::print(file, "..: positive propagation threshold successfully read\n");
         IO::read(Var::Ec.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative propagation threshold successfully read\n");
-        /**/
+        */
         /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
         // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
+		/*
         if(Var::isVoltageDropped){
             IO::read(Var::Vd.positive,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_positive_Vm.dat"));
             IO::print(file, "..: positive voltage drop successfully read\n");
@@ -179,12 +188,12 @@ int main()
         }else{
             Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for leader runs
         }
-        
+		 */
         // Checks whether the initiation point is preset
         if(Var::InitiationType == AT_PREDEF_POS){ // Will need to alter values based on desired initiation point:
             Var::InitX	= Var::L.x/2;													// X-coordinate of initiation point (in meters)
             Var::InitY	= Var::L.y/2;													// Y-coordinate of initiation point (in meters)
-            Var::InitZ	= 225.0e3;                                                       // Z-coordinate of initiation point (in meters)
+			Var::InitZ	= Var::L.z/2;//225.0e3;                                                       // Z-coordinate of initiation point (in meters)
             Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         }else{ // Arbitrarily defined, no changes needed
             Var::InitX	= Var::L.x/2;													// Center of x-domain
@@ -230,11 +239,11 @@ int main()
         int LastStep = 0;
         char filename[200];
         FILE * fp;
-        sprintf(filename,"phi3d%d.dat",LastStep);
+        snprintf(filename,200,"phi3d%d.dat",LastStep);
         while((fp=IO::openFile(filename,"r")))
         {
             LastStep += Var::step3d;
-            sprintf(filename,"phi3d%d.dat",LastStep);
+            snprintf(filename,200,"phi3d%d.dat",LastStep);
             fclose(fp);
         }
         LastStep -= Var::step3d; // This removes the last iteration count from the while loop
@@ -261,21 +270,21 @@ int main()
         Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         IO::print(file, "ii: Discharge initiated at: [" + to_string(Var::InitX/1e3) + " " + to_string(Var::InitY/1e3) + " " + to_string(Var::InitZ/1e3) + "] km; Radius of init. region: " + to_string(Var::InitR/1e3) + "km\n");
         
-        sprintf(filename,"phi3d%d.dat",0);
+        snprintf(filename,200,"phi3d%d.dat",0);
         IO::print(file, "..: Initializing ambient electric potential matrix (phi<<"+(string)filename+").\n");
         IO::read(Var::phi_amb,filename);
         
-        sprintf(filename,"phi3d%d.dat",LastStep);
+        snprintf(filename,200,"phi3d%d.dat",LastStep);
         IO::print(file, "..: Initializing  electric potential matrix (phi<<"+(string)filename+").\n");
         IO::read(Var::phi,filename);
         
         Var::phi_cha = Var::phi - Var::phi_amb;
         
-        sprintf(filename,"Un3d%d.dat",LastStep);
+        snprintf(filename,200,"Un3d%d.dat",LastStep);
         IO::print(file, "..: Initializing map of fixed potential points (Un<<"+(string)filename+")\n");
         IO::read(Var::Un,filename);
         
-        sprintf(filename,"rho3d%d.dat",LastStep);
+        snprintf(filename,200,"rho3d%d.dat",LastStep);
         IO::print(file, "..: Initializing electric charge density matrix (rho<<"+(string)filename+")\n");
         Var::C.reset(Var::d,Var::N);
         IO::read(Var::rho,filename);
@@ -447,7 +456,7 @@ int main()
     IO::print(file, "ii: Calculating electrostatic energy before the discharge\n");
     Var::Eps_bf=0;
     for(int ii=0 ; ii<Var::N.x ; ii++) for(int jj=0 ; jj<Var::N.y ; jj++) for(int kk=0 ; kk<Var::N.z ; kk++)
-        Var::Eps_bf += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+        Var::Eps_bf += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
     IO::print(file, "ii: Electrostatic energy after the discharge: " + to_string(Var::Eps_af) + " J\n");
     
     IO::print(file, "ii: Finding potential extrema\n");
@@ -480,7 +489,7 @@ int main()
     IO::print(file, "ii: Calculating electrostatic energy after the discharge\n");
     Var::Eps_af=0;
     for(int ii=0 ; ii<Var::N.x ; ii++) for(int jj=0 ; jj<Var::N.y ; jj++) for(int kk=0 ; kk<Var::N.z ; kk++)
-        Var::Eps_af += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+        Var::Eps_af += PMC.eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
     Var::eFlux = foo::eFieldFlux(Var::phi,Var::d,Var::N);
     IO::print(file, "ii: Electrostatic energy after the discharge: " + to_string(Var::Eps_af) + " J\n");
     
