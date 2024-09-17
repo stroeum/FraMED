@@ -362,7 +362,7 @@ void IO::write(ListLink& LL, CMatrix3D phiAmb, CMatrix3D phiCha, char * fname)
 	ListLink::iterator	it;
 
 	if(fp)
-		fprintf(fp,"  s.i   s.j   s.k   e.i   e.j   e.k            l            E           dV     s.phiAmb     e.phiAmb     s.phiCha     e.phiCha      p\n");
+//		fprintf(fp,"  s.i   s.j   s.k   e.i   e.j   e.k            l            E           dV     s.phiAmb     e.phiAmb     s.phiCha     e.phiCha      p\n");
 
 		for (it=LL.begin() ; it!=LL.end() ; it++)
 			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %+12.2e %5.4f\n",

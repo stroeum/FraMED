@@ -37,6 +37,7 @@ FraMED
 build/*
 OptimizationProfiles/*
 xcdebugger
+UserInterfaceState.xcuserstate
 
 # plots
 results/*.mp4
