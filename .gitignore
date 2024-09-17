@@ -38,6 +38,8 @@ build/*
 OptimizationProfiles/*
 xcdebugger
 UserInterfaceState.xcuserstate
+xFraMED.xcodeproj/project.xcworkspace/xcuserdata/jeremy.xcuserdatad/UserInterfaceState.xcuserstate
+
 
 # plots
 results/*.mp4
