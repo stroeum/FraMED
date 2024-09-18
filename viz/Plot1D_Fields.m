@@ -6,26 +6,26 @@ positionWidth = 600;
 positionHeight = 800;
 
 %% Compile and Run C++ code
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-    sims.objectName = input(prompt1,'s');
-    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-    sims.objectType = input(prompt2,'s');
-    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-        sims.objectType = input(prompt2,'s');
-    end
-
-    % Settings to ensure proper directory referencing:
-    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
-    if ~exist(sims.pathPNGs,'dir')
-        mkdir(sims.pathPNGs);
-    end
-    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
-    if ~exist(sims.pathVideos,'dir')
-        mkdir(sims.pathVideos);
-    end
-end 
+% if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+%     prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+%     sims.objectName = input(prompt1,'s');
+%     prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
+%     sims.objectType = input(prompt2,'s');
+%     while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+%         fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
+%         sims.objectType = input(prompt2,'s');
+%     end
+% 
+%     % Settings to ensure proper directory referencing:
+%     sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
+%     if ~exist(sims.pathPNGs,'dir')
+%         mkdir(sims.pathPNGs);
+%     end
+%     sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
+%     if ~exist(sims.pathVideos,'dir')
+%         mkdir(sims.pathVideos);
+%     end
+% end 
 cd ../results
 
 %% Plot results

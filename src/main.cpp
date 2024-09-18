@@ -37,8 +37,8 @@ int main()
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
     Var::BCtype					= FREE_SPACE;                                       // Boundary conditions
-    Var::LoadingType            = SET_POTENTIAL;                                        // Charge loading type
-    Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
+	Var::LoadingType            = SET_CHARGES;                                        // Charge loading type
+	Var::InitiationType			= RANDOM;                                    // Initiation type
     
     Var::step3d                 = -100;                                             // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
@@ -52,7 +52,7 @@ int main()
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
     Var::isEsEnergyCalculated	= true;                                             // Electrostatic energy calculated at each step: Y/N
     Var::isBCerrorCalculated	= true;                                             // Error at boundary is calculated at each step: Y/N
-    Var::isVoltageDropped       = true;                                             // Is there a voltage drop (i.e. streamer case): Y/N
+    Var::isVoltageDropped       = false;                                             // Is there a voltage drop (i.e. streamer case): Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
     
@@ -94,11 +94,11 @@ int main()
         /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */
         
         IO::print(file, "..: Reading grid size (N).\n");
-        Var::N.init(41,41,71);
+        Var::N.init(61,61,61);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
 
         IO::print(file, "..: Reading domain size (L)\n");
-        Var::L.init(12e+3,12e+3,70.0e+3);
+        Var::L.init(15e+3,15e+3,15.0e+3);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
 
         IO::print(file, "..: Reading grid resolution (d)\n");
@@ -120,7 +120,7 @@ int main()
         IO::print(file, "..: density successfully read\n");
 
         IO::print(file, "..: Assigning critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        Var::Ec.init(.5e+5,.5e+5,-.5e+5, Var::z_gnd,Var::d,Var::N,0);
+        Var::Ec.init(2.16e+5,2.16e+5,-2.16e+5, Var::z_gnd,Var::d,Var::N,1);
         if(Var::isVoltageDropped){
             Var::Vd.init(0.5e+5,-0.5e+5, Var::z_gnd, Var::L.z, Var::d,Var::N); // Assigned voltage drop for streamer runs
 			//Var::Vd.init(0.5e+5,-0.5e+5, Var::z_gnd,Var::d,Var::N,0); // Assigned voltage drop for streamer runs
@@ -355,12 +355,12 @@ int main()
             IO::print(file, "..: Setting charge layers\n");
             // Q (Coulombs) Charge content; Xq,Yq,Zq (meters) Charge center coordinate; R,H (meters) Size of the charge center //
             /* Example of a cylindrical +20 Coulomb charge layer, centered in the xy-plane between altitudes of 54-70 km */
-            Var::Q =    20;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 62e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 16e+3;
+            Var::Q =    50;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 10e+3; Var::Rq1 = 5e+3;	Var::Rq3 = 2+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
             /* Example of a secondary cylindrical -15 Coulomb charge layer, centered in the xy-plane between altitudes of 45-51 km */
-            Var::Q =    -15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 48e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 6e+3;
+            Var::Q =   -50;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 7e+3; Var::Rq1 = 4e3;	Var::Rq3 = 2e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             
