@@ -7,7 +7,7 @@
 %          may be introduced to accommodate for alternative cases.        %
 % Author: Annelisa Esparza                                                %
 % Contact: annelisa.esparza@my.erau.edu                                   %
-% Date Added: April 11, 2024                                              %
+% Date Added: October 14, 2024                                              %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Select object of interest:
@@ -26,18 +26,19 @@ end
 
 % Select the body of interest (and subsequently the pathway to the existing datafiles):
 if ~exist('grams','var') 
-    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on?\n(No quotation marks needed for string input)\n-->";
     grams.objectName = input(prompt1,'s');
     while ~exist(grams.objectName,'dir')
-        fprintf('\n\tNot an acceptable input. Please check spelling or try a different object.\n');
+        fprintf('\n\tNot an acceptable input.\n\tDefault options: Earth, Mars, Titan, Venus.\n');
         grams.objectName = input(prompt1,'s');
     end
-    prompt2 = "\nWhat type of discharge is this? (leader / streamer)\n-->";
+    prompt2 = "\nWhat type of discharge should it be? (leader/streamer)\n-->";
     grams.objectType = input(prompt2,'s');
     while ~strcmp(grams.objectType,'streamer') && ~strcmp(grams.objectType,'leader')
         fprintf('\n\tNot an acceptable input. Please enter streamer or leader.\n');
         grams.objectType = input(prompt2,'s');
     end
+    grams.ogObjectType = "leader";
 end 
 
 % Loads current altitude values for the respective object:
@@ -174,6 +175,21 @@ switch answer.changes
             end  
         end    
 end
+%% Adapt values per request:
+if strcmp(grams.objectType,'streamer') && strcmp(grams.ogObjectType,'leader')
+    negpropfactor = 20/3;
+    pospropfactor = 20/6;
+    initfactor = 10;
+elseif strcmp(grams.objectType,'leader') && strcmp(grams.ogObjectType,'streamer')
+    negpropfactor = 3/20;
+    pospropfactor = 6/20;
+    initfactor = 1/10;
+elseif strcmp(grams.objectType,grams.ogObjectType)
+    negpropfactor = 1;
+    pospropfactor = 1;
+    initfactor = 1;
+end
+
 
 %% Interpolate and export:
 % Summarize new altitude domain & export results:
@@ -196,7 +212,7 @@ end
 
 % Converts & saves positive propagation threshold (Eth+), if the file exists:
 if exist(strcat(grams.objectName,'/',grams.objectName,'_Eth_positive_Vm.dat'),"file") 
-    grams.Ethpos = load(strcat(grams.objectName,'/',grams.objectName,'_Eth_positive_Vm.dat'));
+    grams.Ethpos = pospropfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_Eth_positive_Vm.dat'));
     newvals_Ethpos = interp1(grams.z,grams.Ethpos,newvals_z,'spline');
     save([grams.pathOutput,'_Eth_positive_Vm.dat'],'newvals_Ethpos','-ascii');
 else
@@ -205,7 +221,7 @@ end
 
 % Converts & saves negative propagation threshold (Eth-), if the file exists:
 if exist(strcat(grams.objectName,'/',grams.objectName,'_Eth_negative_Vm.dat'),"file") 
-    grams.Ethneg = load(strcat(grams.objectName,'/',grams.objectName,'_Eth_negative_Vm.dat'));
+    grams.Ethneg = negpropfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_Eth_negative_Vm.dat'));
     newvals_Ethneg = interp1(grams.z,grams.Ethneg,newvals_z,'spline');
     save([grams.pathOutput,'_Eth_negative_Vm.dat'],'newvals_Ethneg','-ascii');
 else
@@ -214,7 +230,7 @@ end
 
 % Converts & saves initiation threshold (E_initiation), if the file exists:
 if exist(strcat(grams.objectName,'/',grams.objectName,'_E_initiation_Vm.dat'),"file") 
-    grams.Einit = load(strcat(grams.objectName,'/',grams.objectName,'_E_initiation_Vm.dat'));
+    grams.Einit = initfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_E_initiation_Vm.dat'));
     newvals_Einit = interp1(grams.z,grams.Einit,newvals_z,'spline');
     save([grams.pathOutput,'_E_initiation_Vm.dat'],'newvals_Einit','-ascii');
 else
@@ -240,7 +256,7 @@ else
 end
 
 %% (Optional) Define total (xyz) domain size for read-in:
-prompt.domdef = strcat("\nWould you like to define the the number of grid points for the x and y dimensions too? This is not required but simplifies the use of main.cpp to initialize the simulation. (Y/N)\n-->");
+prompt.domdef = strcat("\nWould you like to define the number of grid points for the x and y dimensions too?\nThis is not required but simplifies the use of main.cpp to initialize the simulation. (Y/N)\n-->");
 answer.domdef = input(prompt.domdef,'s');
 while ~strcmp(answer.domdef,'Y') && ~strcmp(answer.domdef,'N')
     fprintf('\n\tNot an acceptable input. Please enter Y for yes or N for no.\n');
@@ -250,7 +266,7 @@ end
 % Inquires and saves spacing and grid values:
 if strcmp(answer.domdef,'Y')
     % Determine x-dimension sizing:
-    prompt.xnodes = strcat("\nHow many grid points shall the x-dimension span? There are currently ",num2str(newvals_N(3))," nodes for the z-dimension.\n-->");
+    prompt.xnodes = strcat("\nThere are currently ",num2str(newvals_N(3))," nodes for the z-dimension.\nHow many grid points shall the x-dimension span?\n-->");
     newvals_N(1) = input(prompt.xnodes);
     while newvals_N(1)~=round(newvals_N(1))
         fprintf('\n\tValue must be an integer.\n');
@@ -268,7 +284,7 @@ if strcmp(answer.domdef,'Y')
     % Defines total domain size with assumption of equal spacings:
     newvals_D = [answer.spacings; answer.spacings; answer.spacings];
     newvals_L = newvals_D.*(newvals_N-1);
-    
+   
     % Outputs summary to the screen:
     fprintf(strcat("\n\t******* SUMMARY OF INITIALIZED SIMULATION DOMAIN *******" + ...
         "\n\t\t\t\t(x)\t(y)\t(z)" + ...
@@ -278,12 +294,18 @@ if strcmp(answer.domdef,'Y')
     if exist(strcat(grams.objectName,'/',grams.objectName,'_Nxyz.dat'),"file") 
         old_N = load(strcat(grams.objectName,'/',grams.objectName,'_Nxyz.dat'));
         reduction = (newvals_N(1)*newvals_N(2)*newvals_N(3))/(old_N(1)*old_N(2)*old_N(3));
-        fprintf(strcat("\n\tTotal nodes = ",num2str(newvals_N(1)*newvals_N(2)*newvals_N(3),'%1.2e'),"\t(",num2str(100*reduction,'%.1f'),"%% of previous ",num2str(old_N(1)*old_N(2)*old_N(3),'%1.2e'),", should run ",num2str(round(10/reduction)/10,'%.1f'),"x faster)\n"));
+        fprintf(strcat("\n\tTotal nodes = ",num2str(newvals_N(1)*newvals_N(2)*newvals_N(3),'%d'),"\t(",num2str(100*reduction,'%.1f'),"%% of previous ",num2str(old_N(1)*old_N(2)*old_N(3),'%d'),", should run ",num2str(round(10/reduction)/10,'%.1f'),"x faster)\n"));
     else
         fprintf(strcat("\n\tTotal nodes = ",num2str(newvals_N(1)*newvals_N(2)*newvals_N(3),'%1.2e'),"\n"));
     end
 
+    % Outputs the path and prefix for the output files:
+    fprintf(strcat("\n\tPath and prefix of associated files: ",grams.pathOutput,"_\n"));
+
     % Exports grid size and spacings:
     save([grams.pathOutput,'_Nxyz.dat'],'newvals_N','-ascii');
     save([grams.pathOutput,'_Dxyz.dat'],'newvals_D','-ascii');
+else
+    % Outputs the path and prefix for the output files:
+    fprintf(strcat("\n\tPath and prefix of associated files: ",grams.pathOutput,"_\n"));
 end
