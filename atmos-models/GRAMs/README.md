@@ -24,7 +24,7 @@ Script uses the .dat files derived from coupling the NASA GRAMs with the TREBEC 
   - Positive propagation threshold ( '_Eth_positive_Vm.dat' )
   - Negative propagation threshold ( '_Eth_negative_Vm.dat' )
   - Initiation threshold ( '_E_initiation_Vm.dat' )
-  - Temperature ( '_T_g.dat' )
+  - Temperature ( '_Tg.dat' )
   - Reduced electric field ( '_Ek.dat' )
 - Path and prefix for associated output files.
 - (Optional) Summary table; only displayed if the horizontal domain size is defined.
