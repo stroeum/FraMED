@@ -80,10 +80,10 @@ How many grid points shall the y-dimension span?
 -->31
 
 	******* SUMMARY OF INITIALIZED SIMULATION DOMAIN *******
-				            (x)	    (y)	    (z)
+				(x)	(y)	(z)
 	Domain Size 	(L):	1500	1500	2000	(meters)
-	Spacings 	    (D):	50	    50	    50	    (meters)
-	Grid Points 	(N):	31	    31	    41	    (nodes)
+	Spacings 	(D):	50	50	50	(meters)
+	Grid Points 	(N):	31	31	41	(nodes)
 
 	Total nodes = 39401	(9.8% of previous 400869, should run 10.2x faster)
 
