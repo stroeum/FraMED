@@ -186,6 +186,9 @@ for ii=1:Links.Nb
                 rho.max = .95* max(max(max(rho.data)));
                 rho.min = .95* min(min(min(rho.data)));
                 plottingChargeRegions('white',0.4,rho,X,Y,Z);
+                if strcmp(is.Grounded,'G')
+                    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
+                end
             end
         end
     end    
