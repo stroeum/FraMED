@@ -177,19 +177,18 @@ switch answer.changes
 end
 %% Adapt values per request:
 if strcmp(grams.objectType,'streamer') && strcmp(grams.ogObjectType,'leader')
-    negpropfactor = 20/3;
-    pospropfactor = 20/6;
+    negpropfactor = (1/3)/(1/20);
+    pospropfactor = (1/6)/(1/20);
     initfactor = 10;
 elseif strcmp(grams.objectType,'leader') && strcmp(grams.ogObjectType,'streamer')
-    negpropfactor = 3/20;
-    pospropfactor = 6/20;
-    initfactor = 1/10;
+    negpropfactor = (1/20)/(1/3);
+    pospropfactor = (1/20)/(1/6);
+    initfactor = (1/10);
 elseif strcmp(grams.objectType,grams.ogObjectType)
     negpropfactor = 1;
     pospropfactor = 1;
     initfactor = 1;
 end
-
 
 %% Interpolate and export:
 % Summarize new altitude domain & export results:
@@ -199,6 +198,7 @@ fprintf(['\n*** New domain for ',grams.objectName,' has an altitude domain betwe
 
 % Creates descriptive filetag prefix:
 grams.pathOutput = [grams.objectName,'/',grams.objectType,'-N',num2str(size(newvals_z,1)),'-D',num2str(answer.spacings),'m'];
+%grams.pathOutput = strcat(grams.pathOutput,'_half');
 save([grams.pathOutput,'_z.dat'],'newvals_z','-ascii');
 
 % Converts & saves particle density (ng), if the file exists:
