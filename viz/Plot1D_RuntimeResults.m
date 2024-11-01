@@ -129,7 +129,7 @@ hold off
 if exist('QMinimization','var')
     nexttile
     hold on
-    plot(links.array,QMinimization.values);
+    plot(links.array(1:length(QMinimization.values)),QMinimization.values);
     set(gca,'FontSize',10,'XLim',[0 links.tracker],'YLim',[0 (max(QMinimization.values))],'TickLabelInterpreter','latex','YAxisLocation','right','XAxisLocation','top');
     ylabel('Runtime for $Q_\mathrm{minimization}$ (s)','Interpreter','latex','FontSize',16);
     legend(['Minimum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.min,'%f'),' seconds (step ',num2str(QMinimization.minIndex),')',newline,'Maximum $Q_\mathrm{minimization}$ runtime: ',num2str(QMinimization.max,'%f'),' seconds (step ',num2str(QMinimization.maxIndex),')'],'Interpreter','latex','location','best', 'box','off','FontSize',10)
