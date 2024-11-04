@@ -34,9 +34,9 @@
 FraMED
 
 # Plots
-results/*.mp4
-results/*.eps
-results/*.mat
-viz/*.png
-viz/*.eps
-figures/*
+Figures/*
+
+# Resized domains
+atmos-models/GRAMs/*/leader*.dat
+atmos-models/GRAMs/*/streamer*.dat
+
