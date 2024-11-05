@@ -53,9 +53,6 @@ function [] = Plot2D_FieldLines(num,sims)
     fprintf('\tData loaded\n')
     
     %% Fix plot parameters
-    
-    %Color = ['r' 'b' 'r' 'b'];
-    Color = ['b' 'r' 'b'];
     NbChargeLayers = size(ChargeLayers);
     NbChargeLayers = NbChargeLayers(1);
     ChargeLayersLineStyle  = '-';
@@ -78,9 +75,14 @@ function [] = Plot2D_FieldLines(num,sims)
     set(findobj('Type','line'),'Color','k')
     plot([min(y(:)) max(y(:))], [z_gnd z_gnd]*1e-3,'k');
     for ii=1:NbChargeLayers
+        if ChargeLayers(ii,1)>0
+            tempColor = 'r'; % positive charge region
+        else
+            tempColor = 'b'; % negative charge region
+        end
         rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*1e-3,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*1e-3,2*ChargeLayers(ii,6)*1e-3,ChargeLayers(ii,7)*1e-3],...
             'Curvature',[0,0],...
-            'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',Color(ii));
+            'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',tempColor);
     %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*1e-3,(z_gnd+ChargeLayers(ii,4))*1e-3,...
     %         ['\leftarrow',num2str(ChargeLayers(ii,1),3),' C'],...
     %         'HorizontalAlignment','left','BackgroundColor','w',...
