@@ -21,6 +21,14 @@ if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideo
     if ~exist(sims.pathVideos,'dir')
         mkdir(sims.pathVideos);
     end
+
+    % Specifies the boundary conditions for the simulation:
+    prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
+    sims.BCtype = input(prompt_BCtype,'s');                    
+    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G')
+        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
+        sims.BCtype = input(prompt_BCtype,'s');
+    end
 end 
 
 cd ../results/
