@@ -37,15 +37,18 @@ if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideo
     if ~exist(sims.pathVideos,'dir')
         mkdir(sims.pathVideos);
     end
+
+    % Specifies the boundary conditions for the simulation:
+    prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
+    sims.BCtype = input(prompt_BCtype,'s');                    
+    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G')
+        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
+        sims.BCtype = input(prompt_BCtype,'s');
+    end
 end 
-prompt_Grounded = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
-is.Grounded = input(prompt_Grounded,'s');                    
-while ~strcmp(is.Grounded,'FS') && ~strcmp(is.Grounded,'G')
-    fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
-    is.Grounded = input(prompt_Grounded,'s');
-end
+
 promptSaveAfter = '\nWould you like to save an image of the charge layer distributions after the discharge has occurred? (Y / N)\n-->';
-saveAfter = input(promptSaveAfter,'s');    
+saveAfter = 'N'; %input(promptSaveAfter,'s');    
 while ~strcmp(saveAfter,'Y') && ~strcmp(saveAfter,'N')
     fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
     saveAfter = input(promptSaveAfter,'s');
@@ -54,6 +57,11 @@ end
 %% Load data files
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
+% Assigns plot height and width based on domain:
+if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
+    sims.plotWidth = 600;
+    sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
+end
 if strcmp(saveAfter,'Y')
     prompt_fileNum = '\nWhich iteration save file would you like to read-in?\nInput example: rhoAmb3d2500.dat\n-->';
     iterationFile = input(prompt_fileNum,'s');
@@ -100,14 +108,14 @@ rho.min = min(min(min(rho.data)));
 % Map ColorScale
 gnd.color = [.75 .75 .75]; % light gray for neutral charges
 figure(1);
-set(gcf,'Position',[0,0,800,600]);
+set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
 hold on;
 
 % Calls the new function that automatically recognizes charge regions:
 plottingChargeRegions('white',0.4,rho,X,Y,Z);
 
 % Represents the neutrally charged (grounded) surface:
-if strcmp(is.Grounded,'G')
+if strcmp(sims.BCtype,'G')
     P.x = [L.x 0 0 L.x]*1e-3;
     P.y = [L.y L.y 0 0]*1e-3;
     P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
