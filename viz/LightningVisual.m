@@ -1,15 +1,12 @@
 % Initiate
 close all
-clearvars -except sims is
+clearvars -except sims
 clf
 
-% For formatting exported image size:
-%% Streamer
-%positionWidth = 600;
-%positionHeight = 1200;
-% Leader
-positionWidth = 800;
-positionHeight = 800;
+%% Option to define variables that are typically input during run-time:
+%is.Rec            = 'Y'; % Would you like to record the lightning propagation as a movie? (Y / N)
+%is.updateRho      = 'Y'; % Would you like to update the charge distribution coloring for every saved step? (Y / N)
+%is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
@@ -30,6 +27,14 @@ if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideo
     if ~exist(sims.pathVideos,'dir')
         mkdir(sims.pathVideos);
     end
+
+    % Specifies the boundary conditions for the simulation:
+    prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
+    sims.BCtype = input(prompt_BCtype,'s');                    
+    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G')
+        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
+        sims.BCtype = input(prompt_BCtype,'s');
+    end
 end 
 
 cd ../results
@@ -49,30 +54,35 @@ if isempty(Links.ID)
     return
 else
     fprintf('\n*** Executing LightningVisual.m script. ***\n');
+    % Assigns plot height and width based on domain:
+    if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
+        sims.plotWidth = 600;
+        sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
+    end
     % User-Based Settings:
-    prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
-    is.Rec = input(prompt_Rec,'s');                    
-    while ~strcmp(is.Rec,'Y') && ~strcmp(is.Rec,'N')
-        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-        is.Rec = input(prompt_Rec,'s');
+    if ~isfield(is,'Rec')
+        prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
+        is.Rec = input(prompt_Rec,'s');                    
+        while ~strcmp(is.Rec,'Y') && ~strcmp(is.Rec,'N')
+            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+            is.Rec = input(prompt_Rec,'s');
+        end
     end
-    prompt_updateChargeDensity = '\nWould you like to update the charge distribution coloring for every saved timestep? (Y / N)\n-->';
-    is.updateChargeDensity = input(prompt_updateChargeDensity,'s');                    
-    while ~strcmp(is.updateChargeDensity,'Y') && ~strcmp(is.updateChargeDensity,'N')
-        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-        is.updateChargeDensity = input(prompt_updateChargeDensity,'s');
+    if ~isfield(is,'updateRho')
+        prompt_updateRho = '\nWould you like to update the charge distribution coloring for every saved step? (Y / N)\n-->';
+        is.updateRho = input(prompt_updateRho,'s');                    
+        while ~strcmp(is.updateRho,'Y') && ~strcmp(is.updateRho,'N')
+            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+            is.updateRho = input(prompt_updateRho,'s');
+        end
     end
-    prompt_highResolution = '\nWould you like to save the final image as a very high resolution image? (Y / N)\nWARNING: Only recommended for preparing posters.\n-->';
-    is.highResolution = input(prompt_highResolution,'s');                    
-    while ~strcmp(is.highResolution,'Y') && ~strcmp(is.highResolution,'N')
-        fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-        is.highResolution = input(prompt_highResolution,'s');
-    end
-    prompt_Grounded = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
-    is.Grounded = input(prompt_Grounded,'s');                    
-    while ~strcmp(is.Grounded,'FS') && ~strcmp(is.Grounded,'G')
-        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
-        is.Grounded = input(prompt_Grounded,'s');
+    if ~isfield(is,'highResolution')
+        prompt_highResolution = '\nWould you like to save the final image as a very high resolution image? (Y / N)\nWARNING: Only recommended for preparing posters.\n-->';
+        is.highResolution = input(prompt_highResolution,'s');                    
+        while ~strcmp(is.highResolution,'Y') && ~strcmp(is.highResolution,'N')
+            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+            is.highResolution = input(prompt_highResolution,'s');
+        end
     end
 end
 
@@ -139,7 +149,7 @@ if (strcmp(is.Rec,'Y') == 1)
 end
 % Draw the tree
 figure(1);
-set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
 set(gcf,'Resize','off')
 hold on;
 grid on;
@@ -159,7 +169,7 @@ set(legend,'Position',[0.225 0.7 .5 .0375],'box','off')
 set(gcf,'Resize','off')
 
 % Represents the neutrally charged (grounded) surface:
-if strcmp(is.Grounded,'G')
+if strcmp(sims.BCtype,'G')
     P.x = [L.x 0 0 L.x]*1e-3;
     P.y = [L.y L.y 0 0]*1e-3;
     P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
@@ -178,7 +188,7 @@ for ii=1:Links.Nb
             plottingChargeRegions('white',0.25,rho,X,Y,Z);
             pause
         else
-            if strcmp(is.updateChargeDensity,'Y') == 1
+            if strcmp(is.updateRho,'Y') == 1
                 allPatches = findall(gcf,'type','patch');
                 delete(allPatches);
                 rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],           '-ascii');
@@ -186,7 +196,7 @@ for ii=1:Links.Nb
                 rho.max = .95* max(max(max(rho.data)));
                 rho.min = .95* min(min(min(rho.data)));
                 plottingChargeRegions('white',0.4,rho,X,Y,Z);
-                if strcmp(is.Grounded,'G')
+                if strcmp(sims.BCtype,'G')
                     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
                 end
             end
@@ -232,7 +242,7 @@ for ii=1:Links.Nb
         'Color',color(ii,:),'HandleVisibility','off');
     
     % Formatting axes:
-    set(gcf,'Position',[0,0,positionWidth,positionHeight]);
+    set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
     set(gcf,'Resize','off')
     %axis equal
     %{
@@ -246,7 +256,7 @@ for ii=1:Links.Nb
     box on
     title([sims.objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
     if(strcmp(is.Rec,'Y') == 1)
-        set(gcf,'Position',[0,0,positionWidth,positionHeight]); 
+        set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]); 
         set(gcf,'Resize','off')
         frame = getframe(gcf);
         writeVideo(Movie,frame);
@@ -269,7 +279,7 @@ end
 %titleInfo = get(gca,'title');
 %set(titleInfo,'Position', [((titleInfo.Extent(3))-(((titleInfo.Parent.InnerPosition(1)/titleInfo.Parent.InnerPosition(3)))/titleInfo.Parent.Position(3))-(titleInfo.Parent.Position(1)/titleInfo.Parent.OuterPosition(3))) 1.004 0]);
 title(['Simulated ', sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');    
-set(gcf,'Position',[0,0,positionWidth,positionHeight]); 
+set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]); 
 set(gcf,'Resize','off')
 % If the 'export_fig' function is assigned to the pathtool:
 if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
