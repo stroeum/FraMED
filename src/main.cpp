@@ -86,8 +86,7 @@ int main()
             IO::print(file,"ii: Starting new leader discharge simulation\n");
         }
 
-        /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */
-        /*
+        /* FOLLOWING SECTION MANUALLY ASSIGNS USER-DEFINED VALUES */ /*
         IO::print(file, "..: Reading grid size (N).\n");
         Var::N.init(41,41,71);
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
@@ -121,13 +120,22 @@ int main()
         }else{
             Var::Vd.init(0.0e+5,-0.0e+5, Var::z_gnd,Var::d,Var::N,1); // Assigned voltage drop for leader runs
         }
-        */ 
-        /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
+        */ /* END OF SECTION THAT MANUALLY ASSIGNS USER-DEFINED VALUES */
 
-        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
-        /**/
+        /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */ /**/
         cout<<"ii: Reading in files from atmos-models directory..."<<endl;
 
+        ListDouble alt=IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_z.dat" ));
+        IO::print(file, "..: altitude successfully read\n");
+        ListDouble ng =IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_ng.dat"));
+        IO::print(file, "..: density successfully read\n");
+        IO::print(file, "..: Reading ground altitude (z_gnd)\n");
+        ListDouble::iterator alt_tracker = alt.begin();
+        Var::z_gnd   = *alt_tracker;
+        advance(alt_tracker,(alt.size()-1));
+        IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
+
+        /* IF READING IN PREDETERMINED GRID SIZES */ /**/
         CMatrix1D M;
         IO::print(file, "..: Reading grid size (N).\n");
         IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Nxyz.dat");
@@ -136,29 +144,29 @@ int main()
         Var::N.z = M[2];
         IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
         InitMatrices(Var::N);
-
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
-
         IO::print(file, "..: Reading grid resolution (d)\n");
         IO::read(M,(char*)"../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Dxyz.dat");
         Var::L.init((Var::N.x-1)*M[0],(Var::N.y-1)*M[1],(Var::N.z-1)*M[2]);
         Var::d.init(Var::L,Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
-        
         IO::print(file, "..: Calculating domain size (L)\n");
         Var::L.init((Var::N.x-1)*Var::d.x,(Var::N.y-1)*Var::d.y,(Var::N.z-1)*Var::d.z);
         IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
-        
-        ListDouble alt=IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_z.dat" ));
-        IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_ng.dat"));
-        IO::print(file, "..: density successfully read\n");
-
-        IO::print(file, "..: Reading ground altitude (z_gnd)\n");
-        ListDouble::iterator alt_tracker = alt.begin();
-        Var::z_gnd   = *alt_tracker;
-        advance(alt_tracker,(alt.size()-1));
-        IO::print(file, "ii: Ground altitude: " + to_string(Var::z_gnd/1e3) + "km\n");
+        /**/ /* END OF IF READING IN PREDETERMINED GRID SIZES */
+       
+        /* IF ASSIGNING GRID SIZES (EXCLUDING ALTITUDE READ-IN) */ /*
+        IO::print(file, "..: Reading grid size (N).\n");
+        Var::N.init(63,63,alt.size());
+        IO::print(file, "ii:\t Grid dimensions      : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
+        IO::print(file, "..: Reading domain size (L)\n");
+        Var::L.init(1.55e+3,1.55e+3,(*alt_tracker-Var::z_gnd));
+        IO::print(file, "ii:\t Total simulation size: [" + to_string(Var::L.x/1e3) + " km, " + to_string(Var::L.y/1e3) + " km, " + to_string(Var::L.z/1e3) + " km]\n");
+        IO::print(file, "..: Reading grid resolution (d)\n");
+        Var::d.init(Var::L,Var::N);
+        IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
+        InitMatrices(Var::N); 
+        */ /* END OF IF ASSIGNING GRID SIZES (EXCLUDING ALTITUDE READ-IN) */
 
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
         IO::read(Var::Ec.initiation,	(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_E_initiation_Vm.dat"));
@@ -167,8 +175,7 @@ int main()
         IO::print(file, "..: positive propagation threshold successfully read\n");
         IO::read(Var::Ec.negative,		(char*)("../atmos-models/EPIC/Jupiter/Jet/streamer_1xsolar_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative propagation threshold successfully read\n");
-        /**/
-        /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
+        /**/ /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
         // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
         if(Var::isVoltageDropped){
