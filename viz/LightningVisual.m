@@ -97,8 +97,8 @@ y = ((0:(N.y-1))*d.y)*1e-3;
 z = ((0:(N.z-1))*d.z + gnd.alt)*1e-3;
 
 [X,Y,Z]=meshgrid(x,y,z);
-rho.max = .95* max(max(max(rho.data)));
-rho.min = .95* min(min(min(rho.data)));
+rho.max = max(max(max(rho.data)));
+rho.min = min(min(min(rho.data)));
 
 % Map ColorScale
 gnd.color = [.75 .75 .75];%[.718 .255 .055];
@@ -124,7 +124,7 @@ if (strcmp(is.Rec,'Y') == 1)
 end
 % Draw the tree
 figure(1);
-set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
+set(gcf,'Position',[0,0,1.2*sims.plotWidth,1.2*sims.plotHeight]);
 set(gcf,'Resize','off')
 hold on;
 grid on;
@@ -154,87 +154,95 @@ end
 % Initialize distance traveled for lightning links:
 distance = 0;
 % For-loop to plot lightning discharge links:
-for ii=1:Links.Nb
+for ii=0:Links.Nb
     %     if(rem(ii,10)==0)
     %         %         pause;
     %     end
-    if mod((ii-1),stepsaves) == 0
-        if ii == 1
-            plottingChargeRegions('white',0.25,rho,X,Y,Z);
-            pause
-        else
-            if strcmp(is.updateRho,'Y') == 1
+    if ii == 0
+        plottingChargeRegions('white',0.4,rho,X,Y,Z);
+    else
+        if strcmp(is.updateRho,'Y') == 1
+            if mod((ii-1),stepsaves) == 0 || ii == Links.Nb
                 allPatches = findall(gcf,'type','patch');
                 delete(allPatches);
-                rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],           '-ascii');
-                rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
-                rho.max = .95* max(max(max(rho.data)));
-                rho.min = .95* min(min(min(rho.data)));
+                if ii == Links.Nb
+                    rho.data = load('../results/rho3d.dat','-ascii');
+                else
+                    rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],'-ascii');
+                end
+                rho.data = ConvertTo3d(rho.data,Nxyz); % nC/_m^3
+                if rho.max < max(max(max(rho.data))) || rho.max > 10*max(max(max(rho.data)))
+                    rho.max = max(max(max(rho.data)));
+                end
+                if abs(rho.min) < abs(min(min(min(rho.data)))) || abs(rho.min) > 10*abs(min(min(min(rho.data))))
+                    rho.min = min(min(min(rho.data)));
+                end
                 plottingChargeRegions('white',0.4,rho,X,Y,Z);
                 if strcmp(sims.BCtype,'G')
                     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
                 end
             end
-        end
-    end    
-    % Defining initial position of lightning link (m)
-    x1 = Links.ID(ii,1)*d.x;
-    y1 = Links.ID(ii,2)*d.y;
-    z1 = Links.ID(ii,3)*d.z+gnd.alt; 
-
-    % Defining final position of lightning link (m)
-    x2 = Links.ID(ii,4)*d.x;
-    y2 = Links.ID(ii,5)*d.y;
-    z2 = Links.ID(ii,6)*d.z+gnd.alt;
-
-    % Keeps track of initiation height and min/max propagation height:
-    if ii == 1
-        initHeight = z1;
-        if z1 > z2
-            maxHeight = z1;
-            minHeight = z2;
+        end    
+        % Defining initial position of lightning link (m)
+        x1 = Links.ID(ii,1)*d.x;
+        y1 = Links.ID(ii,2)*d.y;
+        z1 = Links.ID(ii,3)*d.z+gnd.alt; 
+    
+        % Defining final position of lightning link (m)
+        x2 = Links.ID(ii,4)*d.x;
+        y2 = Links.ID(ii,5)*d.y;
+        z2 = Links.ID(ii,6)*d.z+gnd.alt;
+    
+        % Keeps track of initiation height and min/max propagation height:
+        if ii == 1
+            initHeight = z1;
+            if z1 > z2
+                maxHeight = z1;
+                minHeight = z2;
+            else
+                maxHeight = z2;
+                minHeight = z1;
+            end
         else
-            maxHeight = z2;
-            minHeight = z1;
+            if z2 > maxHeight
+                maxHeight = z2;
+            end
+            if z2 < minHeight
+                minHeight = z2;
+            end
         end
-    else
-        if z2 > maxHeight
-            maxHeight = z2;
-        end
-        if z2 < minHeight
-            minHeight = z2;
-        end
+        
+        % Summing lightning link to overall distance of link traveled (m):
+        distance = distance + sqrt(((x2-x1)^2) + ((y2-y1)^2) + ((z2-z1)^2));
+    
+        % Plotting link:
+        plot3(...
+            [x1, x2]*1e-3,...
+            [y1, y2]*1e-3,...
+            [z1, z2]*1e-3,...
+            'Color',color(ii,:),'HandleVisibility','off');
+        
+        % Formatting axes:
+        % set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
+        % set(gcf,'Resize','off')
+        % %axis equal
+        %{
+        xticks([0 5 10 15 20]);
+        xticklabels({'0','5','10','12'});
+        yticks([0 4 8 12]);
+        yticklabels({'0','4','8','12'});
+        zticks([46 50 54 58 62 66 70]);
+        zticklabels({'46','50','54','58','62','66','70'});
+        %}
     end
-    
-    % Summing lightning link to overall distance of link traveled (m):
-    distance = distance + sqrt(((x2-x1)^2) + ((y2-y1)^2) + ((z2-z1)^2));
-
-    % Plotting link:
-    plot3(...
-        [x1, x2]*1e-3,...
-        [y1, y2]*1e-3,...
-        [z1, z2]*1e-3,...
-        'Color',color(ii,:),'HandleVisibility','off');
-    
-    % Formatting axes:
-    set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
-    set(gcf,'Resize','off')
-    %axis equal
-    %{
-    xticks([0 5 10 15 20]);
-    xticklabels({'0','5','10','12'});
-    yticks([0 4 8 12]);
-    yticklabels({'0','4','8','12'});
-    zticks([46 50 54 58 62 66 70]);
-    zticklabels({'46','50','54','58','62','66','70'});
-    %}
     box on
     title([sims.objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
     if(strcmp(is.Rec,'Y') == 1)
-        set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]); 
-        set(gcf,'Resize','off')
         frame = getframe(gcf);
         writeVideo(Movie,frame);
+        if ii == Links.Nb
+            close(Movie);
+        end
     end
 end
 fprintf(['\n\t',sims.objectType,' reaches minimum of ',num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n']);
@@ -244,18 +252,11 @@ fprintf(['\n\t',sims.objectType,' has propagated a total of ',num2str(distance,'
 %camlight; lighting gouraud
 
 hold off;
-% Record the movie
-if (strcmp(is.Rec,'Y') == 1)
-    frame = getframe(gcf);
-    writeVideo(Movie,frame);
-    close(Movie);
-end
 %title('(b)','Interpreter','latex','FontSize',32,'Units','normalized');
 %titleInfo = get(gca,'title');
 %set(titleInfo,'Position', [((titleInfo.Extent(3))-(((titleInfo.Parent.InnerPosition(1)/titleInfo.Parent.InnerPosition(3)))/titleInfo.Parent.Position(3))-(titleInfo.Parent.Position(1)/titleInfo.Parent.OuterPosition(3))) 1.004 0]);
 title(['Simulated ', sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');    
-set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]); 
-set(gcf,'Resize','off')
+
 % If the 'export_fig' function is assigned to the pathtool:
 if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
     currentFolder = pwd;

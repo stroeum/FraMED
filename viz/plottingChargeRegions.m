@@ -19,8 +19,8 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    
     rhoData.data = round(rhoDataOG.data,-tol);
     uniqueRhos = unique(nonzeros(rhoData.data));
-    rhoData.max = max(uniqueRhos);
-    rhoData.min = min(uniqueRhos);
+    rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
+    rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);
 
     % Prevents misread of charge density when cloud height is less than dz:
     testingvalues = zeros([length(uniqueRhos),1]);
@@ -52,7 +52,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     midRange = floor(((length(rgbValues(:,1))-1)/10))-1;
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
-        [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs(uniqueRhos)),rgbValues);
+        [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs([rhoData.min rhoData.max])),rgbValues);
         %if nullInd == (((length(rgbValues(:,1))-1)/2)+1)
         if nullInd <= (middle+round(midRange/2)) && nullInd >= (middle-round(midRange/2))
             trueUniqueRhos(i)=[];
@@ -67,7 +67,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     colorIndices = zeros([length(uniqueRhos),1]);
     colorVertices = zeros([length(uniqueRhos),3]);
     for j = length(uniqueRhos):-1:1
-        [colorIndices(j),colorVertices(j,:)] = colorDetermination(uniqueRhos(j),max(abs(uniqueRhos)),rgbValues);
+        [colorIndices(j),colorVertices(j,:)] = colorDetermination(uniqueRhos(j),max(abs([rhoData.min rhoData.max])),rgbValues);
         
         % If the region is not neutrally charged:
         if colorIndices(j) ~= (((length(rgbValues(:,1))-1)/2)+1)
@@ -113,9 +113,8 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     
     % Resolves formatting issues with the custom colorbar:
     cmap = (rgbValues+rgbValuesAdjusted+rgbValuesAdjusted)/3;
-    caxis([-max(abs(uniqueRhos)) max(abs(uniqueRhos))]);
+    clim([-max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))])) max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))]))]);
     colormap(cmap);
-    colorbar;
     c = colorbar;
     c.Label.String = 'Charge Density (nC/m$^3$)';
     c.Label.Interpreter = 'latex';
@@ -134,4 +133,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
     grid on
     view(-45,9)
+    if length(trueUniqueRhos)<=3
+        pause
+    end
 end
