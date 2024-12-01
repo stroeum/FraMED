@@ -9,32 +9,7 @@ clf
 %is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-    sims.objectName = input(prompt1,'s');
-    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-    sims.objectType = input(prompt2,'s');
-    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-        fprintf('\tNot an acceptable input. Please enter Streamer or Leader.\n');
-        sims.objectType = input(prompt2,'s');
-    end
-
-    % Settings to ensure proper directory referencing:
-    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
-    if ~exist(sims.pathPNGs,'dir')
-        mkdir(sims.pathPNGs);
-    end
-    sims.pathVideos = ['../Figures/',sims.objectName,'/',sims.objectType,'/Videos'];
-    if ~exist(sims.pathVideos,'dir')
-        mkdir(sims.pathVideos);
-    end
-
-    % Specifies the boundary conditions for the simulation:
-    prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
-    sims.BCtype = input(prompt_BCtype,'s');                    
-    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G')
-        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
-        sims.BCtype = input(prompt_BCtype,'s');
-    end
+    sims = specifySimDetails();
 end 
 
 cd ../results
@@ -60,7 +35,7 @@ else
         sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
     end
     % User-Based Settings:
-    if ~isfield(is,'Rec')
+    if ~exist('is','var') || ~isfield(is,'Rec')
         prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
         is.Rec = input(prompt_Rec,'s');                    
         while ~strcmp(is.Rec,'Y') && ~strcmp(is.Rec,'N')
@@ -68,7 +43,7 @@ else
             is.Rec = input(prompt_Rec,'s');
         end
     end
-    if ~isfield(is,'updateRho')
+    if ~exist('is','var') || ~isfield(is,'updateRho')
         prompt_updateRho = '\nWould you like to update the charge distribution coloring for every saved step? (Y / N)\n-->';
         is.updateRho = input(prompt_updateRho,'s');                    
         while ~strcmp(is.updateRho,'Y') && ~strcmp(is.updateRho,'N')
@@ -76,7 +51,7 @@ else
             is.updateRho = input(prompt_updateRho,'s');
         end
     end
-    if ~isfield(is,'highResolution')
+    if ~exist('is','var') || ~isfield(is,'highResolution')
         prompt_highResolution = '\nWould you like to save the final image as a very high resolution image? (Y / N)\nWARNING: Only recommended for preparing posters.\n-->';
         is.highResolution = input(prompt_highResolution,'s');                    
         while ~strcmp(is.highResolution,'Y') && ~strcmp(is.highResolution,'N')
