@@ -144,22 +144,26 @@ bool Tree::Initiate(FILE * file, const int InitiationType, Point& InitiationPoin
 /**********************************************************************************/
 void Tree::Grow(FILE * file, bool AddNew)
 {
-    bool					_isGndConnected;									// Check connection to the ground
+    bool					_isGndConnected;									    // Check connection to the ground
     char					_strRho3D[50];											// File name for storage of charge density
     char					_strPhi3D[50];											// File name for storage of electrical potential
     char					_strUn3D[50];											// File name for storage of fixed potential cells
     int						_CntLinks(0);											// Current link iteration
     double					_BndErrorTmp = 0;										// Error at the boundaries at the current step
     double					_EsEnergyTmp = 0;										// Electrostatic energy at the current step
+    double					_rhoDiff = 0;										    // Cumulative charge density difference before and after growth of current link
     CMatrix1D				_TotalPotentialTmp(Var::N.z);							// Total potential on the central vertical axis at the current step
     CMatrix1D				_TotalEfieldTmp(Var::N.z);								// Total eField on the central vertical axis at the current step
     CMatrix2D				_phi2D_cha(Var::N.y,Var::N.z);							// Potential induced by the channel in the y-z plane
     CMatrix3D				_phi_cha_tmp;											// Potential due to the channel in the domain before update of the boundary conditions
     CMatrix3D				_rho_cha(Var::N.x,Var::N.y,Var::N.z);					// 3-D Matrix for channel induced charge density
-    CMatrix3D				_rho(Var::N.x,Var::N.y,Var::N.z);					// 3-D Matrix for channel induced charge density
-    //CMatrix1D				rrho3D(Var::N.x*Var::N.y*Var::N.z);						// Total charge density everywhere at the current step
+    CMatrix3D				_rho(Var::N.x,Var::N.y,Var::N.z);					    // 3-D Matrix for channel induced charge density
+    CMatrix3D				_rhoBefore(Var::N.x,Var::N.y,Var::N.z);					// 3-D Matrix for global charge density before growth of current link
+    CMatrix3D				_rhoAfter(Var::N.x,Var::N.y,Var::N.z);					// 3-D Matrix for global charge density after growth of current link
+    
+	//CMatrix1D				rrho3D(Var::N.x*Var::N.y*Var::N.z);						// Total charge density everywhere at the current step
     int						nn = 0;													// Blind variable
-    ListLink::iterator		it;													// index on the list of established links
+    ListLink::iterator		it;													    // index on the list of established links
     Charge					CC;														// Charge transfer at the current step
     Potential				PP;														// Channel potential at the current step
     Vector					pp;														// x-, y-, z-components and norm of the dipole moment at the current step
@@ -167,18 +171,22 @@ void Tree::Grow(FILE * file, bool AddNew)
     
     nn = 0;
     
-    for(int kk=0 ; kk<Var::N.z ; kk++)
+	for(int kk=0 ; kk<Var::N.z ; kk++)
     {
         _TotalEfieldTmp[kk]	= foo::Eijk((Var::N.x-1)/2,(Var::N.y-1)/2,kk,Var::phi,Var::d,Var::N)[3];
         _TotalPotentialTmp[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
         if(Var::isEsEnergyCalculated == true && Var::step3d == 0)
             for(int jj=0 ; jj<Var::N.y ; jj++)
                 for(int ii=0 ; ii<Var::N.x ; ii++)
+				{
                     _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+					_rhoBefore[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+				}
         if(Var::isEsEnergyCalculated == false && Var::step3d != 0)
             for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
             {
                 _rho[ii][jj][kk]		= foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+				_rhoBefore[ii][jj][kk]  = _rho[ii][jj][kk];
                 nn++;
             };
         if(Var::isEsEnergyCalculated == true && Var::step3d != 0)
@@ -186,7 +194,8 @@ void Tree::Grow(FILE * file, bool AddNew)
             {
                 _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
                 _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
-                nn++;
+                _rhoBefore[ii][jj][kk]  = _rho[ii][jj][kk];
+				nn++;
             };
     }
     if(Var::step3d != 0)
@@ -307,12 +316,22 @@ void Tree::Grow(FILE * file, bool AddNew)
                 _TotalPotentialTmp[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
                 if(Var::isEsEnergyCalculated == true && Var::step3d == 0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
+					{
                         _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
+						_rhoAfter[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
+							_rhoDiff+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
+					}
                 if(Var::isEsEnergyCalculated == false && Var::step3d != 0 && _CntLinks%Var::step3d==0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
                         _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
-                        nn++;
+                        if((_rho[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
+							_rhoDiff+= _rho[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						_rhoBefore[ii][jj][kk] = _rho[ii][jj][kk];
+						nn++;
+						
                     };
                 if(Var::isEsEnergyCalculated == true && Var::step3d != 0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
@@ -323,6 +342,10 @@ void Tree::Grow(FILE * file, bool AddNew)
                             _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
                             nn++;
                         }
+						_rhoAfter[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
+							_rhoDiff+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
                     };
             }
             if(Var::step3d != 0 && _CntLinks%Var::step3d==0) {
@@ -340,6 +363,8 @@ void Tree::Grow(FILE * file, bool AddNew)
 		pp = foo::DipoleMoment(Var::QchannelPlus,Var::phi_cha,Var::Un,Var::L,Var::d,Var::N);
 		Var::DischargeDipoleMoment.push_back(pp);
 		Var::CarriedCharge.push_back(Var::QchannelPlus);
+		Var::TransportedRho.push_back(_rhoDiff);
+		_rhoDiff = 0;
 		if(Var::isQMinimized==true){
 			Var::EsEnergy.push_back(_EsEnergyTmp);
 			Var::TotalEfield.push_back(_TotalEfieldTmp);
@@ -498,6 +523,7 @@ void Tree::StoreData(FILE * file)
     // Store channel potential, charge and dipole moment //
     IO::write(Var::ChannelPotential,		(char*)"ChannelPotentials.dat");
     IO::write(Var::CarriedCharge,			(char*)"CarriedCharge.dat");
+	IO::write(Var::TransportedRho,		    (char*)"TransportedRho.dat");
     IO::write(Var::DischargeDipoleMoment,	(char*)"DischargeDipoleMoment.dat");
     
     // Store values of the electrostatic energy in the domain (if calculated) //

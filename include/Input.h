@@ -101,11 +101,12 @@ public:
 	static	SorSolution				SOR;											// Parameters of SOR algorithms
 
 	static	ListDouble				ChannelPotential;								// Channel potential at each stage of development
-	static	ListDouble				CarriedCharge;									// Channel transfer at each of stage development
+	static	ListDouble				CarriedCharge;									// Channel transfer at each stage of development
+	static	ListDouble				TransportedRho;								    // Global sum of positive net charge densities at each stage of development
 	static	ListDouble				EsEnergy;										// Electrostatic energy in the simulation domain
 	static	ListLink				EstablishedLinks;								// List of links constituting the discharge tree
 	static	ListVector				BndUpdateErrors;								// List of errors at the boundaries
-	static	ListVector				DischargeDipoleMoment;							// Channel dipole moment at each of stage development
+	static	ListVector				DischargeDipoleMoment;							// Channel dipole moment at each stage of development
 	static	ListCMatrix1D			TotalPotential;									// Potential on a vertical axis at the center of the simulation domain
 	static	ListCMatrix1D			TotalEfield;									// E-field on a vertical axis at the center of the simulation domain
 	static	ListCharge				ChargeCfg;										// Table with all parameters of the charge configuation

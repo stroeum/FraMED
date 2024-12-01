@@ -77,11 +77,12 @@ Potential               Var::V;                                                 
 SorSolution				Var::SOR;													// Parameters of SOR algorithms
 
 ListDouble				Var::ChannelPotential;										// Channel potential at each stage of development
-ListDouble				Var::CarriedCharge;											// Channel transfer at each of stage development
+ListDouble				Var::CarriedCharge;											// Channel transfer at each stage of development
+ListDouble				Var::TransportedRho;										// Global sum of positive net charge densities at each stage of development
 ListDouble				Var::EsEnergy;												// Electrostatic energy in the simulation domain
 ListLink				Var::EstablishedLinks;										// List of links constituting the discharge tree
 ListVector				Var::BndUpdateErrors;										// List of errors at the boundaries
-ListVector				Var::DischargeDipoleMoment;									// Channel dipole moment at each of stage development
+ListVector				Var::DischargeDipoleMoment;									// Channel dipole moment at each stage of development
 ListCMatrix1D			Var::TotalPotential;										// Potential on a vertical axis at the center of the simulation domain
 ListCMatrix1D			Var::TotalEfield;											// E-field on a vertical axis at the center of the simulation domain
 ListCharge				Var::ChargeCfg;												// Table with all parameters of the charge configuation
@@ -118,11 +119,11 @@ double					Var::maxAlt;
 void Var::ClearLists()
 {
 	ChannelPotential.clear();										// Channel potential at each stage of development
-	CarriedCharge.clear();											// Channel transfer at each of stage development
+	CarriedCharge.clear();											// Channel transfer at each stage of development
 	EsEnergy.clear();												// Electrostatic energy in the simulation domain
 	EstablishedLinks.clear();										// List of links constituting the discharge tree
 	BndUpdateErrors.clear();										// List of errors at the boundaries
-	DischargeDipoleMoment.clear();									// Channel dipole moment at each of stage development
+	DischargeDipoleMoment.clear();									// Channel dipole moment at each stage of development
 	TotalPotential.clear();											// Potential on a vertical axis at the center of the simulation domain
 	TotalEfield.clear();											// E-field on a vertical axis at the center of the simulation domain
 	ChargeCfg.clear();												// Table with all parameters of the charge configuation

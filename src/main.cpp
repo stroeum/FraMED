@@ -287,17 +287,20 @@ int main()
         static	ListLink    PreviousLinks;
         static	ListDouble	PreviousChannelPotential;
         static	ListDouble	PreviousCarriedCharge;
+        static	ListDouble	PreviousChargeTransported;
         CMatrix2D           PreviousDischargeDipoleMoment;
         Vector              P;
         
         IO::read(PreviousLinks                  , (char*)"EstablishedLinks.dat"     );
         IO::read(PreviousChannelPotential       , (char*)"ChannelPotentials.dat"    );
         IO::read(PreviousCarriedCharge          , (char*)"CarriedCharge.dat"        );
+        IO::read(PreviousChargeTransported      , (char*)"ChargeTransported.dat"    );
         IO::read(PreviousDischargeDipoleMoment  , (char*)"DischargeDipoleMoment.dat");
         
         ListLink::iterator   itLink     = PreviousLinks.begin();
         ListDouble::iterator itVo       = PreviousChannelPotential.begin();
         ListDouble::iterator itQ        = PreviousCarriedCharge.begin();
+        ListDouble::iterator itR        = PreviousChargeTransported.begin();
         
         int n=0;
         while (n<LastStep) {
@@ -307,6 +310,8 @@ int main()
             itVo++;
             Var::CarriedCharge.push_back(*itQ);
             itQ++;
+            Var::ChargeTransported.push_back(*itR);
+            itR++;
             
             P.x = PreviousDischargeDipoleMoment[n][0];
             P.y = PreviousDischargeDipoleMoment[n][1];
@@ -559,6 +564,6 @@ void InitMatrices(SizeGrid N)
     Var::phi_amb.init(N.x,N.y,N.z);								// _V	Cloud electric potential
     Var::rho.init(N.x,N.y,N.z);									// _C/m3	total charge density
     Var::Un.init(N.x,N.y,N.z);									// Map of occupied grid points
-    Var::phiNum.init(N.z);													// _V	Total electric potential on a vertical axis in the center of simulation domain
-    Var::EzNum.init(N.z);													// _V/m	Total electric field on a vertical axis in the center of simulation domain
+    Var::phiNum.init(N.z);										// _V	Total electric potential on a vertical axis in the center of simulation domain
+    Var::EzNum.init(N.z);										// _V/m	Total electric field on a vertical axis in the center of simulation domain
 }
