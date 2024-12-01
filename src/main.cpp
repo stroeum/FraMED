@@ -354,11 +354,13 @@ int main()
             Var::Q =    20;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 62e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 16e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
+            Var::C.reset(Var::d,Var::N);
             
             /* Example of a secondary cylindrical -15 Coulomb charge layer, centered in the xy-plane between altitudes of 45-51 km */
             Var::Q =    -15;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 48e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 6e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
+            Var::C.reset(Var::d,Var::N);
             
             /* ALTERNATIVE CHARGE LAYER SHAPES */
             //Var::C.ellipsoid(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3, Var::d,Var::N);
