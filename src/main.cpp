@@ -356,7 +356,13 @@ int main()
     if(Var::isNewRun){
         if (Var::LoadingType == SET_CHARGES) {
             IO::print(file, "..: Setting charge layers\n");
-            // Q (Coulombs) Charge content; Xq,Yq,Zq (meters) Charge center coordinate; R,H (meters) Size of the charge center //
+             /* 
+            Q (Coulombs) Charge content; Xq, Yq, Zq (meters) center coordinate. 
+                -disk:      Rq1 = radius,                         Rq3 = height (meters) 
+                -ellipsoid: Rq1 = semi-axis A, Rq2 = semi-axis B, Rq3 = semi-axis C (meters)
+                -rectangle: Rq1 = width in X,  Rq2 = width in Y,  Rq3 = width in Z (meters)
+            */
+            
             /* Example of a cylindrical +20 Coulomb charge layer, centered in the xy-plane between altitudes of 54-70 km */
             Var::Q =    20;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 62e+3+Var::z_shift; Var::Rq1 = Var::L.x/2;	Var::Rq3 = 16e+3;
             Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
