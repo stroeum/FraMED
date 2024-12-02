@@ -294,20 +294,20 @@ int main()
         static	ListLink    PreviousLinks;
         static	ListDouble	PreviousChannelPotential;
         static	ListDouble	PreviousCarriedCharge;
-        static	ListDouble	PreviousChargeTransported;
+        static	ListDouble	PreviousTransportedRho;
         CMatrix2D           PreviousDischargeDipoleMoment;
         Vector              P;
         
         IO::read(PreviousLinks                  , (char*)"EstablishedLinks.dat"     );
         IO::read(PreviousChannelPotential       , (char*)"ChannelPotentials.dat"    );
         IO::read(PreviousCarriedCharge          , (char*)"CarriedCharge.dat"        );
-        IO::read(PreviousChargeTransported      , (char*)"ChargeTransported.dat"    );
+        IO::read(PreviousTransportedRho         , (char*)"TransportedRho.dat"       );
         IO::read(PreviousDischargeDipoleMoment  , (char*)"DischargeDipoleMoment.dat");
         
         ListLink::iterator   itLink     = PreviousLinks.begin();
         ListDouble::iterator itVo       = PreviousChannelPotential.begin();
         ListDouble::iterator itQ        = PreviousCarriedCharge.begin();
-        ListDouble::iterator itR        = PreviousChargeTransported.begin();
+        ListDouble::iterator itR        = PreviousTransportedRho.begin();
         
         int n=0;
         while (n<LastStep) {
@@ -317,7 +317,7 @@ int main()
             itVo++;
             Var::CarriedCharge.push_back(*itQ);
             itQ++;
-            Var::ChargeTransported.push_back(*itR);
+            Var::TransportedRho.push_back(*itR);
             itR++;
             
             P.x = PreviousDischargeDipoleMoment[n][0];
