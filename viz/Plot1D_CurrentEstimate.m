@@ -121,28 +121,32 @@ fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(1000*l
 fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*0.001,'%.1f')," km from the initiation point."))
 if strcmp(sims.objectType,'Leader')
     fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
-    fprintf(strcat("\n\t\t ",num2str(current.avg.val,'%.4f'),"\tkA\t(mean, including all links,  sigma = ",num2str(current.avg.std,'%.4f')," kA)"));
-    fprintf(strcat("\n\t\t ",num2str(current.partial.val,'%.4f'),"\tkA\t(mean, excluding final link, sigma = ",num2str(current.partial.std,'%.4f')," kA)"));
-    fprintf(strcat("\n\t\t ",num2str(current.max.val,'%.4f'),"\tkA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
-    fprintf(strcat("\n\t\t ",num2str(current.min.val,'%.4f'),"\tkA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
+    fprintf(strcat("\n\t\t",num2str(current.avg.val,5),"\tkA\t(mean, including all links,  sigma = ",num2str(current.avg.std,5)," kA)"));
+    fprintf(strcat("\n\t\t",num2str(current.partial.val,5),"\tkA\t(mean, excluding final link, sigma = ",num2str(current.partial.std,5)," kA)"));
+    fprintf(strcat("\n\t\t",num2str(current.max.val,5),"\tkA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
+    fprintf(strcat("\n\t\t",num2str(current.min.val,5),"\tkA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
 else
     fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
-    fprintf(strcat("\n\t\t ",num2str(1000*current.avg.val,'%.4f'),"\tA\t(mean, including all links,  sigma = ",num2str(1000*current.avg.std,'%.4f')," A)"));
-    fprintf(strcat("\n\t\t ",num2str(1000*current.partial.val,'%.4f'),"\tA\t(mean, excluding final link, sigma = ",num2str(1000*current.partial.std,'%.4f')," A)"));
-    fprintf(strcat("\n\t\t ",num2str(1000*current.max.val,'%.4f'),"\tA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
-    fprintf(strcat("\n\t\t ",num2str(1000*current.min.val,'%.4f'),"\tA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
+    fprintf(strcat("\n\t\t",num2str(1000*current.avg.val,5),"\tA\t(mean, including all links,  sigma = ",num2str(1000*current.avg.std,5)," A)"));
+    fprintf(strcat("\n\t\t",num2str(1000*current.partial.val,5),"\tA\t(mean, excluding final link, sigma = ",num2str(1000*current.partial.std,5)," A)"));
+    fprintf(strcat("\n\t\t",num2str(1000*current.max.val,5),"\tA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
+    fprintf(strcat("\n\t\t",num2str(1000*current.min.val,5),"\tA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
 end
 if links.end(end,3)==0
-    fprintf(strcat("\t ",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/vprop.case),'%.4f'),"\tkA\t(initiation-to-ground path)\n"))
+    fprintf(strcat("\t\t",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/vprop.case),5),"\tkA\t(initiation-to-ground path)\n"))
 end
 
 %% Plot of instantaneous current values:
 clf
 hold on; box on;
 scatter(links.steps,current.case,25,'r.','DisplayName','Instantaneous Current: $I_l = \frac{\Delta  Q_l}{\Delta t_l}$')
-yline(current.max.val,'k:','DisplayName',strcat("Maximum Current: ",num2str(current.max.val,'%.2f')," kA (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
-yline(current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(current.avg.val,'%.2f')," $\pm$ ",num2str(current.avg.std,'%.2f')," kA"),'LineWidth',2);
-yline(current.min.val,'k-','DisplayName',strcat("Minimum Current: ",num2str(current.min.val,'%.2f')," kA (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
+yline(current.max.val,'k:','DisplayName',strcat("Maximum Current: ",num2str(current.max.val,3)," kA (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
+if links.end(end,3)==0
+    yline(current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(current.partial.val,3)," $\pm$ ",num2str(current.partial.std,3)," kA"),'LineWidth',2);
+else
+    yline(current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(current.avg.val,3)," $\pm$ ",num2str(current.avg.std,3)," kA"),'LineWidth',2);
+end
+yline(current.min.val,'k-','DisplayName',strcat("Minimum Current: ",num2str(current.min.val,3)," kA (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
 xlim([0,links.steps(end)]);
 legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
