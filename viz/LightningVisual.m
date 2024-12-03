@@ -1,12 +1,11 @@
 % Initiate
 close all
 clearvars -except sims
-clf
 
 %% Option to define variables that are typically input during run-time:
-%is.Rec            = 'Y'; % Would you like to record the lightning propagation as a movie? (Y / N)
-%is.updateRho      = 'Y'; % Would you like to update the charge distribution coloring for every saved step? (Y / N)
-%is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
+% is.Rec            = 'N'; % Would you like to record the lightning propagation as a movie? (Y / N)
+% is.updateRho      = 'N'; % Would you like to update the charge distribution coloring for every saved step? (Y / N)
+% is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     sims = specifySimDetails();
@@ -259,6 +258,7 @@ title(['Simulated ', sims.objectType,' Discharge: ',sims.objectName],'FontSize',
 
 % If the 'export_fig' function is assigned to the pathtool:
 if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
+    pause
     currentFolder = pwd;
     cd(sims.pathPNGs);
     export_fig HighRes_Discharge.png -transparent -m8

@@ -2,45 +2,11 @@
 % Plot all figures and store them as .eps
 % NB: Videos should be store separately
 clc
+close all
 clearvars
-clf
 
 %% Folders for Saving (User-Defined)
-fprintf('*** Executing main.m script. ***\n');
-prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-sims.objectName = input(prompt1,'s');
-prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-sims.objectType = input(prompt2,'s');
-while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-    fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-    sims.objectType = input(prompt2,'s');
-end
-
-% Ensures directories exist
-sims.pathPNGs = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/PNGs');
-if ~exist(sims.pathPNGs, 'dir')
-    mkdir(sims.pathPNGs)
-end
-sims.pathEPSs = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/EPSs');
-if ~exist(sims.pathEPSs, 'dir')
-    mkdir(sims.pathEPSs)
-end
-
-sims.pathVideos = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/Videos');
-if ~exist(sims.pathVideos, 'dir')
-    mkdir(sims.pathVideos)
-end
-
-% Specifies the boundary conditions for the simulation:
-prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
-sims.BCtype = input(prompt_BCtype,'s');                    
-while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G')
-    fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
-    sims.BCtype = input(prompt_BCtype,'s');
-end
-
-%% Lightning visualization
-LightningVisual;
+sims = specifySimDetails();
 
 %% Runtime Results
 Plot1D_RuntimeResults;
@@ -53,6 +19,10 @@ exportgraphics(gcf,[sims.pathEPSs,'/ChargeTransfer.eps'],'BackgroundColor','whit
 %% Channel Potential
 Plot1D_ChannelPotential;
 exportgraphics(gcf,[sims.pathEPSs,'/ChannelPotential.eps'],'BackgroundColor','white');
+
+%% Current Estimate
+Plot1D_CurrentEstimate;
+exportgraphics(gcf,[sims.pathEPSs,'/CurrentEstimate.eps'],'BackgroundColor','white');
 
 %% Dipole Moment
 Plot1D_DipoleMoment;
@@ -85,6 +55,9 @@ exportgraphics(gcf,[sims.pathEPSs,'/FieldLines.eps'],'BackgroundColor','white');
 %% Charged cloud structure
 Plot3D_CloudDistribution;
 exportgraphics(gcf,[sims.pathEPSs,'/CloudDistribution.eps'],'BackgroundColor','white');
+
+%% Lightning visualization
+LightningVisual;
 
 %% LMA
 LMA_main;

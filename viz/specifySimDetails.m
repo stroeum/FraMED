@@ -17,6 +17,10 @@ function sims = specifySimDetails()
     if ~exist(sims.pathVideos,'dir')
         mkdir(sims.pathVideos);
     end
+    sims.pathEPSs = ['../Figures/',sims.objectName,'/',sims.objectType,'/EPSs'];
+    if ~exist(sims.pathEPSs,'dir')
+        mkdir(sims.pathEPSs);
+    end
 
     % Specifies the boundary conditions for the simulation:
     prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
