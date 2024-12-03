@@ -14,10 +14,17 @@ load('EstablishedLinks.dat', '-ascii');
 load('TransportedRho.dat','-ascii');
 cd ../viz/
 
+% Assign important values regarding the links:
+links.start    = EstablishedLinks(:,1:3);
+links.end      = EstablishedLinks(:,4:6);
+links.distance = EstablishedLinks(:,7);
+links.initiate = links.start(1,:);
+links.steps    = 1:1:size(EstablishedLinks,1);
+
 %% Calculate current:
 % Convert charge density (nC/m3) into charge (C):
 conversionFactor  = (10^(-9))*dxyz(1)*dxyz(2)*dxyz(3);
-chargeTransported = conversionFactor.*TransportedRho;
+chargeTransported = conversionFactor.*TransportedRho(1:links.steps(end));
 
 % Declared constants:
 vprop.leader   = 4.4*(10^5); % propagation speed for leaders,   ~440 km/s,    Thomson1985, doi:10.1029/JD090iD05p08136
@@ -43,13 +50,6 @@ elseif strcmp(sims.objectType,'Leader')
 end
 
 %% Identifies total branch lengths to predict lower limit of timescale:
-% Assign important values:
-links.start    = EstablishedLinks(:,1:3);
-links.end      = EstablishedLinks(:,4:6);
-links.distance = EstablishedLinks(:,7);
-links.initiate = links.start(1,:);
-links.steps    = 1:1:size(EstablishedLinks,1);
-
 % Determines various path branches and distances along each branch:
 statusBar = waitbar(0,strcat("(",num2str(0,'%.0f'),"%) Processing ",num2str(0)," out of ",num2str(size(EstablishedLinks,1))," links."));
 links.total = size(EstablishedLinks,1);
