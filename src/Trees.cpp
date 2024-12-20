@@ -149,9 +149,14 @@ void Tree::Grow(FILE * file, bool AddNew)
     char					_strPhi3D[50];											// File name for storage of electrical potential
     char					_strUn3D[50];											// File name for storage of fixed potential cells
     int						_CntLinks(0);											// Current link iteration
-    double					_BndErrorTmp = 0;										// Error at the boundaries at the current step
+    int						_endi;													// Tracks the most recently added link's x-position
+    int						_endj;													// Tracks the most recently added link's y-position
+    int						_endk;													// Tracks the most recently added link's z-position
+	double					_BndErrorTmp = 0;										// Error at the boundaries at the current step
     double					_EsEnergyTmp = 0;										// Electrostatic energy at the current step
-    double					_rhoDiff = 0;										    // Cumulative charge density difference before and after growth of current link
+    double					_rhoDiffEnd = 0;										// Charge density difference before and after growth of current link at the end node
+    double					_rhoDiffNeg = 0;										// Cumulative negative charge density difference before and after growth of current link
+    double					_rhoDiffPos = 0;										// Cumulative positive charge density difference before and after growth of current link
     CMatrix1D				_TotalPotentialTmp(Var::N.z);							// Total potential on the central vertical axis at the current step
     CMatrix1D				_TotalEfieldTmp(Var::N.z);								// Total eField on the central vertical axis at the current step
     CMatrix2D				_phi2D_cha(Var::N.y,Var::N.z);							// Potential induced by the channel in the y-z plane
@@ -282,7 +287,7 @@ void Tree::Grow(FILE * file, bool AddNew)
                     }
                 Var::BndUpdateErrors.push_back(_BndError);
             }
-            
+
             /**************************************************************************/
             /* The update of the BC introduce sharp gradient and artificial charge    */
             /* close to the boundary, which slightly violate the charge conservation. */
@@ -310,6 +315,12 @@ void Tree::Grow(FILE * file, bool AddNew)
                 sprintf(_strUn3D ,"Un3d%d.dat" , _CntLinks);
                 nn          = 0;
             }
+			for(it=Var::EstablishedLinks.begin(); it!=Var::EstablishedLinks.end();it++)
+			{   // Tracks the coordinates of the most recently added end-node
+				_endi = it->end.i;
+				_endj = it->end.j;
+				_endk = it->end.k;
+			}
             for(int kk=0 ; kk<Var::N.z ; kk++)
             {
                 _TotalEfieldTmp[kk]	= foo::Eijk((Var::N.x-1)/2,(Var::N.y-1)/2,kk,Var::phi,Var::d,Var::N)[3];
@@ -319,16 +330,24 @@ void Tree::Grow(FILE * file, bool AddNew)
 					{
                         _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
 						_rhoAfter[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
-						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
-							_rhoDiff+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>1e-9)
+							_rhoDiffPos+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						else if ((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])<-1e-9)
+							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
+						if((ii==_endi) && (jj==_endj) && (kk==_endk))
+							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
 					}
                 if(Var::isEsEnergyCalculated == false && Var::step3d != 0 && _CntLinks%Var::step3d==0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
                         _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
-                        if((_rho[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
-							_rhoDiff+= _rho[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+                       	if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>1e-9)
+							_rhoDiffPos+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						else if ((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])<-1e-9)
+							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
+						if((ii==_endi) && (jj==_endj) && (kk==_endk))
+							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						_rhoBefore[ii][jj][kk] = _rho[ii][jj][kk];
 						nn++;
 						
@@ -343,8 +362,12 @@ void Tree::Grow(FILE * file, bool AddNew)
                             nn++;
                         }
 						_rhoAfter[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
-						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>0)
-							_rhoDiff+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk]) > 1e-9)
+							_rhoDiffPos+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
+						if(((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk]) < -1e-9))
+							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
+						if((ii==_endi) && (jj==_endj) && (kk==_endk))
+							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
                     };
             }
@@ -363,8 +386,14 @@ void Tree::Grow(FILE * file, bool AddNew)
 		pp = foo::DipoleMoment(Var::QchannelPlus,Var::phi_cha,Var::Un,Var::L,Var::d,Var::N);
 		Var::DischargeDipoleMoment.push_back(pp);
 		Var::CarriedCharge.push_back(Var::QchannelPlus);
-		Var::TransportedRho.push_back(_rhoDiff);
-		_rhoDiff = 0;
+
+		
+		Var::TransportedRhoEnd.push_back(_rhoDiffEnd);
+		Var::TransportedRhoNeg.push_back(_rhoDiffNeg);
+		Var::TransportedRhoPos.push_back(_rhoDiffPos);
+		_rhoDiffEnd = 0;
+		_rhoDiffNeg = 0;
+		_rhoDiffPos = 0;
 		if(Var::isQMinimized==true){
 			Var::EsEnergy.push_back(_EsEnergyTmp);
 			Var::TotalEfield.push_back(_TotalEfieldTmp);
@@ -523,7 +552,9 @@ void Tree::StoreData(FILE * file)
     // Store channel potential, charge and dipole moment //
     IO::write(Var::ChannelPotential,		(char*)"ChannelPotentials.dat");
     IO::write(Var::CarriedCharge,			(char*)"CarriedCharge.dat");
-	IO::write(Var::TransportedRho,		    (char*)"TransportedRho.dat");
+	IO::write(Var::TransportedRhoEnd,		(char*)"TransportedRhoEnd.dat");
+	IO::write(Var::TransportedRhoNeg,		(char*)"TransportedRhoNeg.dat");
+	IO::write(Var::TransportedRhoPos,		(char*)"TransportedRhoPos.dat");
     IO::write(Var::DischargeDipoleMoment,	(char*)"DischargeDipoleMoment.dat");
     
     // Store values of the electrostatic energy in the domain (if calculated) //

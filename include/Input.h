@@ -102,7 +102,9 @@ public:
 
 	static	ListDouble				ChannelPotential;								// Channel potential at each stage of development
 	static	ListDouble				CarriedCharge;									// Channel transfer at each stage of development
-	static	ListDouble				TransportedRho;								    // Global sum of positive net charge densities at each stage of development
+	static	ListDouble				TransportedRhoEnd;								// Charge density difference at end-node for each stage of development
+	static	ListDouble				TransportedRhoNeg;								// Global sum of negative net charge densities at each stage of development
+	static	ListDouble				TransportedRhoPos;								// Global sum of positive net charge densities at each stage of development
 	static	ListDouble				EsEnergy;										// Electrostatic energy in the simulation domain
 	static	ListLink				EstablishedLinks;								// List of links constituting the discharge tree
 	static	ListVector				BndUpdateErrors;								// List of errors at the boundaries

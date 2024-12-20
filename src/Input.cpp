@@ -78,7 +78,9 @@ SorSolution				Var::SOR;													// Parameters of SOR algorithms
 
 ListDouble				Var::ChannelPotential;										// Channel potential at each stage of development
 ListDouble				Var::CarriedCharge;											// Channel transfer at each stage of development
-ListDouble				Var::TransportedRho;										// Global sum of positive net charge densities at each stage of development
+ListDouble				Var::TransportedRhoEnd;								        // Charge density difference at end-node for each stage of development
+ListDouble				Var::TransportedRhoNeg;								        // Global sum of negative net charge densities at each stage of development
+ListDouble				Var::TransportedRhoPos;								        // Global sum of positive net charge densities at each stage of development
 ListDouble				Var::EsEnergy;												// Electrostatic energy in the simulation domain
 ListLink				Var::EstablishedLinks;										// List of links constituting the discharge tree
 ListVector				Var::BndUpdateErrors;										// List of errors at the boundaries

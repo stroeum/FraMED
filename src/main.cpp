@@ -294,20 +294,26 @@ int main()
         static	ListLink    PreviousLinks;
         static	ListDouble	PreviousChannelPotential;
         static	ListDouble	PreviousCarriedCharge;
-        static	ListDouble	PreviousTransportedRho;
+        static	ListDouble	PreviousTransportedRhoEnd;
+        static	ListDouble	PreviousTransportedRhoNeg;
+        static	ListDouble	PreviousTransportedRhoPos;
         CMatrix2D           PreviousDischargeDipoleMoment;
         Vector              P;
         
         IO::read(PreviousLinks                  , (char*)"EstablishedLinks.dat"     );
         IO::read(PreviousChannelPotential       , (char*)"ChannelPotentials.dat"    );
         IO::read(PreviousCarriedCharge          , (char*)"CarriedCharge.dat"        );
-        IO::read(PreviousTransportedRho         , (char*)"TransportedRho.dat"       );
+        IO::read(PreviousTransportedRhoEnd      , (char*)"TransportedRhoEnd.dat"    );
+        IO::read(PreviousTransportedRhoNeg      , (char*)"TransportedRhoNeg.dat"    );
+        IO::read(PreviousTransportedRhoPos      , (char*)"TransportedRhoPos.dat"    );
         IO::read(PreviousDischargeDipoleMoment  , (char*)"DischargeDipoleMoment.dat");
         
         ListLink::iterator   itLink     = PreviousLinks.begin();
         ListDouble::iterator itVo       = PreviousChannelPotential.begin();
         ListDouble::iterator itQ        = PreviousCarriedCharge.begin();
-        ListDouble::iterator itR        = PreviousTransportedRho.begin();
+        ListDouble::iterator itEnd      = PreviousTransportedRhoEnd.begin();
+        ListDouble::iterator itNeg      = PreviousTransportedRhoNeg.begin();
+        ListDouble::iterator itPos      = PreviousTransportedRhoPos.begin();
         
         int n=0;
         while (n<LastStep) {
@@ -317,8 +323,12 @@ int main()
             itVo++;
             Var::CarriedCharge.push_back(*itQ);
             itQ++;
-            Var::TransportedRho.push_back(*itR);
-            itR++;
+            Var::TransportedRhoEnd.push_back(*itEnd);
+            itEnd++;
+            Var::TransportedRhoNeg.push_back(*itNeg);
+            itNeg++;
+            Var::TransportedRhoPos.push_back(*itPos);
+            itPos++;
             
             P.x = PreviousDischargeDipoleMoment[n][0];
             P.y = PreviousDischargeDipoleMoment[n][1];
