@@ -84,6 +84,9 @@ rho.min = min(min(min(rho.data)));
 gnd.color = [.75 .75 .75]; % light gray for neutral charges
 figure(1);
 set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
+% Sets bounds for the axes (comment out if clouds get cut off):
+axis equal
+axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
 hold on;
 
 % Calls the new function that automatically recognizes charge regions:
