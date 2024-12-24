@@ -3,9 +3,11 @@ close all
 clearvars -except sims
 
 %% Option to define variables that are typically input during run-time:
-% is.Rec            = 'N'; % Would you like to record the lightning propagation as a movie? (Y / N)
-% is.updateRho      = 'N'; % Would you like to update the charge distribution coloring for every saved step? (Y / N)
-% is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
+is.Rec            = 'N'; % Would you like to record the lightning propagation as a movie? (Y / N)
+is.updateRho      = 'N'; % Would you like to update the charge distribution coloring for every saved step? (Y / N)
+is.highResolution = 'N'; % Would you like to save the final image as a very high resolution image? (Y / N)
+is.monoChrome     = 'N'; % Would you like the plot to be monochrome? (Y / N)
+
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     sims = specifySimDetails();
@@ -21,6 +23,7 @@ rho.data  = load('rhoAmb.dat',           '-ascii');
 Links.ID  = load('EstablishedLinks.dat', '-ascii');
 gnd.alt   = load('z_gnd.dat',            '-ascii');
 stepsaves = abs(load('step3d.dat',       '-ascii'));
+polarity  = load('TransportedRhoEnd.dat','-ascii');
 
 if isempty(Links.ID)
     fprintf('\n*** LightningVisual.m cannot be executed with current EstablishedLinks.dat file. ***\n');
@@ -34,6 +37,14 @@ else
         sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
     end
     % User-Based Settings:
+    if ~exist('is','var') || ~isfield(is,'monoChrome')
+        prompt_monoChrome = '\nWould you like the lightning links to be plotted in black (Y) or red/blue depending on the polarity of the associated charge movement (N)?\n-->';
+        is.monoChrome = input(prompt_monoChrome,'s');                    
+        while ~strcmp(is.monoChrome,'Y') && ~strcmp(is.monoChrome,'N')
+            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
+            is.monoChrome = input(prompt_monoChrome,'s');
+        end
+    end
     if ~exist('is','var') || ~isfield(is,'Rec')
         prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
         is.Rec = input(prompt_Rec,'s');                    
@@ -67,13 +78,13 @@ N.x = Nxyz(1);
 N.y = Nxyz(2);
 N.z = Nxyz(3);
 
-d.x = dxyz(1);           % _m
-d.y = dxyz(2);           % _m
-d.z = dxyz(3);           % _m
+d.x = dxyz(1);        % _m
+d.y = dxyz(2);        % _m
+d.z = dxyz(3);        % _m
 
-L.x = (N.x-1)*d.x;         % _m
-L.y = (N.y-1)*d.y;         % _m
-L.z = (N.z-1)*d.z;         % _m
+L.x = (N.x-1)*d.x;    % _m
+L.y = (N.y-1)*d.y;    % _m
+L.z = (N.z-1)*d.z;    % _m
 
 S.x = InitPoint(1);   % _m
 S.y = InitPoint(2);   % _m
@@ -102,10 +113,23 @@ rho.min = min(min(min(rho.data)));
 % Map ColorScale
 gnd.color = [.75 .75 .75];%[.718 .255 .055];
 color     = colormap(jet(Links.Nb));
-is.BW = 1; %input('Is plot Monochrome? (1: yes, else: no)\n>> ');
-if (is.BW == 1)
+linestyle = zeros([Links.Nb,1]);
+if strcmp(is.monoChrome,'Y')
     for ii=1:Links.Nb
         color(ii,:) = [0 0 0];
+    end
+else
+    for ii=1:Links.Nb
+        if polarity(ii)>0
+            color(ii,:) = [1 0 0];
+            linestyle(ii) = "-";
+        elseif polarity(ii)<0
+            color(ii,:) = [0 0 1];
+            linestyle(ii) = "-";
+        else
+            color(ii,:) = [0 0 0];
+            linestyle(ii) = "--";
+        end
     end
 end
 % Set movie recording
@@ -213,13 +237,18 @@ for ii=0:Links.Nb
         
         % Summing lightning link to overall distance of link traveled (m):
         distance = distance + sqrt(((x2-x1)^2) + ((y2-y1)^2) + ((z2-z1)^2));
-    
+        
+        % Plotting initiation point:
+        if ii == 1
+            scatter3(x1*1e-3,y1*1e-3,z1*1e-3,100,'filled','MarkerFaceColor','k','HandleVisibility','off','LineWidth',2);
+        end
+
         % Plotting link:
         plot3(...
             [x1, x2]*1e-3,...
             [y1, y2]*1e-3,...
             [z1, z2]*1e-3,...
-            'Color',color(ii,:),'HandleVisibility','off');
+            'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
         
         % Formatting axes:
         % set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
