@@ -242,7 +242,7 @@ for ii=0:is.finalStep
             set(gca,'FontSize',10,'TickLabelInterpreter','latex');
             xlabel('$y$ (km)','Interpreter','latex','FontSize',16);
             ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Vertical Fields at $x$ = ",num2str((L.y*1e-3)/2)," km"),'Interpreter','latex','FontSize',20);
+            title(strcat("Vertical Fields at $x$ = ",num2str(round((L.y*1e-3)/2))," km"),'Interpreter','latex','FontSize',20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y') 
@@ -313,7 +313,7 @@ for ii=0:is.finalStep
             set(gca,'FontSize',10,'TickLabelInterpreter','latex');
             xlabel('$x$ (km)','Interpreter','latex','FontSize',16);
             ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Vertical Fields at $y$ = ",num2str((L.x*1e-3)/2)," km"),'Interpreter','latex','FontSize',20);
+            title(strcat("Vertical Fields at $y$ = ",num2str(round((L.x*1e-3)/2))," km"),'Interpreter','latex','FontSize',20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
@@ -556,12 +556,12 @@ function E = consolidateEfield(num,is,Nxyz)
         E.z2Dmin = permute(Ez3D(:,:,((min(is.altitudes)/d.z)+1)),[2,1,3]);
         E.z2Dmax = permute(Ez3D(:,:,((max(is.altitudes)/d.z)+1)),[2,1,3]);
     elseif strcmp(is.horizontal,'N')
-        E.x2D    = permute(Ex3D(:,(Nxyz(2)-1)/2,:),[3,1,2]);
-        E.x2Dy   = permute(Ey3D(:,(Nxyz(2)-1)/2,:),[3,1,2]);
-        E.y2D    = permute(Ey3D((Nxyz(1)-1)/2,:,:),[3,2,1]);
-        E.y2Dx   = permute(Ex3D((Nxyz(1)-1)/2,:,:),[3,2,1]);
-        E.z2Dx   = permute(Ez3D(:,(Nxyz(2)-1)/2,:),[3,1,2]);
-        E.z2Dy   = permute(Ez3D((Nxyz(1)-1)/2,:,:),[3,2,1]);
+        E.x2D    = permute(Ex3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
+        E.x2Dy   = permute(Ey3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
+        E.y2D    = permute(Ey3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
+        E.y2Dx   = permute(Ex3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
+        E.z2Dx   = permute(Ez3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
+        E.z2Dy   = permute(Ez3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
     end
 end
 
