@@ -262,6 +262,14 @@ void IO::read(CMatrix1D & M, char * ffile)
 /* write a double, 3 ints, 3 doubles, 4 doubles,									  */
 /* a list of doubles, vectors, 1-D matrices											  */
 /**************************************************************************************/
+void IO::write(char * _s, char * fname)
+{
+	fp = openFile(fname, "w");
+
+	if(fp) fprintf(fp,"%s\n", _s);
+	fclose(fp);
+}
+
 void IO::write(double _d, char * fname)
 {
 	fp = openFile(fname, "w");

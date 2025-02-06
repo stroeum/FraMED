@@ -515,10 +515,32 @@ void Tree::StoreData(FILE * file)
     IO::write(EEy2D,		(char*)"Ey2d.dat");
     IO::write(EEz2D,		(char*)"Ez2d.dat");
     IO::write(pphi2D,		(char*)"phi2d.dat");
-    
     IO::write(Var::Un,      (char*)"Un3d.dat" );
     
-    
+    if(Var::curType != PROPAGATING){
+		if(Var::BCtype == TIN_CAN)
+			IO::write((char*)"TIN_CAN", 	    (char*)"Type_BC.dat");
+		else if(Var::BCtype == OPEN_BC)
+			IO::write((char*)"OPEN_BC",	        (char*)"Type_BC.dat");
+		else if(Var::BCtype == G_G)
+			IO::write((char*)"G_G",		        (char*)"Type_BC.dat");
+		else if(Var::BCtype == FREE_SPACE)
+			IO::write((char*)"FREE_SPACE",      (char*)"Type_BC.dat");
+
+		if(Var::curType == JET)
+			IO::write((char*)"JET", 	        (char*)"Type_Result.dat");
+		else if(Var::curType == CLOUD_TO_GROUND)
+			IO::write((char*)"CLOUD_TO_GROUND", (char*)"Type_Result.dat");
+		else if(Var::curType == HORIZONTAL)
+			IO::write((char*)"HORIZONTAL",	    (char*)"Type_Result.dat");
+		else if(Var::curType == INTRA_CLOUD)
+			IO::write((char*)"INTRA_CLOUD",     (char*)"Type_Result.dat");
+		
+		if(Var::isVoltageDropped == true)
+			IO::write((char*)"STREAMER",        (char*)"Type_Discharge.dat");
+		else if(Var::isVoltageDropped == false)
+			IO::write((char*)"LEADER", 	        (char*)"Type_Discharge.dat");
+	}
     /**************************************************************************
      double	QchannelPlus;
      double	QchannelMinus;
