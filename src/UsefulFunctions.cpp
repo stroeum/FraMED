@@ -67,12 +67,19 @@ CMatrix3D foo::GlobalE(const CMatrix3D& phi,const ResGrid& d, const SizeGrid& N,
 		Ey[ii][jj][kk] = _Ey;
 		Ez[ii][jj][kk] = _Ez;
 	};
-    if(nn==-1) {
-        IO::write(Ex,(char*)"Ex3d.dat");
+    if(nn==-2){
+		// Saves the ambient electric fields
+        IO::write(Ex,(char*)"Ex3dAmb.dat");
+        IO::write(Ey,(char*)"Ey3dAmb.dat");
+        IO::write(Ez,(char*)"Ez3dAmb.dat");
+    }else if(nn==-1){						
+	    // Saves the most recent/final electric fields
+		IO::write(Ex,(char*)"Ex3d.dat");
         IO::write(Ey,(char*)"Ey3d.dat");
         IO::write(Ez,(char*)"Ez3d.dat");
-    }else{
-        IO::write(Ex,_strEx3D);
+	}else{
+        // Saves the electric fields on a Var::step3d basis
+		IO::write(Ex,_strEx3D);
         IO::write(Ey,_strEy3D);
         IO::write(Ez,_strEz3D);
     }
