@@ -1,11 +1,13 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% File Name: Plot3D_ChargeLayerDefinitions.m                              %
-% Purpose: Visualizes the charged cloud structure and ground with custom  %
-%          colormap. Labels the charge layers with their FraMED input.    %
-% Author: Annelisa Esparza                                                %
-% Contact: aesparza2014@my.fit.edu                                        %
-% Added Date: April 29, 2022                                              %
-% Last Update: N/A                                                        %
+%   File Name: Plot3D_ChargeLayerDefinitions.m                            %
+%     Purpose: Visualizes the charged cloud structure and ground with     %
+%              custom colormap. Labels the charge layers based on the     %
+%              inputs for FraMED.                                         %
+%      Author: Annelisa Esparza                                           %
+%     Contact: annelisa.esparza@my.erau.edu                               %
+%  Added Date: April 29, 2022                                             %
+% Last Update: February 2025 - Updated to match the options available for %
+%                              the createRedBlueColorMap function.        %                                                       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -13,57 +15,40 @@ close all
 clearvars -except sims
 
 clf
-cd ../results
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     sims = specifySimDetails();
 end
 
-% Quantities of charge layer 1:
-prompt_Q1 = '\nWhat is the charge (in C) within the lower charge layer?\n-->';
-Q1 = input(prompt_Q1);                
-prompt_R1 = '\nWhat is the disk radius (in km) of the lower charge layer?\n-->';
-R1 = input(prompt_R1);  
-prompt_h1 = '\nWhat is the disk height (in km) of the lower charge layer?\n-->';
-h1 = input(prompt_h1);  
-prompt_center1 = '\nWhere is the center of the lower disk height (in km) of the lower charge layer?\nInput format: [ (x-coordinate); (y-coordinate); (z-coordinate)]\n-->';
-center1 = input(prompt_center1);
-
-% Quantities of charge layer 2:
-prompt_Q2 = '\nWhat is the charge (in C) within the lower charge layer?\n-->';
-Q2 = input(prompt_Q2);               
-prompt_R2 = '\nWhat is the disk radius (in km) of the lower charge layer?\n-->';
-R2 = input(prompt_R2);  
-prompt_h2 = '\nWhat is the disk height (in km) of the lower charge layer?\n-->';
-h2 = input(prompt_h2);  
-prompt_center2 = '\nWhere is the center of the lower disk height (in km) of the lower charge layer?\nInput format: [ (x-coordinate); (y-coordinate); (z-coordinate)]\n-->';
-center2 = input(prompt_center2);
-
 %% Load data files
+cd ../results
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
 rho.data = load('rhoAmb.dat','-ascii');
 gnd.alt  = load('z_gnd.dat', '-ascii');
+load('ChargeLayers.dat',     '-ascii');
+cd ../viz
+
+Q1      = ChargeLayers(1,1);
+R1      = ChargeLayers(1,5)/1000;
+h1      = ChargeLayers(1,7)/1000;
+center1 = [ChargeLayers(1,2); ChargeLayers(1,3); ChargeLayers(1,4)]/1000;
+
+Q2      = ChargeLayers(2,1);
+R2      = ChargeLayers(2,5)/1000;
+h2      = ChargeLayers(2,7)/1000;
+center2 = [ChargeLayers(2,2); ChargeLayers(2,3); ChargeLayers(2,4)]/1000;
 
 %% Derive main parameters
-N.x = Nxyz(1);
-N.y = Nxyz(2);
-N.z = Nxyz(3);
+N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
+d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
+L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
 
-d.x = dxyz(1);           % _m
-d.y = dxyz(2);           % _m
-d.z = dxyz(3);           % _m
-
-L.x = (N.x-1)*d.x;         % _m
-L.y = (N.y-1)*d.y;         % _m
-L.z = (N.z-1)*d.z;         % _m
-
-rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
+rho.data = ConvertTo3d(rho.data,Nxyz); % _nC/_m^3
 
 clear Nxyz
 clear dxyz
 clear InitPoint
-cd ../viz
 
 x = ((0:(N.x-1))*d.x)*1e-3;
 y = ((0:(N.y-1))*d.y)*1e-3;
@@ -85,17 +70,16 @@ hold on;
 %axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
 axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
 
-% Calls the new function that automatically recognizes charge regions:
-plottingLayerDefs('white',0.4,rho,X,Y,Z,R1,h1,Q1,center1,R2,h2,Q2,center2);
-
 % Represents the neutrally charged (grounded) surface:
-P.x = [L.x 0 0 L.x]*1e-3;
-P.y = [L.y L.y 0 0]*1e-3;
-P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
-patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName','Ground');
-title(['Charge Layer Distribution (',sims.objectName,')'],'Interpreter','latex','FontSize',28);
-    
+if strcmp(sims.BCtype,'G')
+    P.x = [L.x 0 0 L.x]*1e-3;
+    P.y = [L.y L.y 0 0]*1e-3;
+    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
+    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground: $z$ = ",num2str(gnd.alt*1e-3)," km"));
+end
+title(['Charge Layer Distribution (',sims.objectType,' on ',sims.objectName,')'],'Interpreter','latex','FontSize',28);
+   
+% Calls the new function that automatically recognizes charge regions:
+plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R1,h1,Q1,center1,R2,h2,Q2,center2);
 exportgraphics(gcf,[sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
-% view([90,0]) 
-% camlight; lighting gouraud
 

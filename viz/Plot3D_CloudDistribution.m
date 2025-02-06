@@ -15,7 +15,6 @@ close all
 clearvars -except sims
 
 clf
-cd ../results
 fprintf('\n*** Executing Plot3D_CloudDistribution.m script. ***\n');
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
@@ -30,6 +29,7 @@ while ~strcmp(saveAfter,'Y') && ~strcmp(saveAfter,'N')
 end
 
 %% Load data files
+cd ../results
 load('dxyz.dat',             '-ascii');
 load('Nxyz.dat',             '-ascii');
 % Assigns plot height and width based on domain:
@@ -38,38 +38,24 @@ if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
     sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
 end
 if strcmp(saveAfter,'Y')
-    prompt_fileNum = '\nWhich iteration save file would you like to read-in?\nInput example: rhoAmb3d2500.dat\n-->';
-    iterationFile = input(prompt_fileNum,'s');
-    while ~exist(['../results/',iterationFile],'file')
-        fprintf(['\t*** File ''',iterationFile,''' does not exist in the ''results'' directory. Please try again. ***\n']);
-        iterationFile = input(prompt_fileNum,'s');
-    end
-    rho.data = load(['../results/',iterationFile],'-ascii'); % After discharge
+    fprintf('\tUsing charge layer data from after the discharge occurs.\n');
+    rho.data = load('rho3d.dat,'-ascii'); % After discharge
 else
-    fprintf('\tUsing charge layer data from before discharge occurs.\n');
+    fprintf('\tUsing charge layer data from before the discharge occurs.\n');
     rho.data = load('rhoAmb.dat','-ascii'); % Before discharge
 end
 gnd.alt  = load('z_gnd.dat', '-ascii');
 
 %% Derive main parameters
-N.x = Nxyz(1);
-N.y = Nxyz(2);
-N.z = Nxyz(3);
-
-d.x = dxyz(1);           % _m
-d.y = dxyz(2);           % _m
-d.z = dxyz(3);           % _m
-
-L.x = (N.x-1)*d.x;         % _m
-L.y = (N.y-1)*d.y;         % _m
-L.z = (N.z-1)*d.z;         % _m
+N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
+d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
+L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
 
 cd ../viz
-rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
+rho.data = ConvertTo3d(rho.data,Nxyz); % _nC/_m^3
 
 clear Nxyz
 clear dxyz
-clear InitPoint
 
 x = ((0:(N.x-1))*d.x)*1e-3;
 y = ((0:(N.y-1))*d.y)*1e-3;
@@ -90,7 +76,7 @@ axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
 hold on;
 
 % Calls the new function that automatically recognizes charge regions:
-plottingChargeRegions('white',0.4,rho,X,Y,Z);
+plottingChargeRegions('scalar',0.4,rho,X,Y,Z);
 
 % Represents the neutrally charged (grounded) surface:
 if strcmp(sims.BCtype,'G')

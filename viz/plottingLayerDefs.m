@@ -1,11 +1,13 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% File Name: plottingLayerDefs.m                                          %
-% Purpose: Visualizes the charge layer with FraMED definitions. Outputs a %
-%          figure to the screen but does not save it to a file            %
-%          automatically.                                                 %
-% Author: Annelisa Esparza                                                %
-% Contact: aesparza2014@my.fit.edu                                        %
-% Added Date: April 29, 2022                                              %
+%   File Name: plottingLayerDefs.m                                        %
+%     Purpose: Visualizes the charge layer with FraMED definitions.       % 
+%              Outputs a figure to the screen but does not save it to a   %
+%              file automatically.                                        %
+%      Author: Annelisa Esparza                                           %
+%     Contact: annelisa.esparza@my.erau.edu                               %
+%  Added Date: April 29, 2022                                             %
+% Last Update: February 2025 - Updated to match the options available for %
+%                              the createRedBlueColorMap function.        %                                                       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,h1,Q1,pos1,R2,h2,Q2,pos2)
@@ -31,11 +33,11 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
-    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/10^4));    
+    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    
     rhoData.data = round(rhoDataOG.data,-tol);
     uniqueRhos = unique(nonzeros(rhoData.data));
-    rhoData.max = max(uniqueRhos);
-    rhoData.min = min(uniqueRhos);
+    rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
+    rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);
 
     % Prevents misread of charge density when cloud height is less than dz:
     testingvalues = zeros([length(uniqueRhos),1]);
@@ -48,38 +50,47 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
             testinglocation(testloc) = testloop;
         end
     end
+
     % Copies data to a nearby height without overwriting pre-existing data:
     for testloop2 = 1:1:length(uniqueRhos)
         if testingvalues(testloop2)==1
-            if unique(rhoData.data(:,:,testinglocation(testloop2)-1))==0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))==0
+            if max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))==0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))==0
                 rhoData.data(:,:,testinglocation(testloop2)-1)=rhoData.data(:,:,testinglocation(testloop2));
-            elseif unique(rhoData.data(:,:,testinglocation(testloop2)-1))~=0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))==0
+            elseif max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))~=0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))==0
                 rhoData.data(:,:,testinglocation(testloop2)+1)=rhoData.data(:,:,testinglocation(testloop2));
-            elseif unique(rhoData.data(:,:,testinglocation(testloop2)-1))==0 && unique(rhoData.data(:,:,testinglocation(testloop2)+1))~=0
+            elseif max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)-1))))==0 && max(abs(unique(rhoData.data(:,:,testinglocation(testloop2)+1))))~=0
                 rhoData.data(:,:,testinglocation(testloop2)-1)=rhoData.data(:,:,testinglocation(testloop2));
             end
         end
     end
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
+    middle = (((length(rgbValues(:,1))-1)/2)+1);
+    midRange = floor(((length(rgbValues(:,1))-1)/10))-1;
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
-        [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs(uniqueRhos)),rgbValues);
-        if nullInd == 51
+        [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs([rhoData.min rhoData.max])),rgbValues);
+        %if nullInd == (((length(rgbValues(:,1))-1)/2)+1)
+        if nullInd <= (middle+round(midRange/2)) && nullInd >= (middle-round(midRange/2))
             trueUniqueRhos(i)=[];
         end
     end
+    max_rho_value = max(trueUniqueRhos);
+    min_rho_value = min(trueUniqueRhos);
+    %fprintf(['Maximum density is ',num2str(max(trueUniqueRhos)),'\nMinimum density is ',num2str(min(trueUniqueRhos)),'\nLength of unique densities is ',num2str(length(trueUniqueRhos))]);
     % Sets 
-    view([33 10]);
+    view(-45,9);
     % Plots isocharge regions in a representative color:
     colorIndices = zeros([length(uniqueRhos),1]);
     colorVertices = zeros([length(uniqueRhos),3]);
     for j = length(uniqueRhos):-1:1
-        [colorIndices(j),colorVertices(j,:)] = colorDetermination(uniqueRhos(j),max(abs(uniqueRhos)),rgbValues);
+        [colorIndices(j),colorVertices(j,:)] = colorDetermination(uniqueRhos(j),max(abs([rhoData.min rhoData.max])),rgbValues);
+        
         % If the region is not neutrally charged:
-        if colorIndices(j) ~= 51
+        if colorIndices(j) ~= (((length(rgbValues(:,1))-1)/2)+1)
             % Is the current value a 'truly unique' value?
             [included, location] = ismember(uniqueRhos(j),trueUniqueRhos);
+            % If so, add it to the legend:
             % If so, add it to the legend:
             if included == 1
                 if uniqueRhos(location)>0
@@ -99,26 +110,27 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     
     % Resolves formatting issues with the custom colorbar:
     cmap = (rgbValues+rgbValuesAdjusted+rgbValuesAdjusted)/3;
-    caxis([-max(abs(uniqueRhos)) max(abs(uniqueRhos))]);
+    clim([-max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))])) max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))]))]);
     colormap(cmap);
-    colorbar;
     c = colorbar;
     c.Label.String = 'Charge Density (nC/m$^3$)';
     c.Label.Interpreter = 'latex';
-    c.Label.FontSize = 20;
+    c.Label.FontSize = 24;
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Position',[.42 .27 .5 .3],'Box','off','FontSize',18,'Interpreter','latex');
-    %[~,h_legend]=legend('Location','east','Box','off','FontSize',20,'Interpreter','latex');
+    [~,h_legend]=legend('Location','north','Box','off','FontSize',18,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
-    ax.FontSize = 16;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',24);
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',24);
+    ax.FontSize = 20;
+    xlabel('$x$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
+    ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
     zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
     grid on
-    view(33,10)
+    view(-45,9)
+    if length(trueUniqueRhos)<=3
+        pause
+    end
 end

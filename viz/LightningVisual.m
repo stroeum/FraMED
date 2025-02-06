@@ -182,7 +182,7 @@ for ii=0:Links.Nb
     %         %         pause;
     %     end
     if ii == 0
-        plottingChargeRegions('white',0.4,rho,X,Y,Z);
+        plottingChargeRegions('scalar',0.4,rho,X,Y,Z);
     else
         if strcmp(is.updateRho,'Y') == 1
             if mod((ii-1),stepsaves) == 0 || ii == Links.Nb
@@ -200,7 +200,7 @@ for ii=0:Links.Nb
                 if abs(rho.min) < abs(min(min(min(rho.data)))) || abs(rho.min) > 10*abs(min(min(min(rho.data))))
                     rho.min = min(min(min(rho.data)));
                 end
-                plottingChargeRegions('white',0.4,rho,X,Y,Z);
+                plottingChargeRegions('scalar',0.4,rho,X,Y,Z);
                 if strcmp(sims.BCtype,'G')
                     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
                 end
