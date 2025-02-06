@@ -11,7 +11,7 @@
 #include "SorSolution.h"
 #include <cstring>
 
-typedef enum {INTRA_CLOUD, CLOUD_TO_GROUND, JET, HORIZONTAL} disType;
+typedef enum {PROPAGATING, INTRA_CLOUD, CLOUD_TO_GROUND, JET, HORIZONTAL} disType;
 typedef enum {TIN_CAN, OPEN_BC, G_G, FREE_SPACE} bcType;
 typedef enum {RANDOM, AT_EMAX, AT_PREDEF_POS, AT_REL_EMAX} initType;
 typedef enum {SET_POTENTIAL, SET_CHARGES, CURRENTS, FROM_FILE} loadType;

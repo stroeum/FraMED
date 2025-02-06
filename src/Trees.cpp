@@ -427,7 +427,8 @@ void Tree::Grow(FILE * file, bool AddNew)
         /* Write interim results after every tenth link is added. */
         if((_CntLinks % Var::step3d) == 0)
             Tree::StoreData(file);
-        _CntLinks++;
+		if((Var::curType == PROPAGATING) || (Var::curType != INTRA_CLOUD))
+       	 	_CntLinks++;
         cout<<"ii:\t Nb of established links: "<<_CntLinks<<endl;
     }
     cout<<"Total Number of links: "<<_CntLinks<<endl;
