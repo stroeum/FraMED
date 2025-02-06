@@ -55,6 +55,7 @@ public:
 	static	double					phi0;											// Channel potential after minization
 	static	double					Vmin;											// Minimum in cloud potential
 	static	double					Vmax;											// Maximum in cloud potential
+	static	double					MaximumEfield;									// Maximum electric field magnitude throughout simulation
 	static	double					rhoAmbMin;										// Minimum in cloud charge density
 	static	double					rhoAmbMax;										// Maximum in cloud charge density
 	static	double					QchannelPlus;									// Positive charge content of the channel (== charge transfer)
@@ -126,6 +127,7 @@ public:
 	static	CMatrix3D				phi_cha;										// _V	Channel electric potential
 	static	CMatrix3D				phi_amb;										// _V	Cloud electric potential
 	static	CMatrix3D				rho;											// _C/m3	total charge density
+	static	CMatrix3D				rho_amb;										// _C/m3	Cloud charge density
 	static	CMatrix3D				Un;												// Map of occupied grid points
 	static	CMatrix1D				phiNum;											// _V	Total electric potential on a vertical axis in the center of simulation domain
 	static	CMatrix1D				EzNum;											// _V/m	Total electric field on a vertical axis in the center of simulation domain

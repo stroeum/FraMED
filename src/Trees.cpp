@@ -131,9 +131,33 @@ bool Tree::Initiate(FILE * file, const int InitiationType, Point& InitiationPoin
         Var::phiNum[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
     }
     
-    /* Store Initiation data */
+    /* Store Initiation/Ambient data */
     IO::write(Var::phiNum,	(char*)"phiNumBF.dat");
     IO::write(Var::EzNum,	(char*)"EnumBF.dat");
+	IO::write(Var::phi_amb, (char*)"phiAmb.dat");
+    foo::GlobalE(Var::phi_amb, Var::d, Var::N, -2); // Stores ambient electric field values
+    
+	CMatrix3D				rrho_amb(Var::N.x, Var::N.y, Var::N.z);
+    CMatrix2D				rrho_amb_yz(Var::N.y, Var::N.z);
+    CMatrix2D				rrho_amb_xz(Var::N.x, Var::N.z);
+    
+	rrho_amb    = Var::rho;
+    for(int kk=0 ; kk<Var::N.z ; kk++)
+    {
+        for(int ii=0 ; ii<Var::N.x ; ii++)
+            rrho_amb_xz[ii][kk]= foo::rhoijk(ii,(Var::N.y-1)/2,kk,Var::phi_amb,Var::d,Var::N)*1e9;
+        
+        for(int jj=0 ; jj<Var::N.y ; jj++)
+        {
+            rrho_amb_yz[jj][kk]= foo::rhoijk( (Var::N.x-1)/2,jj,kk, Var::phi_amb,	Var::d,Var::N)*1e9;
+            for(int ii=0 ; ii<Var::N.x ; ii++)
+                rrho_amb(ii,jj,kk)	*= 1e9;
+        }
+    }
+	IO::write(rrho_amb,     (char*)"rhoAmb.dat");
+    IO::write(rrho_amb_yz,	(char*)"rhoAmbYZ.dat");
+    IO::write(rrho_amb_xz,	(char*)"rhoAmbXZ.dat");
+    
     return isInitiated;
 }
 /**********************************************************************************/
@@ -443,9 +467,6 @@ void Tree::StoreData(FILE * file)
     //clock_t		_EndTime;
     //clock_t		_RunTime;
     
-    CMatrix3D				rrho_amb(Var::N.x, Var::N.y, Var::N.z);
-    CMatrix2D				rrho_amb_yz(Var::N.y, Var::N.z);
-    CMatrix2D				rrho_amb_xz(Var::N.x, Var::N.z);
     CMatrix2D				EE2D(	Var::N.y, Var::N.z);
     CMatrix2D				EEx2D(	Var::N.y, Var::N.z);
     CMatrix2D				EEy2D(	Var::N.y, Var::N.z);
@@ -453,24 +474,20 @@ void Tree::StoreData(FILE * file)
     CMatrix2D				pphi2D(	Var::N.y, Var::N.z);
     ListCMatrix1D			CChargeLayers;
     ListCharge::iterator	it;
+	double					tempEfield = 0;
     
     IO::print(file, "..: Writing results\n");
     
     // Derive required values before storage //
-    //Var::E		= foo::GlobalE(	Var::phi,		Var::d,Var::N,-1);
+    Var::E		= foo::GlobalE(Var::phi,		Var::d,Var::N,-1);
     Var::rho	= foo::Globalrho(Var::phi,		Var::d,Var::N);
-    rrho_amb	= foo::Globalrho(Var::phi_amb,	Var::d,Var::N);
     
     for(int kk=0 ; kk<Var::N.z ; kk++)
     {
         Var::EzNum[kk]	= foo::Eijk((Var::N.x-1)/2,(Var::N.y-1)/2,kk,Var::phi,Var::d,Var::N)[3];
         Var::phiNum[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
-        for(int ii=0 ; ii<Var::N.x ; ii++)
-            rrho_amb_xz[ii][kk]= foo::rhoijk(ii,(Var::N.y-1)/2,kk,Var::phi_amb,Var::d,Var::N)*1e9;
-        
         for(int jj=0 ; jj<Var::N.y ; jj++)
         {
-            rrho_amb_yz[jj][kk]= foo::rhoijk( (Var::N.x-1)/2,jj,kk, Var::phi_amb,	Var::d,Var::N)*1e9;
             EE2D[jj][kk]	   =   foo::Eijk( (Var::N.x-1)/2,jj,kk, Var::phi,		Var::d,Var::N)[0];
             EEx2D[jj][kk]	   =   foo::Eijk( (Var::N.x-1)/2,jj,kk, Var::phi,		Var::d,Var::N)[1];
             EEy2D[jj][kk]	   =   foo::Eijk( (Var::N.x-1)/2,jj,kk, Var::phi,		Var::d,Var::N)[2];
@@ -479,7 +496,8 @@ void Tree::StoreData(FILE * file)
             for(int ii=0 ; ii<Var::N.x ; ii++)
             {
                 Var::rho(ii,jj,kk)	*= 1e9;
-                rrho_amb(ii,jj,kk)	*= 1e9;
+            	if(Var::E[ii][jj][kk]>tempEfield)
+					tempEfield = Var::E[ii][jj][kk];
             }
         }
     }
@@ -491,9 +509,6 @@ void Tree::StoreData(FILE * file)
     
     // Store Values in main plane //
     IO::write(Var::rho,		(char*)"rho3d.dat");
-    IO::write(rrho_amb,		(char*)"rhoAmb.dat");
-    IO::write(rrho_amb_yz,	(char*)"rhoAmbYZ.dat");
-    IO::write(rrho_amb_xz,	(char*)"rhoAmbXZ.dat");
     IO::write(EE2D,			(char*)"E2d.dat");
     IO::write(EEx2D,		(char*)"Ex2d.dat");
     IO::write(EEy2D,		(char*)"Ey2d.dat");
@@ -501,7 +516,6 @@ void Tree::StoreData(FILE * file)
     IO::write(pphi2D,		(char*)"phi2d.dat");
     
     IO::write(Var::Un,      (char*)"Un3d.dat" );
-    foo::GlobalE(Var::phi, Var::d, Var::N, -1); //NB: This also stores all components of Ex,Ey,Ez.
     
     
     /**************************************************************************
@@ -587,8 +601,11 @@ void Tree::StoreData(FILE * file)
     // Store Values of the field and potential everywhere //
     IO::write(Var::phi,				(char*)"phi.dat");
     //IO::write(Var::E,				(char*)"E.dat");
-    
-    // Store the list of Established Links //
+	if(tempEfield>Var::MaximumEfield){
+		Var::MaximumEfield = tempEfield;
+		IO::write(tempEfield,(char*)"MaximumEfield.dat");
+	};
+	// Store the list of Established Links //
     IO::write(Var::EstablishedLinks,(char*)"EstablishedLinks.dat");
 }
 /**************************************************************************************/

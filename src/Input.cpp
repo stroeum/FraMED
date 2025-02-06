@@ -32,6 +32,7 @@ int						Var::NumLinks;												// Number of established links in the current
 double					Var::phi0			= 0;									// Channel potential after minization
 double					Var::Vmin			= 0;									// Minimum in cloud potential
 double					Var::Vmax			= 0;									// Maximum in cloud potential
+double					Var::MaximumEfield  = 0;									// Maximum electric field magnitude throughout simulation
 double					Var::rhoAmbMin		= 0;									// Minimum in cloud charge density
 double					Var::rhoAmbMax		= 0;									// Maximum in cloud charge density
 double					Var::QchannelPlus	= 0;									// Positive charge content of the channel (== charge transfer)
@@ -104,6 +105,7 @@ CMatrix3D				Var::phi;													// _V	Total electric potential
 CMatrix3D				Var::phi_cha;												// _V	Channel electric potential
 CMatrix3D				Var::phi_amb;												// _V	Cloud electric potential
 CMatrix3D				Var::rho;													// _C/m3	total charge density
+CMatrix3D				Var::rho_amb;												// _C/m3	ambient charge density
 CMatrix3D				Var::Un;													// Map of occupied grid points
 CMatrix1D				Var::phiNum;												// _V	Total electric potential on a vertical axis in the center of simulation domain
 CMatrix1D				Var::EzNum;													// _V/m	Total electric field on a vertical axis in the center of simulation domain
