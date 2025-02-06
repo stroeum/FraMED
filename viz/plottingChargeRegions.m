@@ -12,8 +12,8 @@
 
 function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval)
     %Creates a unique colormap to represent the charge regions:
-    rgbValues = createRedBlueColorMap(colorbarRange,1);
-    rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
+    rgbValues = createCustomColorMap(colorbarRange,1);
+    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
     tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    

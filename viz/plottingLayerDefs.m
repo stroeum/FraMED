@@ -1,13 +1,13 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 %   File Name: plottingLayerDefs.m                                        %
-%     Purpose: Visualizes the charge layer with FraMED definitions.       % 
+%     Purpose: Visualizes the charge layer with FraMED definitions.       %
 %              Outputs a figure to the screen but does not save it to a   %
 %              file automatically.                                        %
 %      Author: Annelisa Esparza                                           %
 %     Contact: annelisa.esparza@my.erau.edu                               %
 %  Added Date: April 29, 2022                                             %
 % Last Update: February 2025 - Updated to match the options available for %
-%                              the createRedBlueColorMap function.        %                                                       %
+%                              the createCustomColorMap function.        %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,h1,Q1,pos1,R2,h2,Q2,pos2)
@@ -29,8 +29,8 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     end
 
     %Creates a unique colormap to represent the charge regions:
-    rgbValues = createRedBlueColorMap(colorbarRange,1);
-    rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
+    rgbValues = createCustomColorMap(colorbarRange,1);
+    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
     tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    

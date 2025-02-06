@@ -7,7 +7,7 @@
 %     Contact: annelisa.esparza@my.erau.edu                               %
 %  Added Date: April 29, 2022                                             %
 % Last Update: February 2025 - Updated to match the options available for %
-%                              the createRedBlueColorMap function.        %                                                       %
+%                              the createCustomColorMap function.        %                                                       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate

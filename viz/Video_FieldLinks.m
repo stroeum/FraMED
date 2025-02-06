@@ -214,7 +214,7 @@ for ii=0:is.finalStep
             direction = 2*atan(E.z2Dy./sqrt(((E.y2Dx).^2)+((E.y2D).^2)))./pi;
         end
         newMag = EfieldMag./MaximumEfield;
-        tester = colormap(nexttile(1),createRedBlueColorMap('field',1));
+        tester = colormap(nexttile(1),createCustomColorMap('field',1));
         customColorData = zeros([size(direction,1),size(direction,2),3]);
         for i=1:size(direction,1)
             for j = 1:size(direction,2)
@@ -276,13 +276,13 @@ for ii=0:is.finalStep
             hold on
             EfieldMag = sqrt(((E.x2D).^2)+((E.x2Dy).^2)+((E.z2Dx).^2));
             direction = 2*atan(E.z2Dx./sqrt(((E.x2D).^2)+((E.x2Dy).^2)))./pi;
-            tester = colormap(nexttile(3),createRedBlueColorMap('field',1));
+            tester = colormap(nexttile(3),createCustomColorMap('field',1));
         elseif strcmp(is.horizontal,'Y')
             nexttile(4)
             hold on
             EfieldMag = sqrt(((E.x2Dmin).^2)+((E.y2Dmin).^2)+((E.z2Dmin).^2));
             direction = 2*atan(E.z2Dmin./sqrt(((E.x2Dmin).^2)+((E.y2Dmin).^2)))./pi;
-            tester = colormap(nexttile(4),createRedBlueColorMap('field',1));
+            tester = colormap(nexttile(4),createCustomColorMap('field',1));
         end
         newMag = EfieldMag./MaximumEfield;
         customColorData = zeros([size(direction,1),size(direction,2),3]);
@@ -569,8 +569,8 @@ end
 % all scalar quantities plus a custom colorbar placement for a compact form:
 function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zval,is)
     %Creates a unique colormap to represent the charge regions:
-    rgbValues = createRedBlueColorMap(colorbarRange,1);
-    rgbValuesAdjusted = createRedBlueColorMap(colorbarRange,alphaValue);
+    rgbValues = createCustomColorMap(colorbarRange,1);
+    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
     if strcmp(is.whichScalar,'C') 

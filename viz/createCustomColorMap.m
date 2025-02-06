@@ -1,5 +1,5 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%  File Name: createRedBlueColorMap.m                                     %
+%  File Name: createCustomColorMap.m                                     %
 %    Purpose: Creates a custom colormap for scalar or field values, where %
 %             negative values are represented by blue and positive values %
 %             are represented by red.                                     %
@@ -10,7 +10,7 @@
 %             February 2025 - Introduced colormap for field values.       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function customColorMap = createRedBlueColorMap(valuetype,alphavalue)
+function customColorMap = createCustomColorMap(valuetype,alphavalue)
     customColorMap = zeros([101,3]);
     fullValue = length(customColorMap(:,1));
     halfValue = ((fullValue-1)/2);
