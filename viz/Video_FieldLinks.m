@@ -33,7 +33,7 @@ is.horizontal     = 'N'; % Would you like to plot the field for the XY plane at 
 is.altitudes      = [8000; 12500];  % (is.horizontal == 'Y'): Altitudes for horizontal plane plots, in meters.
 
 is.singleImages   = 'N'; % Would you like to export single images for all of the available saved steps? (Y / N)
-is.setExtracts    = [80; 160; 240]; % Would you like to export for any explicit steps? 
+is.setExtracts    = [50; 100; 150]; % Would you like to export for any explicit steps? 
 
 %% Fully-automated onwards:
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
@@ -119,7 +119,7 @@ end
 
 % Set movie recording information:
 if strcmp(is.Rec,'Y')
-    Movie = VideoWriter([sims.pathVideos,'/Fields_',scalarType,'_',planeType,'_',viewType,'_',sims.objectName,'_',sims.objectType],'MPEG-4');
+    Movie = VideoWriter(strcat(sims.pathVideos,'/Fields_',scalarType,'_',planeType,'_',viewType,'_',sims.objectName,'_',sims.objectType),'MPEG-4');
     if is.finalStep <= 60
         Movie.FrameRate = 1;
     elseif is.finalStep > 60 && is.finalStep <= 1000
@@ -197,7 +197,7 @@ for ii=0:is.finalStep
         y1 = Links.ID(1,2)*d.y/1000;
         z1 = ((Links.ID(1,3)*d.z)/1000)+(gnd.alt/1000);
         scatter3(x1,y1,z1,initiationMarker,'k','filled');
-        titleformat = title([sims.objectType,' on ',sims.objectName,': Ambient Conditions'],'FontSize',20,'FontWeight','bold','Interpreter','latex');
+        titleformat = title(strcat(sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
         hold off
 
         % Determines the 2D electric field values for the step:
@@ -345,7 +345,7 @@ for ii=0:is.finalStep
         clear EfieldMag; clear direction; clear newMag;
         box off
         hold off
-        exportgraphics(gcf,[sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Ambient_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',300);
+        exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Ambient_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
     else % (all step values associated with the simulation)
         % Determines the 2D electric field values for the step:
         if strcmp(is.updateScalar,'Y') && (mod((ii-1),stepsaves) == 0 && (ismember(ii,is.setExtracts) || strcmp(is.Rec,'Y') || ismember(ii-1,stepsaves*floor((is.setExtracts-1)/stepsaves)))) || ii == is.finalStep
@@ -503,10 +503,10 @@ for ii=0:is.finalStep
     % Formatting title to reflect step value:
     nexttile(2)
     delete(titleformat);
-    titleformat = title([sims.objectType,' on ',sims.objectName,' after ', int2str(ii) ,' step(s)'],'FontSize',20,'FontWeight','bold','Interpreter','latex');
+    titleformat = title(strcat(sims.objectType," on ",sims.objectName," after ", int2str(ii) ," step(s)"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
     box off
     if strcmp(is.singleImages,'Y') || ismember(ii,is.setExtracts)
-        exportgraphics(gcf,[sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Step-',num2str(ii),'_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',300);
+        exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Step-',num2str(ii),'_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
     end
     if strcmp(is.Rec,'Y')
         frame = getframe(gcf);
@@ -514,10 +514,10 @@ for ii=0:is.finalStep
     end
 end
 % Outputs general information about the discharge's propagation:
-fprintf(['\n\t',sims.objectType,' reaches minimum of ',num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n']);
-fprintf(['\n\t',sims.objectType,' initiated at ',num2str(initHeight,'%.2f'),' meters\n']);
-fprintf(['\n\t',sims.objectType,' reaches maximum of ',num2str(maxHeight,'%.2f'),' meters (',num2str(maxHeight-initHeight,'%+.2f'),' meters)\n']);
-fprintf(['\n\t',sims.objectType,' has propagated a total of ',num2str(distance,'%.2f'),' meters\n']);
+fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight,'%.2f'),' meters\n'));
+fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight,'%.2f'),' meters (',num2str(maxHeight-initHeight,'%+.2f'),' meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance,'%.2f'),' meters\n'));
 hold off;
 
 % Finalizes the movie, if relevant:
@@ -529,8 +529,8 @@ end
 
 % Exports the final graphic:
 delete(titleformat);
-titleformat = title([sims.objectType,' on ',sims.objectName,': Final Results'],'FontSize',20,'FontWeight','bold','Interpreter','latex');
-exportgraphics(gcf,[sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Final_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',300);
+titleformat = title(strcat(sims.objectType," on ",sims.objectName,": Final Results"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
+exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Final_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
 
 %% Functions:
 % Converts 3D electric field data files into respective 2D components:

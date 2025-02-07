@@ -50,6 +50,6 @@ axis([0 max(step) min(min(p)) max(max(p))]);
 box on
 grid on
 hold off
-exportgraphics(gcf,[sims.pathPNGs,'/DipoleMoment_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/DipoleMoment_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 cd ../viz/

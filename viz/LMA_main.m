@@ -127,7 +127,7 @@ LMA_initiation
 
 %% Plot discharge tree branches %%
 if strcmp(Figure.Output,'Movie')
-    vFile = VideoWriter([sims.pathVideos,'/LMA'],'MPEG-4');
+    vFile = VideoWriter(strcat(sims.pathVideos,'/LMA'),'MPEG-4');
     open(vFile);
 end
 LMA_tree
@@ -140,7 +140,7 @@ elseif strcmp(Figure.Output,'Plot')
 end
 
 %% Plot Save
-exportgraphics(gcf, [sims.pathPNGs,'/LMA_Final_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf, strcat(sims.pathPNGs,'/LMA_Final_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 f1 = figure;
 sf1_new = copyobj(sf1,f1);
@@ -148,7 +148,7 @@ set(sf1_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('x (km)');
 ylabel('z (km)');
 axis image
-exportgraphics(f1, [sims.pathPNGs,'/xz_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(f1, strcat(sims.pathPNGs,'/xz_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 f2 = figure;
 sf2_new = copyobj(sf2,f2);
@@ -156,7 +156,7 @@ set(sf2_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('z (km)');
 ylabel('y (km)');
 axis image
-exportgraphics(f2, [sims.pathPNGs,'/yz_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(f2, strcat(sims.pathPNGs,'/yz_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 f3 = figure;
 sf3_new = copyobj(sf3,f3);
@@ -164,4 +164,4 @@ set(sf3_new, 'Units','Normalized','Position',[.05 .05 .9 .9],'TickDir','out','Fo
 xlabel('x (km)');
 ylabel('y (km)');
 axis image
-exportgraphics(f3, [sims.pathPNGs,'/xy_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(f3, strcat(sims.pathPNGs,'/xy_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);

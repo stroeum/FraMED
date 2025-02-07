@@ -71,20 +71,10 @@ else
     end
 end
 
-% Derive main parameters
-Links.Nb = size(Links.ID);
-Links.Nb = Links.Nb(1);
-N.x = Nxyz(1);
-N.y = Nxyz(2);
-N.z = Nxyz(3);
-
-d.x = dxyz(1);        % _m
-d.y = dxyz(2);        % _m
-d.z = dxyz(3);        % _m
-
-L.x = (N.x-1)*d.x;    % _m
-L.y = (N.y-1)*d.y;    % _m
-L.z = (N.z-1)*d.z;    % _m
+% Derive main parameters (number of nodes, spacings, and domain size):
+N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
+d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
+L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
 
 S.x = InitPoint(1);   % _m
 S.y = InitPoint(2);   % _m
@@ -94,6 +84,9 @@ S.R = InitPoint(4);   % _m
 S.i = round(S.x/d.x);
 S.j = round(S.y/d.y);
 S.k = round(S.z/d.z);
+
+Links.Nb = size(Links.ID);
+Links.Nb = Links.Nb(1);
 
 clear dxyz
 clear InitPoint
@@ -111,30 +104,25 @@ rho.max = max(max(max(rho.data)));
 rho.min = min(min(min(rho.data)));
 
 % Map ColorScale
-gnd.color = [.75 .75 .75];%[.718 .255 .055];
-color     = colormap(jet(Links.Nb));
-linestyle = zeros([Links.Nb,1]);
-if strcmp(is.monoChrome,'Y')
-    for ii=1:Links.Nb
-        color(ii,:) = [0 0 0];
-    end
-else
+gnd.color = [.75 .75 .75];
+color     = zeros(Links.Nb,3);
+linestyle = repelem("-",Links.Nb);
+if strcmp(is.monoChrome,'N')
     for ii=1:Links.Nb
         if polarity(ii)>0
             color(ii,:) = [1 0 0];
-            linestyle(ii) = "-";
         elseif polarity(ii)<0
             color(ii,:) = [0 0 1];
-            linestyle(ii) = "-";
         else
             color(ii,:) = [0 0 0];
             linestyle(ii) = "--";
         end
     end
 end
+
 % Set movie recording
 if (strcmp(is.Rec,'Y') == 1)
-    Movie = VideoWriter([sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'],'MPEG-4');
+    Movie = VideoWriter(strcat(sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'),'MPEG-4');
     if Links.Nb <= 60
         Movie.FrameRate = 1;
     elseif Links.Nb > 60 && Links.Nb <= 1000
@@ -244,11 +232,7 @@ for ii=0:Links.Nb
         end
 
         % Plotting link:
-        plot3(...
-            [x1, x2]*1e-3,...
-            [y1, y2]*1e-3,...
-            [z1, z2]*1e-3,...
-            'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
+        plot3([x1, x2]*1e-3,[y1, y2]*1e-3,[z1, z2]*1e-3,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
         
         % Formatting axes:
         % set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
@@ -264,7 +248,7 @@ for ii=0:Links.Nb
         %}
     end
     box on
-    title([sims.objectType,' discharge after ', int2str(ii) ,' step(s)'],'FontSize',28,'FontWeight','bold','Interpreter','latex');
+    title(strcat(sims.objectType," discharge after ", int2str(ii) ," step(s)"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
     if(strcmp(is.Rec,'Y') == 1)
         frame = getframe(gcf);
         writeVideo(Movie,frame);
@@ -273,17 +257,17 @@ for ii=0:Links.Nb
         end
     end
 end
-fprintf(['\n\t',sims.objectType,' reaches minimum of ',num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n']);
-fprintf(['\n\t',sims.objectType,' initiated at ',num2str(initHeight,'%.2f'),' meters\n']);
-fprintf(['\n\t',sims.objectType,' reaches maximum of ',num2str(maxHeight,'%.2f'),' meters (',num2str(maxHeight-initHeight,'%+.2f'),' meters)\n']);
-fprintf(['\n\t',sims.objectType,' has propagated a total of ',num2str(distance,'%.2f'),' meters\n']);
+fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight,'%.2f'),' meters (',num2str(minHeight-initHeight,'%+.2f'),' meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight,'%.2f'),' meters\n'));
+fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight,'%.2f'),' meters (',num2str(maxHeight-initHeight,'%+.2f'),' meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance,'%.2f'),' meters\n'));
 %camlight; lighting gouraud
 
 hold off;
 %title('(b)','Interpreter','latex','FontSize',32,'Units','normalized');
 %titleInfo = get(gca,'title');
 %set(titleInfo,'Position', [((titleInfo.Extent(3))-(((titleInfo.Parent.InnerPosition(1)/titleInfo.Parent.InnerPosition(3)))/titleInfo.Parent.Position(3))-(titleInfo.Parent.Position(1)/titleInfo.Parent.OuterPosition(3))) 1.004 0]);
-title(['Simulated ', sims.objectType,' Discharge: ',sims.objectName],'FontSize',28,'FontWeight','bold','Interpreter','latex');    
+title(strcat("Simulated ", sims.objectType," Discharge: ",sims.objectName),'FontSize',28,'FontWeight','bold','Interpreter','latex');    
 
 % If the 'export_fig' function is assigned to the pathtool:
 if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
@@ -293,5 +277,5 @@ if exist('export_fig') == 2 && strcmp(is.highResolution,'Y') == 1
     export_fig HighRes_Discharge.png -transparent -m8
     cd(currentFolder);
 else
-    exportgraphics(gcf,[sims.pathPNGs,'/Lightning_',sims.objectName,'_',sims.objectType,'.png'],'Resolution',600);
+    exportgraphics(gcf,strcat(sims.pathPNGs,'/Lightning_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',600);
 end

@@ -93,7 +93,7 @@ axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)  % Full span
 
 %% Save figure as file:
 if strcmp(saveAfter,'Y')
-    exportgraphics(gcf,[sims.pathPNGs,'/CloudDistribution_After_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);  % Before discharge
+    exportgraphics(gcf,strcat(sims.pathPNGs,'/CloudDistribution_After_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);  % Before discharge
 else
-    exportgraphics(gcf,[sims.pathPNGs,'/CloudDistribution_Before_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);   % After discharge
+    exportgraphics(gcf,strcat(sims.pathPNGs,'/CloudDistribution_Before_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);   % After discharge
 end

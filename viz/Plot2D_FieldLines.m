@@ -1,20 +1,7 @@
 function [] = Plot2D_FieldLines(num,sims)
     fprintf('\n*** Executing Plot2D_FieldLines.m function. ***\n');
     if ~exist('sims','var') || ~isfield(sims,'pathPNGs') 
-        prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-        sims.objectName = input(prompt1,'s');
-        prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-        sims.objectType = input(prompt2,'s');
-        while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-            fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-            sims.objectType = input(prompt2,'s');
-        end
-    
-        % Settings to ensure proper directory referencing:
-        sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
-        if ~exist(sims.pathPNGs,'dir')
-            mkdir(sims.pathPNGs);
-        end
+        sims = specifySimDetails();
     end 
 
     cd ../results
@@ -93,11 +80,11 @@ function [] = Plot2D_FieldLines(num,sims)
     xlabel('$y$ (km)','Interpreter','latex','FontSize',16);
     ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
     set(gca,'FontSize',10,'TickLabelInterpreter','latex');
-    %title(['Field Lines on ',sims.objectName],'Interpreter','latex','FontSize',18);
+    %title(strcat('Field Lines on ',sims.objectName),'Interpreter','latex','FontSize',18);
         
     axis xy
     axis image
     box on
     
-    exportgraphics(gcf,[sims.pathPNGs,'/FieldLines_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+    exportgraphics(gcf,strcat(sims.pathPNGs,'/FieldLines_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 end 

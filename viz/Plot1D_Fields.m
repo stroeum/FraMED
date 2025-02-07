@@ -85,7 +85,7 @@ set(gca,'XMinorTick','on','YMinorTick','on')
 grid on
 box on
 hold off
-exportgraphics(gcf,[sims.pathPNGs,'/InitiationRequirements_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/InitiationRequirements_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 % Potential before and after flash plot:
 linewidth = 1;
@@ -105,7 +105,7 @@ box on
 % title('E_z and \phi  before the flash [BF] and after [AF]');
 grid on;
 hold off
-exportgraphics(gcf,[sims.pathPNGs,'/phi_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/phi_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 % Electric field thresholds plot:
 fig = figure;
@@ -128,7 +128,7 @@ xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
 ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
 grid on
 set(gcf,'Position',[0,0,600,800]);
-exportgraphics(gcf,[sims.pathPNGs,'/E_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/E_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 %xlim([-1000000,1000000])
 fprintf('\tAverage field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
 

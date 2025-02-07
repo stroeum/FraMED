@@ -121,7 +121,7 @@ if exist('QMinimization','var')
 end
 
 % Format title:
-sgtitle(['(',sims.objectName,'): ',sims.objectType,' discharge runtime results over ',num2str(links.tracker),' steps'],'Interpreter','latex','FontSize',24);
+sgtitle(strcat('(',sims.objectName,"): ",sims.objectType," discharge runtime results over ",num2str(links.tracker)," steps"),'Interpreter','latex','FontSize',24);
 if exist('QMinimization','var')
     set(gcf,'Position',[0,0,800,600]);
 else
@@ -130,4 +130,4 @@ end
 set(gcf,'Resize','off');
 
 % Export figure:
-exportgraphics(gcf,[sims.pathPNGs,'/RuntimeResults_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/RuntimeResults_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);

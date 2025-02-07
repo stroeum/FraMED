@@ -13,7 +13,7 @@ if ~exist(sim.pathPNGs, 'dir')
 end
 
 %% xy
-c = imread([sims.pathPNGs,'/xy_',sims.objectName,'_',sims.objectType,'.png']);
+c = imread(strcat(sims.pathPNGs,'/xy_',sims.objectName,'_',sims.objectType,'.png'));
 
 figure(1)
 subplot(331)
@@ -32,7 +32,7 @@ ylabel('n(r)')
 legend('actual box-count','space-filling box-count');
 
 %% xz
-c = imread([sims.pathPNGs,'/xz_',sims.objectName,'_',sims.objectType,'.png']);
+c = imread(strcat(sims.pathPNGs,'/xz_',sims.objectName,'_',sims.objectType,'.png'));
 
 subplot(334)
 imagesc(~c);
@@ -50,7 +50,7 @@ ylabel('n(r)')
 legend('actual box-count','space-filling box-count');
 
 %% yz
-c = imread([sims.pathPNGs,'/yz_',sims.objectName,'_',sims.objectType,'.png']);
+c = imread(strcat(sims.pathPNGs,'/yz_',sims.objectName,'_',sims.objectType,'.png'));
 
 subplot(337)
 imagesc(~c);

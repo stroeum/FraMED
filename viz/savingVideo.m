@@ -5,7 +5,7 @@ function savingVideo(frames,sims,videoLength)
     else 
         framerates = rates;
     end
-    v = VideoWriter([sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'],'MPEG-4');
+    v = VideoWriter(strcat(sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'),'MPEG-4');
     v.FrameRate = framerates;
     v.Quality = 100;
     open(v);

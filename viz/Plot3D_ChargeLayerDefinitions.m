@@ -7,7 +7,7 @@
 %     Contact: annelisa.esparza@my.erau.edu                               %
 %  Added Date: April 29, 2022                                             %
 % Last Update: February 2025 - Updated to match the options available for %
-%                              the createCustomColorMap function.        %                                                       %
+%                              the createCustomColorMap function.         %  
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -77,9 +77,9 @@ if strcmp(sims.BCtype,'G')
     P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground: $z$ = ",num2str(gnd.alt*1e-3)," km"));
 end
-title(['Charge Layer Distribution (',sims.objectType,' on ',sims.objectName,')'],'Interpreter','latex','FontSize',28);
+title(strcat("Charge Layer Distribution ",sims.objectType," on ",sims.objectName,')'),'Interpreter','latex','FontSize',28);
    
 % Calls the new function that automatically recognizes charge regions:
 plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R1,h1,Q1,center1,R2,h2,Q2,center2);
-exportgraphics(gcf,[sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 

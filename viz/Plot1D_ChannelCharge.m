@@ -3,20 +3,7 @@ clearvars -except sims
 
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') 
-    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-    sims.objectName = input(prompt1,'s');
-    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-    sims.objectType = input(prompt2,'s');
-    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-        sims.objectType = input(prompt2,'s');
-    end
-
-    % Settings to ensure proper directory referencing:
-    sims.pathPNGs = ['../Figures/',sims.objectName,'/',sims.objectType,'/PNGs'];
-    if ~exist(sims.pathPNGs,'dir')
-        mkdir(sims.pathPNGs);
-    end
+    sims = specifySimDetails();
 end 
 
 cd ../results
@@ -39,6 +26,6 @@ set(gca,'FontSize',10);
 axis([0 max(step) min(0) max(Q)]) ;
 box on
 grid on
-exportgraphics(gcf,[sims.pathPNGs,'/ChargeTransfer_',sims.objectName,'_',sims.objectType,'.png'],'BackgroundColor','white','Resolution',300);
+exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeTransfer_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
 cd ../viz
