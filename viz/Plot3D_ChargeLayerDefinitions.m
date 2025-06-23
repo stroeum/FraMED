@@ -11,13 +11,13 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
-close all
+%close all
 clearvars -except sims
-
+figure(1)
 clf
 
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos') 
+    specifySimDetails;
 end
 
 %% Load data files
@@ -29,15 +29,10 @@ gnd.alt  = load('z_gnd.dat', '-ascii');
 load('ChargeLayers.dat',     '-ascii');
 cd ../viz
 
-Q1      = ChargeLayers(1,1);
-R1      = ChargeLayers(1,5)/1000;
-h1      = ChargeLayers(1,7)/1000;
-center1 = [ChargeLayers(1,2); ChargeLayers(1,3); ChargeLayers(1,4)]/1000;
-
-Q2      = ChargeLayers(2,1);
-R2      = ChargeLayers(2,5)/1000;
-h2      = ChargeLayers(2,7)/1000;
-center2 = [ChargeLayers(2,2); ChargeLayers(2,3); ChargeLayers(2,4)]/1000;
+Q = ChargeLayers(:,1);
+R = ChargeLayers(:,5)./1000;
+h = ChargeLayers(:,7)./1000;
+center = ChargeLayers(:,2:4)./1000;
 
 %% Derive main parameters
 N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
@@ -69,6 +64,13 @@ hold on;
 % Sets bounds for the axes (comment out if clouds get cut off):
 %axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
 axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
+if isfield(sims,'disType')
+    title(strcat("Charge Layer Distribution (",sims.disType," ",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
+else
+    title(strcat("Charge Layer Distribution (",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
+end
+% Calls the new function that automatically recognizes charge regions:
+plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R,h,Q,center);
 
 % Represents the neutrally charged (grounded) surface:
 if strcmp(sims.BCtype,'G')
@@ -77,9 +79,6 @@ if strcmp(sims.BCtype,'G')
     P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground: $z$ = ",num2str(gnd.alt*1e-3)," km"));
 end
-title(strcat("Charge Layer Distribution ",sims.objectType," on ",sims.objectName,')'),'Interpreter','latex','FontSize',28);
-   
-% Calls the new function that automatically recognizes charge regions:
-plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R1,h1,Q1,center1,R2,h2,Q2,center2);
+legend
 exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 
