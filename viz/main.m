@@ -6,7 +6,7 @@ close all
 clearvars
 
 %% Folders for Saving (User-Defined)
-sims = specifySimDetails();
+specifySimDetails;
 
 %% Runtime Results
 Plot1D_RuntimeResults;
