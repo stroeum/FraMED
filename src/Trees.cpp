@@ -518,28 +518,14 @@ void Tree::StoreData(FILE * file)
     IO::write(Var::Un,      (char*)"Un3d.dat" );
     
     if(Var::curType != PROPAGATING){
-		if(Var::BCtype == TIN_CAN)
-			IO::write((char*)"TIN_CAN", 	    (char*)"Type_BC.txt");
-		else if(Var::BCtype == OPEN_BC)
-			IO::write((char*)"G",	            (char*)"Type_BC.txt");
-		else if(Var::BCtype == G_G)
-			IO::write((char*)"G_G",		        (char*)"Type_BC.txt");
-		else if(Var::BCtype == FREE_SPACE)
-			IO::write((char*)"FS",              (char*)"Type_BC.txt");
-
 		if(Var::curType == JET)
-			IO::write((char*)"jet", 	        (char*)"Type_Result.txt");
+			IO::write((char*)"Jet", 	        (char*)"Type_Result.txt");
 		else if(Var::curType == CLOUD_TO_GROUND)
-			IO::write((char*)"cloud-to-ground", (char*)"Type_Result.txt");
+			IO::write((char*)"Cloud-to-Ground", (char*)"Type_Result.txt");
 		else if(Var::curType == HORIZONTAL)
-			IO::write((char*)"horizontal",	    (char*)"Type_Result.txt");
+			IO::write((char*)"Horizontal",	    (char*)"Type_Result.txt");
 		else if(Var::curType == INTRA_CLOUD)
-			IO::write((char*)"intracloud",      (char*)"Type_Result.txt");
-		
-		if(Var::isVoltageDropped == true)
-			IO::write((char*)"Streamer",        (char*)"Type_Discharge.txt");
-		else if(Var::isVoltageDropped == false)
-			IO::write((char*)"Leader", 	        (char*)"Type_Discharge.txt");
+			IO::write((char*)"Intracloud",      (char*)"Type_Result.txt");
 	}
     /**************************************************************************
      double	QchannelPlus;
