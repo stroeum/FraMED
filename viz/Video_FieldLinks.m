@@ -14,15 +14,14 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Clear the workspace of unnecessary existing variables:
-close all
 clearvars -except sims
-clf
 
 %% User-defined variables that influence the plot:
-is.Rec            = 'N'; % Would you like to record the lightning propagation as a video? (Y / N)
+is.Rec            = 'Y'; % Would you like to record the lightning propagation as a video? (Y / N)
 is.monoChrome     = 'N'; % Would you like the discharge plotted only in black? (Y / N)
 is.whichScalar    = 'P'; % Would you like to plot the charge density (C) or the potential (P)?
 is.updateScalar   = 'Y'; % Would you like to update the charge/potential distribution coloring using the saved steps? (Y / N)
+is.highRes        = 'Y';
 
 is.zoomedIn       = 'N'; % Would you like to plot a specific region of the domain (Y/N)?
 is.zoomedX        = [7500; 17500];  % (is.zoomedIn == 'Y'): Zoomed in region for the X domain, in meters.
@@ -30,14 +29,14 @@ is.zoomedY        = [7500; 17500];  % (is.zoomedIn == 'Y'): Zoomed in region for
 is.zoomedZ        = [4000; 14000];  % (is.zoomedIn == 'Y'): Zoomed in region for the Z domain, in meters.
 
 is.horizontal     = 'N'; % Would you like to plot the field for the XY plane at two altitudes (Y) or for the XZ/YZ planes at the center of the domain (N)?
-is.altitudes      = [8000; 12500];  % (is.horizontal == 'Y'): Altitudes for horizontal plane plots, in meters.
+is.altitudes      = [5000; 6000];  % (is.horizontal == 'Y'): Altitudes for horizontal plane plots, in meters.
 
 is.singleImages   = 'N'; % Would you like to export single images for all of the available saved steps? (Y / N)
-is.setExtracts    = [50; 100; 150]; % Would you like to export for any explicit steps? 
+is.setExtracts    = []; % Would you like to export for any explicit steps? 
 
 %% Fully-automated onwards:
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+    specifySimDetails;
 end
 
 % Load data files
@@ -79,8 +78,8 @@ is.finalStep = size(Links.ID,1);
 
 % Assigns plot height and width based on domain:
 if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
-    sims.plotWidth = 600;
-    sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
+    sims.plotWidth = 800;
+    sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*7)*80;
 end
 
 % Map ColorScale
@@ -121,28 +120,36 @@ end
 if strcmp(is.Rec,'Y')
     Movie = VideoWriter(strcat(sims.pathVideos,'/Fields_',scalarType,'_',planeType,'_',viewType,'_',sims.objectName,'_',sims.objectType),'MPEG-4');
     if is.finalStep <= 60
-        Movie.FrameRate = 1;
+        Movie.FrameRate = 4;
     elseif is.finalStep > 60 && is.finalStep <= 1000
         Movie.FrameRate = round(is.finalStep/20);
     else
         Movie.FrameRate = round(is.finalStep/60);
     end
-    Movie.Quality = 50;
+    Movie.Quality = 100;
     open(Movie);
 end
 
 % Prepares the tiled layout for the figure:
+if strcmp(is.highRes,'Y')
+    is.resFactor = 2;
+else
+    is.resFactor = 1;
+end
 if strcmp(is.horizontal,'Y')
+    figure(1); clf;
     tiledlayout(2,3,"TileSpacing","tight","Padding","tight")
     nexttile
+    box on
     nexttile([2 2])
     hold on;
-    set(gcf,'Position',[0,0,(5.6/3)*sims.plotWidth,1.5*sims.plotHeight]);
+    set(gcf,'Position',[0,0,is.resFactor*4*round((1.8*sims.plotWidth)/3),is.resFactor*4*round((1.3*sims.plotHeight)/3)],'Color','White');
 elseif strcmp(is.horizontal,'N')
+    figure(2); clf;
     tiledlayout(1,3,"TileSpacing","tight","Padding","tight")
     nexttile(2)
     hold on;
-    set(gcf,'Position',[0,0,1.8*sims.plotWidth,sims.plotHeight]);
+    set(gcf,'Position',[0,0,is.resFactor*4*round((2.1*sims.plotWidth)/3),is.resFactor*4*round((sims.plotHeight)/3)],'Color','White');
 end
 set(gcf,'Resize','off');
 grid on;
@@ -158,7 +165,13 @@ else
     ylim([0 max(y)]);
     zlim([0 max(z)]);
     arrowDensity = 10;
-    initiationMarker = 20;
+    if strcmp(is.horizontal,'N')
+        initiationMarker = 20*is.resFactor;
+        arrowDensity = 10*is.resFactor;
+    elseif strcmp(is.horizontal,'Y')
+        initiationMarker = 30*is.resFactor;
+        arrowDensity = 7*is.resFactor;
+    end
 end
 
 % Represents the neutrally charged (grounded) surface, if relevant:
@@ -169,10 +182,14 @@ if strcmp(sims.BCtype,'G')
     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
 end
 hold off
-nexttile        
+nexttile  
+box on
 
 % Initialize distance traveled for lightning links:
 distance = 0;
+
+% Converts altitudes to respective indices:  
+is.altitudes = ((is.altitudes./d.z)+1); 
 
 % For-loop to plot lightning discharge links and field lines:
 for ii=0:is.finalStep
@@ -197,7 +214,7 @@ for ii=0:is.finalStep
         y1 = Links.ID(1,2)*d.y/1000;
         z1 = ((Links.ID(1,3)*d.z)/1000)+(gnd.alt/1000);
         scatter3(x1,y1,z1,initiationMarker,'k','filled');
-        titleformat = title(strcat(sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
+        titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
         hold off
 
         % Determines the 2D electric field values for the step:
@@ -235,14 +252,14 @@ for ii=0:is.finalStep
         set(nexttile(1),'CLim',[0 1])
         set(nexttile(1),'CLimMode','manual')
         if strcmp(is.horizontal,'N')
-            p1.bar.Label.FontSize = 14;
+            p1.bar.Label.FontSize = is.resFactor*14;
             p1.bar.Location = "southoutside"; 
             p1.mag = surf(vals.y,vals.z1,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p1.dir = streamslice(vals.y,vals.z1,E.y2D,E.z2Dy,arrowDensity,'arrows');
-            set(gca,'FontSize',10,'TickLabelInterpreter','latex');
-            xlabel('$y$ (km)','Interpreter','latex','FontSize',16);
-            ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Vertical Fields at $x$ = ",num2str(round((L.y*1e-3)/2))," km"),'Interpreter','latex','FontSize',20);
+            set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
+            xlabel('$y$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel('$z$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Vertical Electric Fields at $x$ = ",num2str(round((L.y*1e-3)/2))," km"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y') 
@@ -251,14 +268,14 @@ for ii=0:is.finalStep
                 set(gca,'XDir','reverse','XLim',[min(vals.y(:)) max(vals.y(:))],'YLim',[min(vals.z1(:)) max(vals.z1(:))]);
             end
         elseif strcmp(is.horizontal,'Y')
-            p1.bar.Label.FontSize = 12;
+            p1.bar.Label.FontSize = is.resFactor*14;
             p1.bar.Location = "eastoutside"; 
             p1.mag = surf(vals.x,vals.y,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p1.dir = streamslice(vals.x,vals.y,E.x2Dmax,E.y2Dmax,arrowDensity,'arrows');
-            set(gca,'FontSize',10,'TickLabelInterpreter','latex');
-            xlabel('$x$ (km)','Interpreter','latex','FontSize',16);
-            ylabel('$y$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Horizontal Fields at $z$ = ",num2str(z(((max(is.altitudes)/d.z)+1)))," km"),'Interpreter','latex','FontSize',20);
+            set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
+            xlabel('$x$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel('$y$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(max(is.altitudes)))," km"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
@@ -267,7 +284,7 @@ for ii=0:is.finalStep
                 set(gca,'XLim',[min(vals.x(:)) max(vals.x(:))],'YLim',[min(vals.y(:)) max(vals.y(:))]);
             end
         end
-        box off
+        box on
         hold off
        
         % Plots the electric field lines and ensures proper formatting for the second planar extract:
@@ -303,17 +320,17 @@ for ii=0:is.finalStep
         p2.bar.TickLabelInterpreter = 'latex';
         p2.bar.AxisLocation = "out";
         if strcmp(is.horizontal,'N')
-            p2.bar.Label.FontSize = 14;
+            p2.bar.Label.FontSize = is.resFactor*14;
             set(nexttile(3),'CLim',[0 1])
             set(nexttile(3),'CLimMode','manual')
             p2.bar.Location = "southoutside"; 
             p2.mag = surf(vals.x,vals.z2,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p2.dir = streamslice(vals.x,vals.z2,E.x2D,E.z2Dx,arrowDensity,'arrows');
             set(findobj('Type','line'),'Color',[0 0 0 0.5],'LineWidth',0.25);
-            set(gca,'FontSize',10,'TickLabelInterpreter','latex');
-            xlabel('$x$ (km)','Interpreter','latex','FontSize',16);
-            ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Vertical Fields at $y$ = ",num2str(round((L.x*1e-3)/2))," km"),'Interpreter','latex','FontSize',20);
+            set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
+            xlabel('$x$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel('$z$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Vertical Electric Fields at $y$ = ",num2str(round((L.x*1e-3)/2))," km"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
@@ -322,17 +339,17 @@ for ii=0:is.finalStep
                 set(gca,'XLim',[min(vals.x(:)) max(vals.x(:))],'YLim',[min(vals.z2(:)) max(vals.z2(:))]);
             end
         elseif strcmp(is.horizontal,'Y')
-            p2.bar.Label.FontSize = 12;
+            p2.bar.Label.FontSize = is.resFactor*14;
             set(nexttile(4),'CLim',[0 1])
             set(nexttile(4),'CLimMode','manual')
             p2.bar.Location = "eastoutside"; 
             p2.mag = surf(vals.x,vals.y,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p2.dir = streamslice(vals.x,vals.y,E.x2Dmin,E.y2Dmin,arrowDensity,'arrows');
             set(findobj('Type','line'),'Color',[0 0 0 0.5],'LineWidth',0.25);
-            set(gca,'FontSize',10,'TickLabelInterpreter','latex');
-            xlabel('$x$ (km)','Interpreter','latex','FontSize',16);
-            ylabel('$y$ (km)','Interpreter','latex','FontSize',16);
-            title(strcat("Horizontal Fields at $z$ = ",num2str(z(((min(is.altitudes)/d.z)+1)))," km"),'Interpreter','latex','FontSize',20);
+            set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
+            xlabel('$x$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel('$y$ (km)','Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(min(is.altitudes)))," km"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
@@ -343,7 +360,7 @@ for ii=0:is.finalStep
             
         end
         clear EfieldMag; clear direction; clear newMag;
-        box off
+        box on
         hold off
         exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Ambient_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
     else % (all step values associated with the simulation)
@@ -498,12 +515,16 @@ for ii=0:is.finalStep
         distance = distance + sqrt(((x2-x1)^2) + ((y2-y1)^2) + ((z2-z1)^2));
     
         % Plotting link:
-        plot3([x1, x2]*1e-3,[y1, y2]*1e-3,[z1, z2]*1e-3,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',1.5);
+        if strcmp(is.horizontal,'N')
+            plot3([x1, x2]*1e-3,[y1, y2]*1e-3,[z1, z2]*1e-3,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',1.5);
+        elseif strcmp(is.horizontal,'Y')
+            plot3([x1, x2]*1e-3,[y1, y2]*1e-3,[z1, z2]*1e-3,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
+        end
     end
     % Formatting title to reflect step value:
     nexttile(2)
     delete(titleformat);
-    titleformat = title(strcat(sims.objectType," on ",sims.objectName," after ", int2str(ii) ," step(s)"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
+    titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName," after ", int2str(ii) ," step(s)"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
     box off
     if strcmp(is.singleImages,'Y') || ismember(ii,is.setExtracts)
         exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Step-',num2str(ii),'_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
@@ -529,7 +550,7 @@ end
 
 % Exports the final graphic:
 delete(titleformat);
-titleformat = title(strcat(sims.objectType," on ",sims.objectName,": Final Results"),'FontSize',20,'FontWeight','bold','Interpreter','latex');
+titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName,": Final Results"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
 exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Final_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
 
 %% Functions:
@@ -549,12 +570,12 @@ function E = consolidateEfield(num,is,Nxyz)
         Ez3D     = ConvertTo3d(load(['../results/Ez3d',num2str(num),'.dat']),Nxyz);
     end
     if strcmp(is.horizontal,'Y')
-        E.x2Dmin = permute(Ex3D(:,:,((min(is.altitudes)/d.z)+1)),[2,1,3]);
-        E.x2Dmax = permute(Ex3D(:,:,((max(is.altitudes)/d.z)+1)),[2,1,3]);
-        E.y2Dmin = permute(Ey3D(:,:,((min(is.altitudes)/d.z)+1)),[2,1,3]);
-        E.y2Dmax = permute(Ey3D(:,:,((max(is.altitudes)/d.z)+1)),[2,1,3]);
-        E.z2Dmin = permute(Ez3D(:,:,((min(is.altitudes)/d.z)+1)),[2,1,3]);
-        E.z2Dmax = permute(Ez3D(:,:,((max(is.altitudes)/d.z)+1)),[2,1,3]);
+        E.x2Dmin = permute(Ex3D(:,:,min(is.altitudes)),[2,1,3]);
+        E.x2Dmax = permute(Ex3D(:,:,max(is.altitudes)),[2,1,3]);
+        E.y2Dmin = permute(Ey3D(:,:,min(is.altitudes)),[2,1,3]);
+        E.y2Dmax = permute(Ey3D(:,:,max(is.altitudes)),[2,1,3]);
+        E.z2Dmin = permute(Ez3D(:,:,min(is.altitudes)),[2,1,3]);
+        E.z2Dmax = permute(Ez3D(:,:,max(is.altitudes)),[2,1,3]);
     elseif strcmp(is.horizontal,'N')
         E.x2D    = permute(Ex3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
         E.x2Dy   = permute(Ey3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
@@ -577,7 +598,7 @@ function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zva
         tol = ceil(log10(round(max(max(max(abs(scalarvaluesOG.data)))),1,'significant')/(10^2)));
         scalarvalues.data = round(scalarvaluesOG.data,-tol);
     elseif strcmp(is.whichScalar,'P')
-        tol = 0; % ceil(log10(round(max(max(max(abs(scalarvaluesOG.data)))),1,'significant')/(10^2)))
+        tol = 1; % ceil(log10(round(max(max(max(abs(scalarvaluesOG.data)))),1,'significant')/(10^2)))
         scalarvalues.data = 2*round(0.5*scalarvaluesOG.data,-tol);
     end
     uniqueValues = unique(nonzeros(scalarvalues.data));
@@ -691,7 +712,7 @@ function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zva
             c.Label.String = 'Total Potential (MV)';
         end
         c.Label.HorizontalAlignment = 'center';
-        c.Label.FontSize = 16;
+        c.Label.FontSize = 16*is.resFactor;
         c.TickDirection = 'out';
         c.TickLabelInterpreter = 'latex';
         c.AxisLocation = "out";
@@ -703,9 +724,9 @@ function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zva
     end
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
-    ax.FontSize = 10;
-    xlabel('$x$ (km)','Interpreter','latex','FontSize',16,'HorizontalAlignment','left');
-    ylabel('$y$ (km)','Interpreter','latex','FontSize',16,'HorizontalAlignment','right');
+    ax.FontSize = 10*is.resFactor;
+    xlabel('$x$ (km)','Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','left');
+    ylabel('$y$ (km)','Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','right');
     grid on
     view(-45,5)
 end
