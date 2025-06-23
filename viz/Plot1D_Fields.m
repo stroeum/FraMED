@@ -3,7 +3,7 @@ close all
 
 %% Compile and Run C++ code
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+    specifySimDetails;
 end 
 cd ../results
 

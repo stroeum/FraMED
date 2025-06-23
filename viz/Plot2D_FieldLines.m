@@ -1,7 +1,7 @@
 function [] = Plot2D_FieldLines(num,sims)
     fprintf('\n*** Executing Plot2D_FieldLines.m function. ***\n');
     if ~exist('sims','var') || ~isfield(sims,'pathPNGs') 
-        sims = specifySimDetails();
+        specifySimDetails;
     end 
 
     cd ../results

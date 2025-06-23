@@ -3,7 +3,7 @@ clearvars -except sims
 
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') 
-    sims = specifySimDetails();
+    specifySimDetails;
 end 
 
 cd ../results

@@ -4,7 +4,7 @@ close all
 
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+    specifySimDetails;
 end
 
 if ~exist(sim.pathPNGs, 'dir')

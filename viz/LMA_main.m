@@ -9,7 +9,7 @@ global alt_hist FocusArea Font Ground
 
 % Preparing subdirectories:
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+    specifySimDetails;
 end
 
 %% Initialisation %%

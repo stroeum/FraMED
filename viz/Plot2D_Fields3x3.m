@@ -3,7 +3,7 @@ clearvars -except sims
 beep  off
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs')
-    sims = specifySimDetails();
+    specifySimDetails;
 end 
 fprintf('\n*** Executing Plot2D_Fields3x3.m script. ***\n');
 

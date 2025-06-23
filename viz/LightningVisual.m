@@ -10,7 +10,7 @@ is.monoChrome     = 'N'; % Would you like the plot to be monochrome? (Y / N)
 
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    sims = specifySimDetails();
+    specifySimDetails;
 end 
 
 cd ../results
