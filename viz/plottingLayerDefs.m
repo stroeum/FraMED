@@ -6,27 +6,17 @@
 %      Author: Annelisa Esparza                                           %
 %     Contact: annelisa.esparza@my.erau.edu                               %
 %  Added Date: April 29, 2022                                             %
-% Last Update: February 2025 - Updated to match the options available for %
-%                              the createCustomColorMap function.        %
+% Last Update: June 2025 - Updated to properly order the legend labeling. %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,h1,Q1,pos1,R2,h2,Q2,pos2)
+function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center)
     % Ensures charge regions are properly labeled
-    if Q1 < Q2
-        tempQ = Q1;
-        tempR = R1;
-        tempH = h1;
-        tempPos = pos1;
-        Q1 = Q2;
-        R1 = R2;
-        h1 = h2;
-        pos1 = pos2;
-        Q2 = tempQ;
-        R2 = tempR;
-        h2 = tempH;
-        pos2 = tempPos;
-        clear tempQ tempR tempH tempPos
-    end
+    testVals = Q./(pi.*(R.^2).*h);
+    [~,correctOrder] = sort(testVals);
+    Q = Q(correctOrder);
+    R = R(correctOrder);
+    h = h(correctOrder);
+    center = center(correctOrder,:);
 
     %Creates a unique colormap to represent the charge regions:
     rgbValues = createCustomColorMap(colorbarRange,1);
@@ -66,7 +56,7 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
     middle = (((length(rgbValues(:,1))-1)/2)+1);
-    midRange = floor(((length(rgbValues(:,1))-1)/10))-1;
+    midRange = floor((0.025*(length(rgbValues(:,1))-1)))-1;
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
         [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs([rhoData.min rhoData.max])),rgbValues);
@@ -95,10 +85,10 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
             if included == 1
                 if uniqueRhos(location)>0
                     p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R_1$ = ',num2str(R1),' km' newline 'Height: $h_1$ = ',num2str(h1),' km' newline 'Charge: $Q_1$ = ',num2str(Q1),' C' newline 'Center: $\left(x_1,y_1,z_1\right)$ = (',num2str(pos1(1)),' km, ',num2str(pos1(2)),' km, ',num2str(pos1(3)),' km)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' km' newline 'Height: $h$ = ',num2str(h(location)),' km' newline 'Charge: $Q$ = ',num2str(Q(location)),' C' newline 'Center: (',num2str(center(location,1)),' km, ',num2str(center(location,2)),' km, ',num2str(center(location,3)),' km)' newline]);
                 else
                     p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R_2$ = ',num2str(R2),' km' newline 'Height: $h_2$ = ',num2str(h2),' km' newline 'Charge: $Q_2$ = ',num2str(Q2),' C' newline 'Center: $\left(x_2,y_2,z_2\right)$ = (',num2str(pos2(1)),' km, ',num2str(pos2(2)),' km, ',num2str(pos2(3)),' km)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' km' newline 'Height: $h$ = ',num2str(h(location)),' km' newline 'Charge: $Q$ = ',num2str(Q(location)),' C' newline 'Center: (',num2str(center(location,1)),' km, ',num2str(center(location,2)),' km, ',num2str(center(location,3)),' km)' newline]);
                 end
                 isonormals(Xval,Yval,Zval,rhoData.data,p1);
                 drawnow
@@ -119,7 +109,12 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Location','north','Box','off','FontSize',18,'Interpreter','latex');
+    if length(R) > 2
+        fontSize = 12;
+    else
+        fontSize = 14;
+    end
+    [~,h_legend]=legend('Location','north','Box','off','FontSize',fontSize,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
     ax = gca;
@@ -131,6 +126,6 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R1,
     grid on
     view(-45,9)
     if length(trueUniqueRhos)<=3
-        pause
+        %pause
     end
 end
