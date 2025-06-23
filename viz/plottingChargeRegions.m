@@ -62,7 +62,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     min_rho_value = min(trueUniqueRhos);
     %fprintf(['Maximum density is ',num2str(max(trueUniqueRhos)),'\nMinimum density is ',num2str(min(trueUniqueRhos)),'\nLength of unique densities is ',num2str(length(trueUniqueRhos))]);
     % Sets 
-    view(-45,9);
+    view(-45,5);
     % Plots isocharge regions in a representative color:
     colorIndices = zeros([length(uniqueRhos),1]);
     colorVertices = zeros([length(uniqueRhos),3]);
@@ -132,7 +132,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
     zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
     grid on
-    view(-45,9)
+    view(-45,5)
     if length(trueUniqueRhos)<=3
         pause
     end
