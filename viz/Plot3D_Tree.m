@@ -1,4 +1,3 @@
-function []= Plot3D_Tree()
 close all
 clearvars -except sims
 
@@ -133,9 +132,8 @@ for n = 1:NbSpheres
 
     N(n) = 0;
     for m=1:NbOfLinks
-        if ( (EstablishedLinks(m,4)*dx-InitX)^2 +...
-                (EstablishedLinks(m,5)*dy-InitY)^2 +...
-                (EstablishedLinks(m,6)*dz-InitZ)^2 <= R(n)^2 )
+        if ( (EstablishedLinks(m,4)*dx-InitX)^2 + (EstablishedLinks(m,5)*dy-InitY)^2 + (EstablishedLinks(m,6)*dz-InitZ)^2 <= R(n)^2 )
+            disp((EstablishedLinks(m,4)*dx-InitX)^2 + (EstablishedLinks(m,5)*dy-InitY)^2 + (EstablishedLinks(m,6)*dz-InitZ)^2)
             N(n) = N(n)+1;
         end
     end
@@ -150,6 +148,8 @@ xlabel('ln(R)','FontSize',12)
 ylabel('ln(N)','FontSize',12)
 D=P(1,1);
 title(['Fractal dimension D = ', num2str(D)],'FontSize',12,'FontWeight','bold');
+exportgraphics(gcf,strcat(sims.pathPNGs,'/Tree_',sims.objectName,'_',sims.objectType,'_FractalDimension.png'),'Resolution',600);
+
 Lowest_Altitude = min(EstablishedLinks(:,6)*dz)+z_gnd;
 fprintf('Lowest Altitude   = %f\n\n',Lowest_Altitude);
 
@@ -160,5 +160,3 @@ writeVideo(vFile,frame);
 close(vFile);
 cd ../viz/
 
-
-end
