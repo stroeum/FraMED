@@ -113,6 +113,8 @@ public:
 													// Constructor surcharge - Vertical cylinder
 	Potential(double,double,double,double,double,ResGrid,SizeGrid);
 													// Constructor surcharge - Sphere
+    bool sphere(double, double, double, double, double, ResGrid, SizeGrid);
+                                                    // Assign potential assuming spherical geometry
 	double	getVo()	{return Vo;};					// Return the potential Vo
 	bool	getEquiPotential() {return EquiPotential;};
 	// Return EquiPotential

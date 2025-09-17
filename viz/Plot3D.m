@@ -79,7 +79,7 @@ patch(Xp, Yp, Zp, z_gnd,'FaceColor',gnd_color);
 
 for ii=1:NbOfLinks
     plot3([EstablishedLinks(ii,1)*dx, EstablishedLinks(ii,4)*dx]*1e-3,[EstablishedLinks(ii,2)*dy, EstablishedLinks(ii,5)*dy]*1e-3,[EstablishedLinks(ii,3)*dz+z_gnd, EstablishedLinks(ii,6)*dz+z_gnd]*1e-3,'Color',color(ii,:));
-    axis([Lx*1/4 Lx*3/4 Ly*1/4 Ly*3/4 z_gnd 2/2*(Lz+z_gnd)]*1e-3)
+    axis([Lx*0/4 Lx*4/4 Ly*0/4 Ly*4/4 z_gnd 2/2*(Lz+z_gnd)]*1e-3)
     xlabel('x (km)','FontSize',12);
     ylabel('y (km)','FontSize',12);
     zlabel('z (km)','FontSize',12);

@@ -34,9 +34,9 @@ int main()
     
     Var::ThresholdOvershoot		= 10;                                               // % by which the Einit must be exceeded
     // arbitrarily fixed to 1 in this case.
-    Var::BCtype					= OPEN_BC;                                          // Boundary conditions
-    Var::LoadingType            = SET_CHARGES;                                      // Charge loading type
-    Var::InitiationType			= AT_PREDEF_POS;                                    // Initiation type
+    Var::BCtype					= TIN_CAN;                                          // Boundary conditions
+    Var::LoadingType            = SET_POTENTIAL;                                      // Charge loading type
+    Var::InitiationType			= RANDOM;                                    // Initiation type
     
     Var::step3d                 = 100;                                              // rho, E, V is calculated and store every step3d
     // = 0 3-D values never calculated
@@ -44,7 +44,7 @@ int main()
     Var::isBndXingPossible		= false;                                            // Channel is allowed to cross boundaries: Y/N
     Var::isQMinimized	        = true;                                             // Channel potential ensure charges neutrality: Y/N
     Var::isFlashAccoutedInBC 	= false;                                            // Channel charge is accounted for in  BC: Y/N
-    Var::isInitiationPossible	= true;                                             // Init. possible in domain after charge load: Y/N
+    Var::isInitiationPossible	= false;                                             // Init. possible in domain after charge load: Y/N
     Var::isLinkXingPossible		= false;                                            // Channels crosses are allowed: Y/N
     Var::isRsDeveloped			= true;                                             // Return stroke development: Y/N
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
@@ -134,9 +134,9 @@ int main()
         /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */ /**/
         cout<<"ii: Reading in files from atmos-models directory..."<<endl;
 
-        ListDouble alt=IO::read((char*)("atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_z.dat" ));
+        ListDouble alt=IO::read((char*)("atmos-models/examples/Box/streamer-N51-D0.001m_z.dat" ));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_ng.dat"));
+        ListDouble ng =IO::read((char*)("atmos-models/examples/Box/streamer-N51-D0.001m_ng.dat"));
         IO::print(file, "..: density successfully read\n");
         IO::print(file, "..: Reading ground altitude (z_gnd)\n");
         ListDouble::iterator alt_tracker = alt.begin();
@@ -147,7 +147,7 @@ int main()
         /* IF READING IN PREDETERMINED GRID SIZES */ /**/
         CMatrix1D M;
         IO::print(file, "..: Reading grid size (N).\n");
-        IO::read(M,(char*)"../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Nxyz.dat");
+        IO::read(M,(char*)"../atmos-models/examples/Box/streamer-N51-D0.001m_Nxyz.dat");
         Var::N.x = M[0];
         Var::N.y = M[1];
         Var::N.z = M[2];
@@ -155,7 +155,7 @@ int main()
         InitMatrices(Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
         IO::print(file, "..: Reading grid resolution (d)\n");
-        IO::read(M,(char*)"../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Dxyz.dat");
+        IO::read(M,(char*)"../atmos-models/examples/Box/streamer-N51-D0.001m_Dxyz.dat");
         Var::L.init((Var::N.x-1)*M[0],(Var::N.y-1)*M[1],(Var::N.z-1)*M[2]);
         Var::d.init(Var::L,Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
@@ -178,19 +178,19 @@ int main()
         */ /* END OF IF ASSIGNING GRID SIZES (EXCLUDING ALTITUDE READ-IN) */
 
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_E_initiation_Vm.dat"));
+        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/examples/Box/streamer-N51-D0.001m_E_initiation_Vm.dat"));
         IO::print(file, "..: initiation threshold successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_positive_Vm.dat"));
+        IO::read(Var::Ec.positive,		(char*)("../atmos-models/examples/Box/streamer-N51-D0.001m_Eth_positive_Vm.dat"));
         IO::print(file, "..: positive propagation threshold successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_negative_Vm.dat"));
+        IO::read(Var::Ec.negative,		(char*)("../atmos-models/examples/Box/streamer-N51-D0.001m_Eth_negative_Vm.dat"));
         IO::print(file, "..: negative propagation threshold successfully read\n");
         /**/ /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
         // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
         if(Var::isVoltageDropped){
-            IO::read(Var::Vd.positive,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_positive_Vm.dat"));
+            IO::read(Var::Vd.positive,		(char*)("../atmos-models/examples/Box/streamer-N51-D0.001m_Eth_positive_Vm.dat"));
             IO::print(file, "..: positive voltage drop successfully read\n");
-            IO::read(Var::Vd.negative,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_negative_Vm.dat"));
+            IO::read(Var::Vd.negative,		(char*)("../atmos-models/examples/Box/streamer-N51-D0.001m_Eth_negative_Vm.dat"));
             IO::print(file, "..: negative voltage drop successfully read\n");// Assigned voltage drop for streamer runs
         }else{
             Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for leader runs
@@ -381,29 +381,11 @@ int main()
                 -ellipsoid: Rq1 = semi-axis A, Rq2 = semi-axis B, Rq3 = semi-axis C (meters)
                 -rectangle: Rq1 = width in X,  Rq2 = width in Y,  Rq3 = width in Z (meters)
             */
-            /* (Negative charge, screening layer) */
-            Var::Q =   -10;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 11.5e+3+Var::z_shift; Var::Rq1 = 6.0e+3;	Var::Rq3 = 1.0e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
+            Var::Q =   10e-9;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = Var::L.z/2; Var::Rq1 = 5.0e-3;
+            Var::C.sphere(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1, Var::d,Var::N);
             Var::ChargeCfg.push_back(Var::C);
             Var::C.reset(Var::d,Var::N);
 
-            /* (Positive charge, upper dipole) */
-            Var::Q =  350;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 9.0e+3+Var::z_shift; Var::Rq1 = 5.0e+3;	Var::Rq3 = 2.0e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::C.reset(Var::d,Var::N);
-            
-            /* (Negative charge, mid layer) */
-            Var::Q =   -365;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 6.0e+3+Var::z_shift; Var::Rq1 = 4.0e+3;	Var::Rq3 = 2.0e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::C.reset(Var::d,Var::N);
-                
-            // /* (Positive charge, lower dipole) */
-            Var::Q =    25;	Var::Xq = Var::L.x/2;	Var::Yq = Var::L.y/2;	Var::Zq = 3.5e+3+Var::z_shift; Var::Rq1 = 4.0e+3;	Var::Rq3 = 1.0e+3;
-            Var::C.disk(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq3, Var::d,Var::N);
-            Var::ChargeCfg.push_back(Var::C);
-            Var::C.reset(Var::d,Var::N);
             
             /* ALTERNATIVE CHARGE LAYER SHAPES */
             //Var::C.ellipsoid(Var::Q, Var::Xq,Var::Yq,Var::Zq, Var::Rq1,Var::Rq2,Var::Rq3, Var::d,Var::N);
@@ -444,17 +426,17 @@ int main()
             //       
             //        ApplyBC(BCtype,phi,C.rho,d,N);
             
-            Var::Eo  = 1e5; // _V/_m
+            Var::Eo  = 4.5e5; // _V/_m
             Var::Vo  = -Var::Eo*(Var::N.z-1)*Var::d.z;
             Var::Xp  = Var::L.x/2;
             Var::Yp  = Var::L.y/2;
-            Var::Zp  = Var::L.z;
-            Var::Rp1 = Var::L.x;
+            Var::Zp  = Var::L.z/2;
+            Var::Rp1 = 5e-3;
             Var::Rp2 = Var::L.y;
             Var::Rp3 = Var::d.z;
             
             
-            Var::V.init(Var::Vo, Var::Xp,Var::Yp, Var::Zp,Var::Rp1,Var::Rp2,Var::Rp3, Var::d,Var::N);
+            Var::V.sphere(Var::Vo, Var::Xp,Var::Yp, Var::Zp,Var::Rp1, Var::d,Var::N);
             
             //        for(int ii=0 ; ii<N.x ; ii++) for(int jj=0 ; jj<N.y ; jj++)    for(int kk=0 ; kk<N.z ; kk++)
             //        {phi[ii][jj][kk]=-Eo*kk*d.z;};
@@ -463,7 +445,7 @@ int main()
             IO::print(file, "++: Finished setting potential!\n");
         } else if(Var::LoadingType == FROM_FILE) {
             IO::print(file, "..: Loading charge layers\n");
-            Var::C.init((char*)"atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_rhoAmb.dat",Var::N);
+            Var::C.init((char*)"atmos-models/examples/Box/streamer-N51-D0.001m_rhoAmb.dat",Var::N);
             Var::ChargeCfg.push_back(Var::C);
             Var::phiNum.init(Var::N.z);                                                    // _V    Total electric potential on a vertical axis in the center of simulation domain
             Var::EzNum.init(Var::N.z);
@@ -480,7 +462,7 @@ int main()
     }
     IO::print(file, "..: Initializing domain\n");
     if(Var::LoadingType == SET_POTENTIAL) {
-        bool UniformE = true;
+        bool UniformE = false;
         BC::AddUniformE(UniformE, Var::Eo, Var::phi, Var::Un, Var::L, Var::d, Var::N);
         Var::SOR.init(Var::phi,Var::epsilon, Var::MaxStep, Var::d, Var::N, Var::V, Var::Un);
     } else {
