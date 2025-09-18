@@ -18,9 +18,9 @@ end
 if exist('../results/Type_Discharge.txt','file')
     sims.BCtype = string(textscan(fopen('../results/Type_BC.txt'),'%s'));
 else        
-    prompt_BCtype = '\nIs the domain in free space (FS) or is z = 0 grounded (G)?\n-->';
+    prompt_BCtype = '\nIs the domain in free space (FS), is z = 0 grounded (G), are the top and bottom of the domain grounded (G_G), or are all sides of the domain grounded (TIN_CAN)?\n-->';
     sims.BCtype = input(prompt_BCtype,'s');                    
-    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
+    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G') && ~strcmp(sims.BCtype,'TIN_CAN') && ~strcmp(sims.BCtype,'G_G')
         fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
         sims.BCtype = input(prompt_BCtype,'s');
     end
