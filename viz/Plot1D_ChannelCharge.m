@@ -23,7 +23,7 @@ plot(step,Q,'LineWidth',1,'LineStyle','-');
 xlabel('step','FontSize',12);
 ylabel('Q_{cha} (C)','FontSize',12);
 set(gca,'FontSize',10);
-axis([0 max(step) min(0) max(Q)]) ;
+axis([0 max(step) min([min(Q) 0]) max([0 max(Q)]));
 box on
 grid on
 exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeTransfer_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
