@@ -50,7 +50,7 @@ int main()
     Var::isInitiationPrevented	= false;                                            // Only simulate cloud electrical structure
     Var::isEsEnergyCalculated	= true;                                             // Electrostatic energy calculated at each step: Y/N
     Var::isBCerrorCalculated	= true;                                             // Error at boundary is calculated at each step: Y/N
-    Var::isVoltageDropped       = false;                                            // Is there a voltage drop (i.e. streamer case): Y/N
+    Var::isVoltageDropped       = true;                                            // Is there a voltage drop (i.e. streamer case): Y/N
     
     Var::ThresholdOvershoot		/= 100;                                             // Convert % into decimal
     

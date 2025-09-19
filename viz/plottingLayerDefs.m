@@ -23,8 +23,13 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
     rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
-    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    
-    rhoData.data = round(rhoDataOG.data,-tol);
+    tol = log10(round(max(max(max(abs(rhoDataOG.data)))),2,'significant'));   
+    if tol < 0 
+        tol = floor(tol);
+    else
+        tol = ceil(tol);
+    end
+    rhoData.data = round(rhoDataOG.data,(2-tol));
     uniqueRhos = unique(nonzeros(rhoData.data));
     rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
     rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);

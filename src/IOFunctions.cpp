@@ -309,7 +309,7 @@ void IO::write(ListDouble& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%f\n", *it);
+			fprintf(fp,"%e\n", *it);
 	fclose(fp);
 }
 
@@ -334,7 +334,7 @@ void IO::write(ListVector& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%f %f %f\n", it->x,it->y,it->z);
+			fprintf(fp,"%e %e %e\n", it->x,it->y,it->z);
 	fclose(fp);
 }
 
@@ -360,7 +360,7 @@ void IO::write(ListLink& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+12.2f %+12.2f %+12.2f %5.4f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
+			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+12.2e %+12.2f %+12.2f %5.4f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
 	fclose(fp);
 }
 

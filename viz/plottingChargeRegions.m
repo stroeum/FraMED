@@ -16,8 +16,13 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
    
     % Determines the range of the colorbar among other factors:
-    tol = ceil(log10(round(max(max(max(abs(rhoDataOG.data)))),1,'significant')/(10^2)));    
-    rhoData.data = round(rhoDataOG.data,-tol);
+    tol = log10(round(max(max(max(abs(rhoDataOG.data)))),2,'significant'));   
+    if tol < 0 
+        tol = floor(tol);
+    else
+        tol = ceil(tol);
+    end
+    rhoData.data = round(rhoDataOG.data,(2-tol));
     uniqueRhos = unique(nonzeros(rhoData.data));
     rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
     rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);
@@ -49,7 +54,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
     middle = (((length(rgbValues(:,1))-1)/2)+1);
-    midRange = floor(((length(rgbValues(:,1))-1)/10))-1;
+    midRange = floor((0.025*(length(rgbValues(:,1))-1)))-1;
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
         [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs([rhoData.min rhoData.max])),rgbValues);
