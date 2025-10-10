@@ -847,6 +847,29 @@ Potential::Potential(double VVo, double XXc, double YYc, double ZZc, double RR, 
 		};
 }
 
+bool Potential::sphere(double VVo, double XXc, double YYc, double ZZc, double RR, ResGrid _d, SizeGrid _N)
+{
+    EquiPotential    = true;
+    Vo                = VVo;
+    Xc                = XXc;
+    Yc                = YYc;
+    Zc                = ZZc;
+    L                = RR;                                // Radius of the sphere
+    Un.init(_N.x,_N.y,_N.z);
+    rho.init(_N.x,_N.y,_N.z);
+
+    double    ccptPoints    = 0;
+
+    for(int ii=0 ; ii<_N.x ; ii++) for(int jj=0 ; jj<_N.y ; jj++) for(int kk=0 ; kk<_N.z ; kk++)
+        if(sqrt(pow(ii*_d.x-Xc,2)+pow(jj*_d.y-Yc,2)+pow(kk*_d.z-Zc,2))<=RR) {
+            rho[ii][jj][kk] = Vo;
+            Un[ii][jj][kk]  = 1;
+        }
+            
+    
+    return true;
+}
+
 ostream & operator<< (ostream & os, const Potential & P)
 {
 	return os<<" Vo = "<<P.Vo<<"\n [Xc, Yc, Zc] = ["<<P.Xc<<" "<<P.Yc<<" "<<P.Zc<<"]\n [L, W, H] = ["<<P.L<<" "<<P.W<<" "<<P.H<<"]\n"; /* <<"rho: "<<C.rho */
