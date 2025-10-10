@@ -20,7 +20,7 @@ load z_gnd.dat              -ascii
 % Derive main parameters                                                  %
 %-------------------------------------------------------------------------%
 NbOfLinks = size(EstablishedLinks);
-NbOfLinks = NbOfLinks(1);
+NbOfLinks = NbOfLinks(1);2
 Nx = Nxyz(1);
 Ny = Nxyz(2);
 Nz = Nxyz(3);

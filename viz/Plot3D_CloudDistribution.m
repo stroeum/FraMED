@@ -18,7 +18,7 @@ clf
 fprintf('\n*** Executing Plot3D_CloudDistribution.m script. ***\n');
 
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
-    specifySimDetails;
+    specifySimDetails; 
 end
 
 promptSaveAfter = '\nWould you like to save an image of the charge layer distributions after the discharge has occurred? (Y / N)\n-->';

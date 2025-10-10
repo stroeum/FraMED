@@ -6,7 +6,7 @@ clearvars -except sims
 figure;
 global Charges NbLayers
 %-------------------------------------------------------------------------%
-% Load data files                                                         %
+% Load data files                                                           %
 %-------------------------------------------------------------------------%
 
 cd ../results/
@@ -19,7 +19,7 @@ Charges     = load('ChargeLayers.dat');
 % EzNum       = load('EzNum.dat');
 % phiNum      = load('phiNum.dat');
 % Einitiation = load('Einitiation.dat');
-% EthPositive = load('EthPositive.dat');
+% EthPositive = load('EthPositive.dat'); 
 % EthNegative = load('EthNegative.dat');
 z_gnd       = load('z_gnd.dat');
 
