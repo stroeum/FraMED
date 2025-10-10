@@ -274,7 +274,7 @@ void IO::write(double _d, char * fname)
 {
 	fp = openFile(fname, "w");
 
-	if(fp) fprintf(fp,"%f\n", _d);
+	if(fp) fprintf(fp,"%e\n", _d);
 	fclose(fp);
 }
 
@@ -290,7 +290,7 @@ void IO::write(double aa, double bb, double cc,	char * fname)
 {
 	fp = openFile(fname, "w");
 
-	if(fp) fprintf(fp,"%f\n%f\n%f\n", aa, bb, cc);
+	if(fp) fprintf(fp,"%e\n%e\n%e\n", aa, bb, cc);
 	fclose(fp);
 }
 
@@ -298,7 +298,7 @@ void IO::write(double aa, double bb, double cc, double _d,	char * fname)
 {
 	fp = openFile(fname, "w");
 
-	if(fp) fprintf(fp,"%f\n%f\n%f\n%f\n", aa, bb, cc, _d);
+	if(fp) fprintf(fp,"%e\n%e\n%e\n%e\n", aa, bb, cc, _d);
 	fclose(fp);
 }
 
@@ -309,7 +309,7 @@ void IO::write(ListDouble& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%f\n", *it);
+			fprintf(fp,"%e\n", *it);
 	fclose(fp);
 }
 
@@ -334,7 +334,7 @@ void IO::write(ListVector& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%f %f %f\n", it->x,it->y,it->z);
+			fprintf(fp,"%e %e %e\n", it->x,it->y,it->z);
 	fclose(fp);
 }
 
@@ -347,7 +347,7 @@ void IO::write(ListCMatrix1D& LL, char * fname)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
 		{
 			for (int ii=0 ; ii<it->getNbElem() ; ii++)
-				fprintf(fp,"%f ",it->getElem(ii));
+				fprintf(fp,"%e ",it->getElem(ii));
 			fprintf(fp,"\n");
 		};
 	fclose(fp);
@@ -360,7 +360,7 @@ void IO::write(ListLink& LL, char * fname)
 
 	if(fp)
 		for (it=LL.begin() ; it!=LL.end() ; it++)
-			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+12.2f %+12.2f %+12.2f %5.4f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
+			fprintf(fp,"%5d %5d %5d %5d %5d %5d %+e %+e %+e %1.8f\n", it->start.i, it->start.j, it->start.k, it->end.i, it->end.j, it->end.k, it->l, it->efield, it->deltaV, it->proba );
 	fclose(fp);
 }
 

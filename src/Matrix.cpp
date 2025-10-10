@@ -261,7 +261,7 @@ void CMatrix3D::fwrite(string s)
 		for (int ii=0 ; ii<xSize ; ii++)
 		{
 			for (int jj=0 ; jj<ySize ; jj++)
-                fprintf(ffile,"%f ", pMatrix3d[ii][jj][kk]);
+                fprintf(ffile,"%e ", pMatrix3d[ii][jj][kk]);
 			fprintf(ffile,"\n");
 		};
 		fprintf(ffile,"\n");
@@ -383,7 +383,7 @@ void CMatrix2D::fwrite(string s)
 	FILE * ffile = Open (c, "w");
 	for (int jj=0 ; jj<ySize ; jj++)
 	{
-		for (int ii=0 ; ii<xSize ; ii++) fprintf(ffile,"%f ", pMatrix2d[ii][jj]);
+		for (int ii=0 ; ii<xSize ; ii++) fprintf(ffile,"%e ", pMatrix2d[ii][jj]);
 		fprintf(ffile,"\n");
 	};
 	fclose(ffile);
@@ -446,7 +446,7 @@ void CMatrix1D::fwrite(string s)
 	char * c = &s[0];
 	FILE * ffile = Open (c, "w");
 	for (int ii=0 ; ii<iNbElem ; ii++)
-		fprintf(ffile,"%f\n",pElems[ii]);
+		fprintf(ffile,"%e\n",pElems[ii]);
 	fclose(ffile);
 }// fwrite
 /**************************************************************************************/
