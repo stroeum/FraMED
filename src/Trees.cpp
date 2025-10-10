@@ -429,6 +429,7 @@ void Tree::Grow(FILE * file, bool AddNew)
             Tree::StoreData(file);
 		if((Var::curType == PROPAGATING) || (Var::curType != INTRA_CLOUD))
        	 	_CntLinks++;
+		cout<<"ii:\t Channel positive charge: "<<Var::QchannelPlus<<endl;
         cout<<"ii:\t Nb of established links: "<<_CntLinks<<endl;
     }
     cout<<"Total Number of links: "<<_CntLinks<<endl;
