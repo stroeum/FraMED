@@ -1,13 +1,16 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% File Name: resizeDomain.m                                               %
-% Purpose: Adds capabilities to interpolate results output by TREBEC and  %
-%          the respective NASA GRAM into different FraMED domain sizes    %
-%          without the need to rerun any simulations. Current version     %
-%          only works when the initial altitude is zero. A future version %
-%          may be introduced to accommodate for alternative cases.        %
-% Author: Annelisa Esparza                                                %
-% Contact: annelisa.esparza@my.erau.edu                                   %
-% Date Added: October 14, 2024                                              %
+%  File Name: resizeDomain.m                                              %
+%    Purpose: Adds capabilities to interpolate results output by TREBEC   %
+%             and the respective NASA GRAM into different FraMED domain   %
+%             sizes without the need to rerun any simulations. Current    %
+%             version only works when the initial altitude is zero. A     %
+%             future version may be introduced to accommodate for         %
+%             alternative cases.                                          %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Date Added: October 14, 2024                                            %
+%    Updates: October 2025 - Integrated checkMagnitude function to allow  %
+%                            for non-mesoscale domaain sizes.             %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Select object of interest:
@@ -192,12 +195,13 @@ end
 
 %% Interpolate and export:
 % Summarize new altitude domain & export results:
+spatialFactor = checkMagnitude(answer.spacings);
 newvals_z = (grams.Lmin:answer.spacings:answer.domain)';
 newvals_N = [0; 0; size(newvals_z,1)];
-fprintf(['\n*** New domain for ',grams.objectName,' has an altitude domain between ',num2str(newvals_z(1)), 'm --> ',num2str(answer.domain),'m with ',num2str(answer.spacings),'m spacings in between (total of ',num2str(newvals_N(3)),' grid points). ***\n']);
+fprintf(['\n*** New domain for ',grams.objectName,' has an altitude domain between ',num2str(spatialFactor.Number*newvals_z(1)), spatialFactor.Unit,'m --> ',num2str(spatialFactor.Number*answer.domain),spatialFactor.Unit,'m with ',num2str(spatialFactor.Number*answer.spacings),spatialFactor.Unit,'m spacings in between (total of ',num2str(newvals_N(3)),' grid points). ***\n']);
 
 % Creates descriptive filetag prefix:
-grams.pathOutput = [grams.objectName,'/',grams.objectType,'-N',num2str(size(newvals_z,1)),'-D',num2str(answer.spacings),'m'];
+grams.pathOutput = [grams.objectName,'/',grams.objectType,'-N',num2str(size(newvals_z,1)),'-D',num2str(spatialFactor.Number*answer.spacings),spatialFactor.Unit,'m'];
 %grams.pathOutput = strcat(grams.pathOutput,'_half');
 save([grams.pathOutput,'_z.dat'],'newvals_z','-ascii');
 
@@ -288,8 +292,8 @@ if strcmp(answer.domdef,'Y')
     % Outputs summary to the screen:
     fprintf(strcat("\n\t******* SUMMARY OF INITIALIZED SIMULATION DOMAIN *******" + ...
         "\n\t\t\t\t(x)\t(y)\t(z)" + ...
-        "\n\tDomain Size \t(L):\t",num2str(newvals_L(1)),"\t",num2str(newvals_L(2)),"\t",num2str(newvals_L(3)),"\t(meters)" + ...
-        "\n\tSpacings \t(D):\t",num2str(newvals_D(1)),"\t",num2str(newvals_D(2)),"\t",num2str(newvals_D(3)),"\t(meters)" + ...
+        "\n\tDomain Size \t(L):\t",num2str(spatialFactor.Number*newvals_L(1)),"\t",num2str(spatialFactor.Number*newvals_L(2)),"\t",num2str(spatialFactor.Number*newvals_L(3)),"\t(",spatialFactor.Prefix,"meters)" + ...
+        "\n\tSpacings \t(D):\t",num2str(spatialFactor.Number*newvals_D(1)),"\t",num2str(spatialFactor.Number*newvals_D(2)),"\t",num2str(spatialFactor.Number*newvals_D(3)),"\t(",spatialFactor.Prefix,"meters)" + ...
         "\n\tGrid Points \t(N):\t",num2str(newvals_N(1)),"\t",num2str(newvals_N(2)),"\t",num2str(newvals_N(3)),"\t(nodes)\n"));
     if exist(strcat(grams.objectName,'/',grams.objectName,'_Nxyz.dat'),"file") 
         old_N = load(strcat(grams.objectName,'/',grams.objectName,'_Nxyz.dat'));
@@ -308,4 +312,60 @@ if strcmp(answer.domdef,'Y')
 else
     % Outputs the path and prefix for the output files:
     fprintf(strcat("\n\tPath and prefix of associated files: ",grams.pathOutput,"_\n"));
+end
+
+% Determines appropriate unit naming convention based on magnitude:
+function factor = checkMagnitude(number)
+    % Determines the best order of magnitude based on an array of values:
+    magnitude = log10(nonzeros(abs(number)));
+    magBase3  = floor(magnitude/3);
+    order = max(magBase3);
+    
+    % Limits possible values to the units available:
+    if order > 3
+        order = 3;
+    elseif order < -5
+        order = -5;
+    end
+    
+    % Converts from SI to custom magnitude:
+    factor.Number = 10^(-3*order);
+    switch order
+        case -5
+            factor.Unit   = 'f';
+            factor.Prefix = 'femto';
+        case -4
+            factor.Unit   = 'p';
+            factor.Prefix = 'pico';
+        case -3
+            factor.Unit   = 'n';
+            factor.Prefix = 'nano';
+        case -2
+            factor.Unit   = 'u';
+            factor.Prefix = 'micro';
+        case -1
+            factor.Unit   = 'm';
+            factor.Prefix = 'milli';
+        case 0
+            factor.Unit   = '';
+            factor.Prefix = '';
+        case 1
+            factor.Unit   = 'k';
+            factor.Prefix = 'kilo';
+        case 2
+            factor.Unit   = 'M';
+            factor.Prefix = 'mega';
+        case 3
+            factor.Unit   = 'G';
+            factor.Prefix = 'giga';
+        otherwise
+            return;
+    end
+    
+    % Allows for appropriate rendering in the LaTeX environment:
+    if order == -2
+        factor.LaTeX = '$\mu$';
+    else
+        factor.LaTeX = factor.Unit;
+    end
 end
