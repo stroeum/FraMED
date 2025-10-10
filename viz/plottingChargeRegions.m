@@ -1,19 +1,21 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% File Name: plottingChargeRegions.m                                      %
-% Purpose: Visualizes the charged cloud structure with custom color map.  %
-%          Outputs a figure to the screen but does not save it to a file  %
-%          automatically. LaTeX-ified April 29, 2022. Changed view angle  %
-%          and several notations on February 20, 2024.                    %
-% Author: Annelisa Esparza                                                %
-% Contact: aesparza2014@my.fit.edu                                        %
-% Added Date: February 22, 2022                                           %
-% Last Update: February 20, 2024                                          %
+%   File Name: plottingChargeRegions.m                                    %
+%     Purpose: Visualizes the charged cloud structure with custom color   %
+%              map. Outputs a figure to the screen but does not save it   %
+%              to a file automatically. LaTeX-ified April 29, 2022.       %
+%              Changed view angle and several notations on February 20,   %
+%              2024. Automated unit conversion for simulations of non-    %
+%              mesoscale domains on September 25, 2025.                   %
+%      Author: Annelisa Esparza                                           %
+%     Contact: annelisa.esparza@my.erau.edu                               %
+%  Added Date: February 22, 2022                                          %
+% Last Update: September 25, 2025                                         %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval)
-    %Creates a unique colormap to represent the charge regions:
-    rgbValues = createCustomColorMap(colorbarRange,1);
-    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
+function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,spatialFactor)
+    % Checks the scale for the charge density (taking into account the values are stored as nC/m3):
+    densityFactor = checkMagnitude((10^(-9)*rhoDataOG.data(:)));
+    densityFactor.Number = (densityFactor.Number)*(10^(-9));
    
     % Determines the range of the colorbar among other factors:
     tol = log10(round(max(max(max(abs(rhoDataOG.data)))),2,'significant'));   
@@ -22,10 +24,10 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     else
         tol = ceil(tol);
     end
-    rhoData.data = round(rhoDataOG.data,(2-tol));
+    rhoData.data = (densityFactor.Number)*round(rhoDataOG.data,(2-tol));
     uniqueRhos = unique(nonzeros(rhoData.data));
-    rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
-    rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);
+    rhoData.max = max([densityFactor.Number*rhoDataOG.max max(uniqueRhos)]);
+    rhoData.min = min([densityFactor.Number*rhoDataOG.min min(uniqueRhos)]);
 
     % Prevents misread of charge density when cloud height is less than dz:
     testingvalues = zeros([length(uniqueRhos),1]);
@@ -39,6 +41,10 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
         end
     end
 
+    % Creates a unique colormap to represent the charge regions:
+    rgbValues = createCustomColorMap(colorbarRange,1);
+    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
+
     % Copies data to a nearby height without overwriting pre-existing data:
     for testloop2 = 1:1:length(uniqueRhos)
         if testingvalues(testloop2)==1
@@ -51,10 +57,12 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
             end
         end
     end
+
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
     middle = (((length(rgbValues(:,1))-1)/2)+1);
     midRange = floor((0.025*(length(rgbValues(:,1))-1)))-1;
+    
     % Removes values that are approximately zero (i.e. neutral):
     for i = length(trueUniqueRhos):-1:1
         [nullInd,~] = colorDetermination(trueUniqueRhos(i),max(abs([rhoData.min rhoData.max])),rgbValues);
@@ -93,11 +101,11 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                         chosenAlpha = alphaValue;
                     end
                     if uniqueRhos(location) == max_rho_value && min_rho_value > 0
-                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \leq \rho \leq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',strcat('$$0 \leq \rho \leq$$ ',num2str(trueUniqueRhos(location)),' $',densityFactor.LaTeX,'C/m$^3$'));
                         isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                         drawnow
                     elseif uniqueRhos(location) == min_rho_value && max_rho_value < 0
-                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',['$$0 \geq \rho \geq$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                        set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',chosenAlpha,'HandleVisibility','on','DisplayName',strcat('$$0 \geq \rho \geq$$ ',num2str(trueUniqueRhos(location)),' ',densityFactor.LaTeX,'C/m$^3$'));
                         isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                         drawnow
                     else
@@ -106,7 +114,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
                         drawnow
                     end
                 else
-                    set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',['Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' nC/m$^3$']);
+                    set(p1,'FaceColor',colorVertices(j,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',strcat('Charge Density $$\approx$$ ',num2str(trueUniqueRhos(location)),' ',densityFactor.LaTeX,'C/m$^3$'));
                     isonormals(Xval,Yval,Zval,pagetranspose(rhoData.data),p1);
                     drawnow
                 end
@@ -121,7 +129,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     clim([-max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))])) max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))]))]);
     colormap(cmap);
     c = colorbar;
-    c.Label.String = 'Charge Density (nC/m$^3$)';
+    c.Label.String = strcat('Charge Density (',densityFactor.LaTeX,'C/m$^3$)');
     c.Label.Interpreter = 'latex';
     c.Label.FontSize = 24;
     c.TickLabelInterpreter = 'latex';
@@ -133,9 +141,9 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
     ax.FontSize = 20;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
-    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
+    xlabel(strcat('$x$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
+    ylabel(strcat('$y$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
+    zlabel(strcat('$z$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',24);
     grid on
     view(-45,5)
     if length(trueUniqueRhos)<=3

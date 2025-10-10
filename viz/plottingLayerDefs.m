@@ -9,19 +9,22 @@
 % Last Update: June 2025 - Updated to properly order the legend labeling. %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center)
-    % Ensures charge regions are properly labeled
+function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center,spatialFactor)
+    % Checks the scale for the charge density (taking into account the values are stored as nC/m3):
+    densityFactor = checkMagnitude((10^(-9)*rhoDataOG.data(:)));
+    densityFactor.Number = densityFactor.Number*(10^(-9));
+   
+    % Checks the scale for the charge embedded within each layer:
+    chargeFactor = checkMagnitude(Q);
+
+    % Ensures charge regions are properly labeled (sorting by highest to lowest charge density):
     testVals = Q./(pi.*(R.^2).*h);
     [~,correctOrder] = sort(testVals);
-    Q = Q(correctOrder);
+    Q = (chargeFactor.Number)*Q(correctOrder); 
     R = R(correctOrder);
     h = h(correctOrder);
     center = center(correctOrder,:);
-
-    %Creates a unique colormap to represent the charge regions:
-    rgbValues = createCustomColorMap(colorbarRange,1);
-    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
-   
+    
     % Determines the range of the colorbar among other factors:
     tol = log10(round(max(max(max(abs(rhoDataOG.data)))),2,'significant'));   
     if tol < 0 
@@ -29,10 +32,10 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
     else
         tol = ceil(tol);
     end
-    rhoData.data = round(rhoDataOG.data,(2-tol));
+    rhoData.data = (densityFactor.Number)*round(rhoDataOG.data,(2-tol));
     uniqueRhos = unique(nonzeros(rhoData.data));
-    rhoData.max = max([rhoDataOG.max max(uniqueRhos)]);
-    rhoData.min = min([rhoDataOG.min min(uniqueRhos)]);
+    rhoData.max = max([densityFactor.Number*rhoDataOG.max max(uniqueRhos)]);
+    rhoData.min = min([densityFactor.Number*rhoDataOG.min min(uniqueRhos)]);
 
     % Prevents misread of charge density when cloud height is less than dz:
     testingvalues = zeros([length(uniqueRhos),1]);
@@ -45,7 +48,11 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
             testinglocation(testloc) = testloop;
         end
     end
-
+   
+    % Creates a unique colormap to represent the charge regions:
+    rgbValues = createCustomColorMap(colorbarRange,1);
+    rgbValuesAdjusted = createCustomColorMap(colorbarRange,alphaValue);
+   
     % Copies data to a nearby height without overwriting pre-existing data:
     for testloop2 = 1:1:length(uniqueRhos)
         if testingvalues(testloop2)==1
@@ -58,6 +65,7 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
             end
         end
     end
+
     % Determines truly unique values for legend usage:
     trueUniqueRhos = uniqueRhos;
     middle = (((length(rgbValues(:,1))-1)/2)+1);
@@ -90,10 +98,10 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
             if included == 1
                 if uniqueRhos(location)>0
                     p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' km' newline 'Height: $h$ = ',num2str(h(location)),' km' newline 'Charge: $Q$ = ',num2str(Q(location)),' C' newline 'Center: (',num2str(center(location,1)),' km, ',num2str(center(location,2)),' km, ',num2str(center(location,3)),' km)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',spatialFactor.LaTeX,'m)' newline]);
                 else
                     p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' km' newline 'Height: $h$ = ',num2str(h(location)),' km' newline 'Charge: $Q$ = ',num2str(Q(location)),' C' newline 'Center: (',num2str(center(location,1)),' km, ',num2str(center(location,2)),' km, ',num2str(center(location,3)),' km)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',spatialFactor.LaTeX,'m)' newline]);
                 end
                 isonormals(Xval,Yval,Zval,rhoData.data,p1);
                 drawnow
@@ -108,7 +116,7 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
     clim([-max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))])) max(abs([rhoData.min rhoData.max max(abs(uniqueRhos))]))]);
     colormap(cmap);
     c = colorbar;
-    c.Label.String = 'Charge Density (nC/m$^3$)';
+    c.Label.String = strcat('Charge Density (',densityFactor.LaTeX,'C/m$^3$)');
     c.Label.Interpreter = 'latex';
     c.Label.FontSize = 24;
     c.TickLabelInterpreter = 'latex';
@@ -125,9 +133,9 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
     ax.FontSize = 20;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
-    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
+    xlabel(strcat('$x$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
+    ylabel(strcat('$y$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
+    zlabel(strcat('$z$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',24);
     grid on
     view(-45,5)
     if length(trueUniqueRhos)<=3

@@ -15,11 +15,11 @@ TransportedRho = load('TransportedRhoPos.dat','-ascii');
 TransportedRhoCheck = load('TransportedRhoNeg.dat','-ascii');
 current.polarity = load('TransportedRhoEnd.dat','-ascii');
 
-% Considers the case for a CG strike depositing charge to the ground:
+%% Considers the case for a CG strike depositing charge to the ground:
 if current.polarity(end)==0 && EstablishedLinks(end,6)==0
     current.polarity(end)=-(TransportedRho(end)+TransportedRhoCheck(end));
 % Considers a now-resolved bug that recorded an additional link for ICs:
-elseif current.polarity(end)==0 && size(current.polarity,1)==(size(EstablishedLinks,1)+1)
+elseif abs(current.polarity(end)/current.polarity(end-1))<=(1e-14) && size(current.polarity,1)==(size(EstablishedLinks,1)+1)
     TransportedRho(end)=[];
     TransportedRhoCheck(end)=[];
     current.polarity(end)=[];
@@ -32,7 +32,8 @@ links.end      = EstablishedLinks(:,4:6);
 links.distance = EstablishedLinks(:,7);
 links.initiate = links.start(1,:);
 links.steps    = 1:1:size(EstablishedLinks,1);
-links.height   = EstablishedLinks(:,6)*dxyz(3)/1000;
+links.height   = EstablishedLinks(:,6)*dxyz(3);
+spatialFactor  = checkMagnitude(links.height);
 
 %% Calculate current:
 % Convert charge density (nC/m3) into charge (C):
@@ -60,11 +61,11 @@ tau.leader.neg   = polarity.neg.*EstablishedLinks(:,7)./vprop.leader.neg;
 tau.streamer.pos = polarity.pos.*EstablishedLinks(:,7)./vprop.streamer.pos;
 tau.streamer.neg = polarity.neg.*EstablishedLinks(:,7)./vprop.streamer.neg;
 
-% Calculates the current (units of kiloAmps):
-current.leader.pos   = 0.001*polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.pos);
-current.leader.neg   = 0.001*polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.neg);
-current.streamer.pos = 0.001*polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.pos);
-current.streamer.neg = 0.001*polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.neg);
+% Calculates the current (units of Amps):
+current.leader.pos   = polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.pos);
+current.leader.neg   = polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.neg);
+current.streamer.pos = polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.pos);
+current.streamer.neg = polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.neg);
 
 % Assigns the correct values for the system:
 if strcmp(sims.objectType,'Streamer')
@@ -132,11 +133,11 @@ links.timescale.min = links.maxdistance/(polarity.neg(maxindex)*vprop.case.neg +
 
 % Highlights longest path (or path to ground, if applicable):
 [longestpath.start, longestpath.end] = string2link(links.path(maxindex),links.initiate);
-highlightPath(longestpath,links,Nxyz,dxyz,'r')
+highlightPath(longestpath,links,Nxyz,dxyz,'r',spatialFactor)
 exportgraphics(gcf,strcat(sims.pathPNGs,'/Path-Longest_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 if links.end(end,3)==0
     [groundpath.start, groundpath.end] = string2link(links.path(end),links.initiate);
-    highlightPath(groundpath,links,Nxyz,dxyz,'b')
+    highlightPath(groundpath,links,Nxyz,dxyz,'b',spatialFactor)
     exportgraphics(gcf,strcat(sims.pathPNGs,'/Path-Ground_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 end
 
@@ -151,23 +152,22 @@ current.partial.val = mean(current.case(1:(end-1)));
 current.partial.pos = mean(nonzeros(current.case(1:(end-1)).*polarity.pos(1:(end-1))));
 current.partial.neg = mean(nonzeros(current.case(1:(end-1)).*polarity.neg(1:(end-1))));
 current.partial.std = std(current.case(1:(end-1)));
+
+% Determine the scale:
+temporalFactor   = checkMagnitude([links.timescale.min; links.timescale.max]);
+currentFactor    = checkMagnitude(current.case(:));
+minCurrentFactor = checkMagnitude(current.min.val);
+
+% Output to the screen the results:
 fprintf(strcat("\n\t",sims.objectType," (positive) propagation speed approximated as ",num2str(vprop.case.pos/1000,'%.0f')," km/s."))
 fprintf(strcat("\n\t",sims.objectType," (negative) propagation speed approximated as ",num2str(vprop.case.neg/1000,'%.0f')," km/s."))
-fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(1000*links.timescale.min,'%.1f')," - ",num2str(1000*links.timescale.max,'%.1f')," ms."))
-fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*0.001,'%.1f')," km from the initiation point."))
-if strcmp(sims.objectType,'Leader')
-    fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
-    fprintf(strcat("\n\t\t",num2str(current.avg.val,5),"\tkA\t(mean, including all links,  sigma = ",num2str(current.avg.std,5)," kA)"));
-    fprintf(strcat("\n\t\t",num2str(current.partial.val,5),"\tkA\t(mean, excluding final link, sigma = ",num2str(current.partial.std,5)," kA)"));
-    fprintf(strcat("\n\t\t",num2str(current.max.val,5),"\tkA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
-    fprintf(strcat("\n\t\t",num2str(current.min.val,5),"\tkA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
-else
-    fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
-    fprintf(strcat("\n\t\t",num2str(1000*current.avg.val,5),"\tA\t(mean, including all links,  sigma = ",num2str(1000*current.avg.std,5)," A)"));
-    fprintf(strcat("\n\t\t",num2str(1000*current.partial.val,5),"\tA\t(mean, excluding final link, sigma = ",num2str(1000*current.partial.std,5)," A)"));
-    fprintf(strcat("\n\t\t",num2str(1000*current.max.val,5),"\tA\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
-    fprintf(strcat("\n\t\t",num2str(1000*current.min.val,5),"\tA\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
-end
+fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(temporalFactor.Number*links.timescale.min,'%.1f')," - ",num2str(temporalFactor.Number*links.timescale.max,'%.1f')," ",temporalFactor.Unit,"s."))
+fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*spatialFactor.Number,'%.1f')," ",spatialFactor.Unit,"m from the initiation point."))
+fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
+fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.avg.val,5),"\t",currentFactor.Unit,"A\t(mean, including all links,  sigma = ",num2str(currentFactor.Number*current.avg.std,5)," ",currentFactor.Unit,"A)"));
+fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.partial.val,5),"\t",currentFactor.Unit,"A\t(mean, excluding final link, sigma = ",num2str(currentFactor.Number*current.partial.std,5)," ",currentFactor.Unit,"A)"));
+fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.max.val,5),"\t",currentFactor.Unit,"A\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
+fprintf(strcat("\n\t\t",num2str(minCurrentFactor.Number*current.min.val,5),"\t",minCurrentFactor.Unit,"A\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
 if links.end(end,3)==0
     fprintf(strcat("\t\t",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/(polarity.neg(end)*vprop.case.neg + polarity.pos(end)*vprop.case.pos)),5),"\tkA\t(initiation-to-ground path)\n"))
 end
@@ -175,22 +175,22 @@ end
 %% Plot of instantaneous current values:
 clf
 hold on; box on;
-scatter(links.steps(current.polarity>0),current.case(current.polarity>0),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(current.case(current.polarity>0)),3)," $\pm$ ",num2str(std(current.case(current.polarity>0)),3)," kA"))
-scatter(links.steps(current.polarity<0),current.case(current.polarity<0),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(current.case(current.polarity<0)),3)," $\pm$ ",num2str(std(current.case(current.polarity<0)),3)," kA"))
-yline(current.max.val,'k:','DisplayName',strcat("Maximum Current: ",num2str(current.max.val,3)," kA (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
+scatter(links.steps(current.polarity>0),currentFactor.Number*current.case(current.polarity>0),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity>0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity>0)),3)," ",currentFactor.LaTeX,"A"))
+scatter(links.steps(current.polarity<0),currentFactor.Number*current.case(current.polarity<0),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity<0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity<0)),3)," ",currentFactor.LaTeX,"A"))
+yline(currentFactor.Number*current.max.val,'k:','DisplayName',strcat("Maximum Current: ",num2str(currentFactor.Number*current.max.val,3)," ",currentFactor.LaTeX,"A (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
 if links.end(end,3)==0
-    yline(current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(current.partial.val,3)," $\pm$ ",num2str(current.partial.std,3)," kA"),'LineWidth',2);
+    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(currentFactor.Number*current.partial.val,3)," $\pm$ ",num2str(currentFactor.Number*current.partial.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
 else
-    yline(current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(current.avg.val,3)," $\pm$ ",num2str(current.avg.std,3)," kA"),'LineWidth',2);
+    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(currentFactor.Number*current.avg.val,3)," $\pm$ ",num2str(currentFactor.Number*current.avg.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
 end
-yline(current.min.val,'k-','DisplayName',strcat("Minimum Current: ",num2str(current.min.val,3)," kA (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
+yline(currentFactor.Number*current.min.val,'k-','DisplayName',strcat("Minimum Current: ",num2str(minCurrentFactor.Number*current.min.val,3)," ",minCurrentFactor.LaTeX,"A (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
 xlim([0,links.steps(end)]);
 legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
 title(strcat("Current Estimate for ",sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
 xlabel('Propagation Link $l$','FontSize',20,'Interpreter','latex');
-ylabel('Current $I$ (kA)','FontSize',20,'Interpreter','latex');
+ylabel(strcat('Current $I$ (',currentFactor.LaTeX,'A)'),'FontSize',20,'Interpreter','latex');
 grid off; hold off;
 set(gcf,'Position',[0,0,1200,800]);
 exportgraphics(gcf,strcat(sims.pathPNGs,'/CurrentEstimate_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);  
@@ -198,34 +198,33 @@ exportgraphics(gcf,strcat(sims.pathPNGs,'/CurrentEstimate_',sims.objectName,'_',
 %% Plot of currents wrt end node altitudes:
 clf
 hold on; box on;
-x.pos = current.case(current.polarity>0);
-y.pos = links.height(current.polarity>0);
-x.neg = current.case(current.polarity<0);
-y.neg = links.height(current.polarity<0);
+x.pos = currentFactor.Number*current.case(current.polarity>0);
+y.pos = spatialFactor.Number*links.height(current.polarity>0);
+x.neg = currentFactor.Number*current.case(current.polarity<0);
+y.neg = spatialFactor.Number*links.height(current.polarity<0);
 if y.pos(end) == 0
-    scatter(x.pos(1:(end-1)),y.pos(1:(end-1)),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos(1:(end-1))),3)," $\pm$ ",num2str(std(x.pos(1:(end-1))),3)," kA"));
+    scatter(x.pos(1:(end-1)),y.pos(1:(end-1)),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos(1:(end-1))),3)," $\pm$ ",num2str(std(x.pos(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
 else
-    scatter(x.pos,y.pos,50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos),3)," $\pm$ ",num2str(std(x.pos),3)," kA"));
+    scatter(x.pos,y.pos,50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos),3)," $\pm$ ",num2str(std(x.pos),3)," ",currentFactor.LaTeX,"A"));
 end
 if y.neg(end) == 0
-    scatter(x.neg(1:(end-1)),y.neg(1:(end-1)),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg(1:(end-1))),3)," $\pm$ ",num2str(std(x.neg(1:(end-1))),3)," kA"));
+    scatter(x.neg(1:(end-1)),y.neg(1:(end-1)),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg(1:(end-1))),3)," $\pm$ ",num2str(std(x.neg(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
 else
-    scatter(x.neg,y.neg,50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg),3)," $\pm$ ",num2str(std(x.neg),3)," kA"));
+    scatter(x.neg,y.neg,50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg),3)," $\pm$ ",num2str(std(x.neg),3)," ",currentFactor.LaTeX,"A"));
 end
-yline(links.start(1,3)*dxyz(3)./1000,'k:','DisplayName',strcat("Initiation Height: ",num2str(links.start(1,3)*dxyz(3)./1000,3)," km"),'LineWidth',1);
-ylim([0 max(links.height)+(dxyz(3)/1000)]);
+yline(spatialFactor.Number*links.start(1,3)*dxyz(3),'k:','DisplayName',strcat("Initiation Height: ",num2str(spatialFactor.Number*links.start(1,3)*dxyz(3),3)," ",spatialFactor.LaTeX,"m"),'LineWidth',1);
 if y.pos(end) == 0 || y.neg(end)==0
-    xlim([0,max(current.case(1:(end-1)))]);
+    xlim([0,currentFactor.Number*max(current.case(1:(end-1)))]);
 else
-    xlim([0,max(current.case)]);
+    xlim([0,currentFactor.Number*max(current.case)]);
 end
-ylim([0 max(links.height)+(dxyz(3)/1000)]);
+ylim([0 spatialFactor.Number*(max(links.height)+(dxyz(3)))]);
 legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
 title(strcat("Current Estimate for ",sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
-xlabel('Current $I$ (kA)','FontSize',20,'Interpreter','latex');
-ylabel('Altitude of End Node (km)','FontSize',20,'Interpreter','latex');
+xlabel(strcat('Current $I$ (',currentFactor.LaTeX,'A)'),'FontSize',20,'Interpreter','latex');
+ylabel(strcat('Altitude of End Node (',spatialFactor.LaTeX,'m)'),'FontSize',20,'Interpreter','latex');
 grid off; hold off;
 set(gcf,'Position',[0,0,1200,800]);
 exportgraphics(gcf,strcat(sims.pathPNGs,'/CurrentHeight_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);  
@@ -234,16 +233,16 @@ exportgraphics(gcf,strcat(sims.pathPNGs,'/CurrentHeight_',sims.objectName,'_',si
 clf %nexttile
 hold on
 box on
-scatter(links.steps,1000*tau.case,25,'ko','filled','MarkerFaceAlpha',0.5,'DisplayName',strcat("Propagation Timescale: $$\Delta t_n = \frac{\Delta l_n}{v_\mathrm{prop}}$$"))% where $$v_\mathrm{prop}=$$ ",num2str(testVelocity/1000)," km/s"))
-yline(mean(1000*tau.case),'--k',strcat(num2str(mean(1000*tau.case),'%.2f')," ms"),'LineWidth',1,'DisplayName',strcat("Mean Timescale: $$\bar{\Delta t}=\frac{1}{N} \sum^N_{n=1}{\Delta t_n}$$"),'Interpreter','latex','FontSize',12)
+scatter(links.steps,temporalFactor.Number*tau.case,25,'ko','filled','MarkerFaceAlpha',0.5,'DisplayName',strcat("Propagation Timescale: $$\Delta t_n = \frac{\Delta l_n}{v_\mathrm{prop}}$$"))% where $$v_\mathrm{prop}=$$ ",num2str(testVelocity/1000)," km/s"))
+yline(mean(temporalFactor.Number*tau.case),'--k',strcat(num2str(mean(temporalFactor.Number*tau.case),'%.2f')," ",temporalFactor.LaTeX,"s"),'LineWidth',1,'DisplayName',strcat("Mean Timescale: $$\bar{\Delta t}=\frac{1}{N} \sum^N_{n=1}{\Delta t_n}$$"),'Interpreter','latex','FontSize',12)
 xlim([0,links.steps(end)])
-ylim([0 ceil(max(1000*tau.case))])
-legend('Interpreter','latex','FontSize',16,'location','south','box','off')
+ylim([0 ceil(max(temporalFactor.Number*tau.case))])
+legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
-title(strcat("Link Timescale (",sims.objectType,", Grid Spacings $=$ ",num2str(dxyz(1)*0.001)," km)"),'Interpreter','latex','FontSize',24);
+title(strcat("Link Timescale (",sims.objectType,", Grid Spacings $=$ ",num2str(dxyz(1)*spatialFactor.Number)," ",spatialFactor.LaTeX,"m)"),'Interpreter','latex','FontSize',24);
 xlabel('Propagation Link $l$','FontSize',20,'Interpreter','latex');
-ylabel('Timescale $\tau$ (ms)','FontSize',20,'Interpreter','latex');
+ylabel(strcat('Timescale $\tau$ (',temporalFactor.LaTeX,'s)'),'FontSize',20,'Interpreter','latex');
 grid off
 hold off
 set(gcf,'Position',[0,0,600,1000]);
@@ -411,8 +410,8 @@ function [starts, ends] = string2link(path, initiation)
     
 end
 
-function highlightPath(longestpath,links,Nxyz,dxyz_m,color)
-    dxyz = dxyz_m/1000;
+function highlightPath(longestpath,links,Nxyz,dxyz_m,color,spatialFactor)
+    dxyz = dxyz_m*spatialFactor.Number;
     clf
     hold on
     for N = 1:1:size(links.start,1)
@@ -425,9 +424,9 @@ function highlightPath(longestpath,links,Nxyz,dxyz_m,color)
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
     ax.FontSize = 20;
-    xlabel('$x$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
-    ylabel('$y$-position (km)','Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
-    zlabel('$z$-position (km)','Interpreter','latex','FontSize',24);
+    xlabel(strcat('$x$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
+    ylabel(strcat('$y$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
+    zlabel(strcat('$z$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',24);
     axis equal
     view(-45,5);
     xlim([0,(Nxyz(1)-1)*dxyz(1)]);

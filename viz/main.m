@@ -57,7 +57,12 @@ Plot3D_CloudDistribution;
 exportgraphics(gcf,strcat(sims.pathEPSs,'/CloudDistribution.eps'),'BackgroundColor','white');
 
 %% Lightning visualization
-LightningVisual;
+Plot3D_TreeAndCharges;
+exportgraphics(gcf,strcat(sims.pathEPSs,'/LightningVisual.eps'),'BackgroundColor','white');
+
+%% Lightning alongside electric field
+Plot3D_TreeAndFields;
+exportgraphics(gcf,strcat(sims.pathEPSs,'/LightningFields.eps'),'BackgroundColor','white');
 
 %% LMA
 LMA_main;

@@ -6,8 +6,9 @@
 %      Author: Annelisa Esparza                                           %
 %     Contact: annelisa.esparza@my.erau.edu                               %
 %  Added Date: April 29, 2022                                             %
-% Last Update: February 2025 - Updated to match the options available for %
+%     Updates: February 2025 - Updated to match the options available for %
 %                              the createCustomColorMap function.         %  
+%               October 2025 - Integrates the checkMagnitude function.    %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -29,11 +30,6 @@ gnd.alt  = load('z_gnd.dat', '-ascii');
 load('ChargeLayers.dat',     '-ascii');
 cd ../viz
 
-Q = ChargeLayers(:,1);
-R = ChargeLayers(:,5)./1000;
-h = ChargeLayers(:,7)./1000;
-center = ChargeLayers(:,2:4)./1000;
-
 %% Derive main parameters
 N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
 d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
@@ -45,9 +41,18 @@ clear Nxyz
 clear dxyz
 clear InitPoint
 
-x = ((0:(N.x-1))*d.x)*1e-3;
-y = ((0:(N.y-1))*d.y)*1e-3;
-z = ((0:(N.z-1))*d.z + gnd.alt)*1e-3;
+% Determines the appropriate magnitude for the units:
+spatialFactor = checkMagnitude([((0:(N.x-1))*d.x) ((0:(N.y-1))*d.y) ((0:(N.z-1))*d.z)]);
+
+Q = ChargeLayers(:,1);
+R = ChargeLayers(:,5)*spatialFactor.Number;
+h = ChargeLayers(:,7)*spatialFactor.Number;
+center = ChargeLayers(:,2:4)*spatialFactor.Number;
+
+% Linear spaces for the three position dimensions:
+x = ((0:(N.x-1))*d.x)*spatialFactor.Number;
+y = ((0:(N.y-1))*d.y)*spatialFactor.Number;
+z = ((0:(N.z-1))*d.z + gnd.alt)*spatialFactor.Number;
 
 [X,Y,Z] = meshgrid(x,y,z);
 rho.max = max(max(max(rho.data)));
@@ -62,22 +67,29 @@ set(gcf,'Position',[0,0,1000,1000]);
 hold on;
 
 % Sets bounds for the axes (comment out if clouds get cut off):
-%axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
-axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)                     % Full span 
+%axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number) % Slight crop
+axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number)                     % Full span 
 if isfield(sims,'disType')
     title(strcat("Charge Layer Distribution (",sims.disType," ",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
 else
     title(strcat("Charge Layer Distribution (",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
 end
 % Calls the new function that automatically recognizes charge regions:
-plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R,h,Q,center);
+plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R,h,Q,center,spatialFactor);
 
 % Represents the neutrally charged (grounded) surface:
-if strcmp(sims.BCtype,'G')
-    P.x = [L.x 0 0 L.x]*1e-3;
-    P.y = [L.y L.y 0 0]*1e-3;
-    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
-    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground: $z$ = ",num2str(gnd.alt*1e-3)," km"));
+if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
+    P.x = [L.x 0 0 L.x]*spatialFactor.Number;
+    P.y = [L.y L.y 0 0]*spatialFactor.Number;
+    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*spatialFactor.Number;
+    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground"));
+    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
+        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
+        if strcmp(sims.BCtype,'TIN_CAN')
+            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
+            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
+        end
+    end
 end
 legend
 exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);

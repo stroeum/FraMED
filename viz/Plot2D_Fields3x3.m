@@ -9,15 +9,15 @@ fprintf('\n*** Executing Plot2D_Fields3x3.m script. ***\n');
 
 cd ../results/
 %% Load
-EthPositive = load('EthPositive.dat')*1e-5;
-EthNegative = load('EthNegative.dat')*1e-5;
-EzBF        = load('EnumBF.dat')*1e-5;
-ExAF3D      = load('Ex3d.dat')*1e-5;
-EyAF3D      = load('Ey3d.dat')*1e-5;
-EzAF3D      = load('Ez3d.dat')*1e-5;
-dxyz        = load('dxyz.dat')*1e-3;
+EthPositive = load('EthPositive.dat');
+EthNegative = load('EthNegative.dat');
+EzBF        = load('EnumBF.dat');
+ExAF3D      = load('Ex3d.dat');
+EyAF3D      = load('Ey3d.dat');
+EzAF3D      = load('Ez3d.dat');
+dxyz        = load('dxyz.dat');
 Nxyz        = load('Nxyz.dat');
-z_gnd       = load('z_gnd.dat')*1e-3;
+z_gnd       = load('z_gnd.dat');
 
 %% Derive main sims
 Nx = Nxyz(1);
@@ -37,6 +37,11 @@ y = (0:Ny-1)'*dy;       % _m
 z = (0:Nz-1)'*dz+z_gnd; % _m
 clear dxyz
 cd ../viz/
+
+% Determine the magnitude of the values:
+spatialFactor = checkMagnitude(z(:));
+fieldFactor = checkMagnitude([EzBF(:); ExAF3D(:); EyAF3D(:); EzAF3D(:); EthPositive(:); EthNegative(:)]);
+maxfieldLim = 1.1*fieldFactor.Number*max([max(max(abs(EzAF3D))) -min(EzBF) max(EzBF) -min(EthNegative) max(EthPositive)]);
 
 %% Convert
 ExAF3D  = ConvertTo3d(ExAF3D,Nxyz);
@@ -74,17 +79,17 @@ for nn=1:3
             EyAF(kk) = EyAF3D(ii(mm),jj(nn),kk);
             EzAF(kk) = EzAF3D(ii(mm),jj(nn),kk);
         end
-        plot(EthPositive,z,'g--',EthNegative,z,'g--',EzBF,z,'b', EzAF,z,'r')
-        axis([2*min(EthNegative) 2*max(EthPositive) min(z) max(z)])
+        plot(fieldFactor.Number*EthPositive,spatialFactor.Number*z,'g--',fieldFactor.Number*EthNegative,spatialFactor.Number*z,'g--',fieldFactor.Number*EzBF,spatialFactor.Number*z,'b', fieldFactor.Number*EzAF,spatialFactor.Number*z,'r')
+        axis([-maxfieldLim maxfieldLim spatialFactor.Number*min(z) spatialFactor.Number*max(z)])
         set(gca,'XMinorTick','on','YMinorTick','on')
         grid on
         if pp<=3
-            xlabel('Ez (kV/cm)','FontSize',12);
+            xlabel(strcat('Ez (',fieldFactor.Unit,'V/m)'),'FontSize',12);
         end
         if pp==1 || pp==4 || pp==7
-            ylabel('z (km)','FontSize',12);
+            ylabel(strcat('z (',spatialFactor.Unit,'m)'),'FontSize',12);
         end
-        title(['x = ',num2str(x(ii(mm))),' km; y = ',num2str(y(jj(nn))),' km'],'Fontsize',12)
+        title(strcat("x = ",num2str(spatialFactor.Number*x(ii(mm)))," ",spatialFactor.Unit,"m; y = ",num2str(spatialFactor.Number*y(jj(nn)))," ",spatialFactor.Unit,'m'),'Fontsize',12)
 
         pp = pp+1;
     end

@@ -1,13 +1,14 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% File Name: Plot3D_CloudDistribution.m                                   %
-% Purpose: Visualizes the charged cloud structure and ground with custom  %
-%          colormap. Outputs a figure to the screen but does not save it  %
-%          to a file automatically Updated February 20, 2024 to allow for %
-%          free-space boundary condition distinction.                     %
-% Author: Annelisa Esparza                                                %
-% Contact: aesparza2014@my.fit.edu                                        %
+%  File Name: Plot3D_CloudDistribution.m                                  %
+%    Purpose: Visualizes the charged cloud structure and ground with      %
+%             custom colormap. Outputs a figure to the screen but does    %
+%             not save it to a file automatically.                        %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisaesparza@my.erau.edu                                 %
 % Added Date: February 22, 2022                                           %
-% Last Update: February 20, 2024                                          %
+%    Updates: February 2024 - Integrated free-space BCs.                  %
+%              October 2025 - Integrated checkMagnitude function and      %
+%                             tin-can BCs.                                %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -57,9 +58,13 @@ rho.data = ConvertTo3d(rho.data,Nxyz); % _nC/_m^3
 clear Nxyz
 clear dxyz
 
-x = ((0:(N.x-1))*d.x)*1e-3;
-y = ((0:(N.y-1))*d.y)*1e-3;
-z = ((0:(N.z-1))*d.z + gnd.alt)*1e-3;
+% Determines the appropriate magnitude for the units:
+spatialFactor = checkMagnitude([((0:(N.x-1))*d.x) ((0:(N.y-1))*d.y) ((0:(N.z-1))*d.z)]);
+
+% Linear spaces for the three position dimensions:
+x = ((0:(N.x-1))*d.x)*spatialFactor.Number;
+y = ((0:(N.y-1))*d.y)*spatialFactor.Number;
+z = ((0:(N.z-1))*d.z + gnd.alt)*spatialFactor.Number;
 
 [X,Y,Z] = meshgrid(x,y,z);
 rho.max = max(max(max(rho.data)));
@@ -72,24 +77,31 @@ figure(1);
 set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
 % Sets bounds for the axes (comment out if clouds get cut off):
 axis equal
-axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3) % Slight crop
+axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number) % Slight crop
 hold on;
 
 % Calls the new function that automatically recognizes charge regions:
-plottingChargeRegions('scalar',0.4,rho,X,Y,Z);
+plottingChargeRegions('scalar',0.4,rho,X,Y,Z,spatialFactor);
 
 % Represents the neutrally charged (grounded) surface:
-if strcmp(sims.BCtype,'G')
-    P.x = [L.x 0 0 L.x]*1e-3;
-    P.y = [L.y L.y 0 0]*1e-3;
-    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*1e-3;
+if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
+    P.x = [L.x 0 0 L.x]*spatialFactor.Number;
+    P.y = [L.y L.y 0 0]*spatialFactor.Number;
+    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*spatialFactor.Number;
     patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
+    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
+        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
+        if strcmp(sims.BCtype,'TIN_CAN')
+            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
+            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
+        end
+    end
 end
 axis equal
 
 % Sets bounds for the axes (comment out if clouds get cut off):
-%axis([0 L.x 0 L.y 15000 55000]*1e-3)                % Cropped view
-axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*1e-3)  % Full span 
+%axis([0 L.x 0 L.y 15000 55000]*spatialFactor.Number)                % Cropped view
+axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number)  % Full span 
 
 %% Save figure as file:
 if strcmp(saveAfter,'Y')

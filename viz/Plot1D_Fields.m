@@ -19,11 +19,6 @@ EthPositive = load('EthPositive.dat');
 EthNegative = load('EthNegative.dat');
 z_gnd       = load('z_gnd.dat');
 
-dz = dxyz(3);
-Nz = Nxyz(3);
-Lz = (Nz-1)*dz;
-z  = (0:Nz-1)*dz+z_gnd;
-clear dxyz Nxyz
 if length(EthNegative)~=length(EzNumBF)
     fprintf('\n*** Plot1D_Fields.m cannot be executed with current EthNegative.dat and EnumBF.dat files.\n');
     cd ../viz
@@ -31,31 +26,38 @@ if length(EthNegative)~=length(EzNumBF)
 else
     fprintf('\n*** Executing Plot1D_Fields.m script. ***\n');
 end
+cd ../viz
+
+dz = dxyz(3);
+Nz = Nxyz(3);
+Lz = (Nz-1)*dz;
+z  = (0:Nz-1)*dz+z_gnd;
+clear dxyz Nxyz
+
+% Determine the magnitude of the values:
+spatialFactor = checkMagnitude(z(:));
+fieldFactor = checkMagnitude([EzNumBF(:); EzNumAF(:); Einitiation(:); EthPositive(:); EthNegative(:)]);
+potentialFactor = checkMagnitude([phiNumBF(:); phiNumAF(:)]);
+maxfieldLim = 1.1*max([fieldFactor.Number*max([-min(EzNumBF) max(EzNumBF) -min(EzNumAF) max(EzNumAF) -min(EthNegative) max(EthPositive) max(Einitiation)]) potentialFactor.Number*max([-min(phiNumBF) max(phiNumBF) -min(phiNumAF) max(phiNumAF)])]);
 
 % Initiation requirements plot:
 figure;
 subplot(121)
 hold on
 plot(...
-    EzNumBF(:),z*1e-3,'r-.',...
-    1/1000*phiNumBF(:), z*1e-3, 'b-',...
-    EthNegative(:),z*1e-3, 'g--',...
-    EthPositive(:),z*1e-3, 'g--'...
+    fieldFactor.Number*EzNumBF(:),z*spatialFactor.Number,'r-.',...
+    potentialFactor.Number*phiNumBF(:), z*spatialFactor.Number, 'b-',...
+    fieldFactor.Number*EthNegative(:),z*spatialFactor.Number, 'g--',...
+    fieldFactor.Number*EthPositive(:),z*spatialFactor.Number, 'g--'...
     );
-plot([min(EthNegative) max(EthPositive)],[z_gnd,z_gnd]*1e-3,'k');
-% semilogx(...
-%     abs(EzNum(:)), [0:size(EzNum)-1]*dz,'r-',...
-%     abs(Einitiation(:)),[0:size(Einitiation)-1]*dz, 'b--',...
-%     abs(EthNegative(:)),[0:size(EthNegative)-1]*dz, 'g--',...
-%     abs(EthPositive(:)),[0:size(EthPositive)-1]*dz, 'g--'...
-%     );
+plot([fieldFactor.Number*min(EthNegative) fieldFactor.Number*max(EthPositive)],[z_gnd,z_gnd]*spatialFactor.Number,'k');
 
-axis([min(EthNegative) max(EthPositive) 0 (Lz+z_gnd)*1e-3]);
-legend('E_z [BF]','\phi [BF]','E_{th}^\pm');
-xlabel('E_z (V/m) & \phi (kV)');
-ylabel('Altitude (km)');
-title('E_z and \phi  before the flash [BF]');
-set(gca,'XMinorTick','on','YMinorTick','on')
+axis([-maxfieldLim maxfieldLim 0 (Lz+z_gnd)*spatialFactor.Number]);
+legend('$E_z$ [AF]','$\phi$ [AF]','$E_{th}^\pm$','interpreter','latex');
+xlabel(strcat('$E_z$ (',fieldFactor.Unit,'V/m) \& $\phi$ (',potentialFactor.Unit,'V)'),'interpreter','latex');
+ylabel(strcat('Altitude (',spatialFactor.Unit,'m)'),'interpreter','latex');
+title('$E_z$ and $\phi$ before the flash [BF]','interpreter','latex');
+set(gca,'XMinorTick','on','YMinorTick','on','TickLabelInterpreter','latex')
 grid on
 box on
 hold off
@@ -63,25 +65,18 @@ hold off
 subplot(122)
 hold on
 plot(...
-    EzNumAF(:)*10^-9,z*1e-3,'r-.',...
-    1/1000*phiNumAF(:), z*1e-3, 'b-',...
-    EthNegative(:),z*1e-3, 'g--',...
-    EthPositive(:),z*1e-3, 'g--'...
+    EzNumAF(:)*fieldFactor.Number,z*spatialFactor.Number,'r-.',...
+    potentialFactor.Number*phiNumAF(:), z*spatialFactor.Number, 'b-',...
+    fieldFactor.Number*EthNegative(:),z*spatialFactor.Number, 'g--',...
+    fieldFactor.Number*EthPositive(:),z*spatialFactor.Number, 'g--'...
     );
-plot([min(EthNegative) max(EthPositive)],[z_gnd,z_gnd]*1e-3,'k');
-% semilogx(...
-%     abs(EzNum(:)), [0:size(EzNum)-1]*dz,'r-',...
-%     abs(Einitiation(:)),[0:size(Einitiation)-1]*dz, 'b--',...
-%     abs(EthNegative(:)),[0:size(EthNegative)-1]*dz, 'g--',...
-%     abs(EthPositive(:)),[0:size(EthPositive)-1]*dz, 'g--'...
-%     );
-
-axis([min(EthNegative) max(EthPositive) 0 (Lz+z_gnd)*1e-3]);
-legend('E_z [BF]','\phi [BF]','E_{th}^\pm');
-xlabel('E_z (V/m) & \phi (kV)');
-ylabel('Altitude (km)','FontSize',16);
-title('E_z and \phi  after the flash [AF]');
-set(gca,'XMinorTick','on','YMinorTick','on')
+plot([fieldFactor.Number*min(EthNegative) fieldFactor.Number*max(EthPositive)],[z_gnd,z_gnd]*spatialFactor.Number,'k');
+axis([-maxfieldLim maxfieldLim 0 (Lz+z_gnd)*spatialFactor.Number]);
+legend('$E_z$ [AF]','$\phi$ [AF]','$E_{th}^\pm$','interpreter','latex');
+xlabel(strcat('$E_z$ (',fieldFactor.Unit,'V/m) \& $\phi$ (',potentialFactor.LaTeX,'V)'),'interpreter','latex');
+ylabel(strcat('Altitude (',spatialFactor.LaTeX,'m)'),'interpreter','latex');
+title('$E_z$ and $\phi$ after the flash [AF]','interpreter','latex');
+set(gca,'XMinorTick','on','YMinorTick','on','TickLabelInterpreter','latex')
 grid on
 box on
 hold off
@@ -92,17 +87,17 @@ linewidth = 1;
 figure;
 %set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
 hold on
-plot(phiNumBF(:)*1e-6, z*1e-3, 'b-','LineWidth',linewidth)
-plot(phiNumAF(:)*1e-6, z*1e-3, 'b--','LineWidth',linewidth)
-plot([1.1*min(phiNumBF(:)*1e-6) 1.1*max(phiNumBF(:)*1e-6)],[z_gnd,z_gnd]*1e-3,'k','LineWidth',linewidth);
+plot(phiNumBF(:)*potentialFactor.Number, z*spatialFactor.Number, 'b-','LineWidth',linewidth)
+plot(phiNumAF(:)*potentialFactor.Number, z*spatialFactor.Number, 'b--','LineWidth',linewidth)
+plot([1.1*min(phiNumBF(:)*potentialFactor.Number) 1.1*max(phiNumBF(:)*potentialFactor.Number)],[z_gnd,z_gnd]*spatialFactor.Number,'k','LineWidth',linewidth);
 hold off
-axis([1.1*min(phiNumBF(:)*1e-6) 1.1*max(phiNumBF(:)*1e-6) 0 (Lz+z_gnd)*1e-3]);
-xlabel('$\phi$ (MV)','FontSize',18,'Interpreter','latex');
-ylabel('Altitude (km)','FontSize',18,'Interpreter','latex');
-set(gca,'FontSize',14);
-set(gca,'XMinorTick','on','YMinorTick','on')
+axis([1.1*min(phiNumBF(:)*potentialFactor.Number) 1.1*max(phiNumBF(:)*potentialFactor.Number) 0 (Lz+z_gnd)*spatialFactor.Number]);
+legend('$\phi$ [BF]','$\phi$ [AF]','interpreter','latex','location','best');
+xlabel(strcat('$\phi$ (',potentialFactor.LaTeX,'V)'),'FontSize',18,'Interpreter','latex');
+ylabel(strcat('Altitude (',spatialFactor.LaTeX,'m)'),'FontSize',18,'Interpreter','latex');
+set(gca,'FontSize',14,'XMinorTick','on','YMinorTick','on','TickLabelInterpreter','latex')
 box on
-% title('E_z and \phi  before the flash [BF] and after [AF]');
+title('$\phi$  before the flash [BF] and after [AF]','interpreter','latex');
 grid on;
 hold off
 exportgraphics(gcf,strcat(sims.pathPNGs,'/phi_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
@@ -112,24 +107,20 @@ fig = figure;
 set(gcf,'Position',[0,0,600,800]);
 set(gcf,'Resize','off')
 hold on
-plot(EzNumBF(:)*1e-5, z*1e-3, 'r-','LineWidth',linewidth,'DisplayName','Electric Field')
-plot(EthNegative(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'HandleVisibility','off')
-plot(EthPositive(:)*1e-5,z*1e-3, 'g-.','LineWidth',linewidth,'DisplayName','Propagation Threshold')
-plot(Einitiation(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'DisplayName','Initiation Threshold')
-plot(-Einitiation(:)*1e-5,z*1e-3, 'b--','LineWidth',linewidth,'HandleVisibility','off')
+plot(EzNumBF(:)*fieldFactor.Number, z*spatialFactor.Number, 'r-','LineWidth',linewidth,'DisplayName','Electric Field')
+plot(EthNegative(:)*fieldFactor.Number,z*spatialFactor.Number, 'g-.','LineWidth',linewidth,'HandleVisibility','off')
+plot(EthPositive(:)*fieldFactor.Number,z*spatialFactor.Number, 'g-.','LineWidth',linewidth,'DisplayName','Propagation Threshold')
+plot(Einitiation(:)*fieldFactor.Number,z*spatialFactor.Number, 'b--','LineWidth',linewidth,'DisplayName','Initiation Threshold')
+plot(-Einitiation(:)*fieldFactor.Number,z*spatialFactor.Number, 'b--','LineWidth',linewidth,'HandleVisibility','off')
 hold off
-axis([-1.25*max(Einitiation*1e-5) 1.25*max(Einitiation*1e-5) 0 (Lz+z_gnd)*1e-3]);
+axis([1.25*fieldFactor.Number*min([-max(Einitiation) -max(EzNumBF) min(EzNumBF)]) 1.25*fieldFactor.Number*max([max(Einitiation) -min(EzNumBF) max(EzNumBF)]) 0 (Lz+z_gnd)*spatialFactor.Number]);
 legend('Interpreter','latex','FontSize',16,'location','northeast')
-set(gca,'FontSize',16);
-set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
+set(gca,'FontSize',16,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
 box on
 title('Electric Field Thresholds','Interpreter','latex','FontSize',28);
-xlabel('$E_z$ (kV/cm)','FontSize',20,'Interpreter','latex');
-ylabel('Altitude (km)','FontSize',20,'Interpreter','latex');
+xlabel(strcat('$E_z$ (',fieldFactor.LaTeX,'V/m)'),'FontSize',20,'Interpreter','latex');
+ylabel(strcat('Altitude (',spatialFactor.LaTeX,'m)'),'FontSize',20,'Interpreter','latex');
 grid on
 set(gcf,'Position',[0,0,600,800]);
 exportgraphics(gcf,strcat(sims.pathPNGs,'/E_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
-%xlim([-1000000,1000000])
 fprintf('\tAverage field reduction: %f\n',mean(abs(EzNumAF)./abs(EzNumBF)));
-
-cd ../viz

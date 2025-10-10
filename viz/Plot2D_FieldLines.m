@@ -23,17 +23,17 @@ function [] = Plot2D_FieldLines(num,sims)
     z_gnd        = load('z_gnd.dat');
     ChargeLayers = load('ChargeLayers.dat');
     cd ../viz
-    dx = dxyz(1);               % _m
-    dy = dxyz(2);               % _m
-    dz = dxyz(3);               % _m
+    dx = dxyz(1);            % _m
+    dy = dxyz(2);            % _m
+    dz = dxyz(3);            % _m
     
     Nx = Nxyz(1);
     Ny = Nxyz(2);
     Nz = Nxyz(3);
     
-    Lx = (Nx-1)*dx*1e-3;         % _m
-    Ly = (Ny-1)*dy*1e-3;         % _m
-    Lz = (Nz-1)*dz*1e-3;         % _m
+    Lx = (Nx-1)*dx;         % _m
+    Ly = (Ny-1)*dy;         % _m
+    Lz = (Nz-1)*dz;         % _m
     
     clear dxyz Nxyz
     
@@ -46,39 +46,42 @@ function [] = Plot2D_FieldLines(num,sims)
     ChargeLayersLineWidth  = 1;
     
     %% Derive data for plotting
-    x        = (0:Nx-1)'*dx*1e-3;
-    y        = (0:Ny-1)'*dy*1e-3;
-    z        = ((0:Nz-1)'*dz+z_gnd)*1e-3;
+    x        = (0:Nx-1)'*dx;
+    y        = (0:Ny-1)'*dy;
+    z        = ((0:Nz-1)'*dz+z_gnd);
     [y,z1]    = meshgrid(y,z);
     [x,z2]    = meshgrid(x,z);
     
+    % Determine the magnitude of the values:
+    spatialFactor = checkMagnitude(z(:));
+
     %% Plot
     figure;
     hold on
     %set(gcf,'Units','inches','OuterPosition', [10 10 20 30]/3)
-    axis([min(y(:)) max(y(:)) min(z1(:)) max(z1(:))]);
-    streamslice(y,z1,Ey2D,Ez2D,10,'arrows');
+    axis([spatialFactor.Number*min(y(:)) spatialFactor.Number*max(y(:)) spatialFactor.Number*min(z1(:)) spatialFactor.Number*max(z1(:))]);
+    streamslice(spatialFactor.Number*y,spatialFactor.Number*z1,Ey2D,Ez2D,10,'arrows');
     % quiver(y,z,Ey2D',Ez2D');
     set(findobj('Type','line'),'Color','k')
-    plot([min(y(:)) max(y(:))], [z_gnd z_gnd]*1e-3,'k');
+    plot([spatialFactor.Number*min(y(:)) spatialFactor.Number*max(y(:))], [z_gnd z_gnd]*spatialFactor.Number,'k');
     for ii=1:NbChargeLayers
         if ChargeLayers(ii,1)>0
             tempColor = 'r'; % positive charge region
         else
             tempColor = 'b'; % negative charge region
         end
-        rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*1e-3,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*1e-3,2*ChargeLayers(ii,6)*1e-3,ChargeLayers(ii,7)*1e-3],...
+        rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*spatialFactor.Number,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*spatialFactor.Number,2*ChargeLayers(ii,6)*spatialFactor.Number,ChargeLayers(ii,7)*spatialFactor.Number],...
             'Curvature',[0,0],...
             'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',tempColor);
-    %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*1e-3,(z_gnd+ChargeLayers(ii,4))*1e-3,...
+    %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*spatialFactor.Number,(z_gnd+ChargeLayers(ii,4))*spatialFactor.Number,...
     %         ['\leftarrow',num2str(ChargeLayers(ii,1),3),' C'],...
     %         'HorizontalAlignment','left','BackgroundColor','w',...
     %         'FontSize',10,'Color',Color(ii))
     end
     
     hold off
-    xlabel('$y$ (km)','Interpreter','latex','FontSize',16);
-    ylabel('$z$ (km)','Interpreter','latex','FontSize',16);
+    xlabel(strcat('$y$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
+    ylabel(strcat('$z$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
     set(gca,'FontSize',10,'TickLabelInterpreter','latex');
     %title(strcat('Field Lines on ',sims.objectName),'Interpreter','latex','FontSize',18);
         

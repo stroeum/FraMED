@@ -15,17 +15,16 @@ if isempty(Q) || (size(Q,1)-1) == 0
 else
     fprintf('\n*** Executing Plot1D_ChannelCharge.m script. ***\n');
 end
+cd ../viz
 step = (0:size(Q,1)-1)';
+chargeFactor = checkMagnitude(Q);
 
 set(gcf,'Units','inches','OuterPosition', [20 20 20 20]/6)
-
-plot(step,Q,'LineWidth',1,'LineStyle','-');
+plot(step,chargeFactor.Number*Q,'LineWidth',1,'LineStyle','-');
 xlabel('step','FontSize',12);
-ylabel('Q_{cha} (C)','FontSize',12);
+ylabel(strcat('Q_{cha} (',chargeFactor.Unit,'C)'),'FontSize',12);
 set(gca,'FontSize',10);
-axis([0 max(step) min([min(Q) 0]) max([0 max(Q)]));
+axis([0 max(step) min([chargeFactor.Number*min(Q) 0]) max([0 chargeFactor.Number*max(Q)])]);
 box on
 grid on
 exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeTransfer_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
-
-cd ../viz
