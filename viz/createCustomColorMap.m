@@ -11,7 +11,7 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function customColorMap = createCustomColorMap(valuetype,alphavalue)
-    customColorMap = zeros([151,3]);
+    customColorMap = zeros([161,3]);
     fullValue = length(customColorMap(:,1));
     halfValue = ((fullValue-1)/2);
     if strcmp(valuetype,'scalar') == 1 || strcmp(valuetype,'Scalar') == 1
