@@ -1,12 +1,14 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%   File Name: plottingLayerDefs.m                                        %
-%     Purpose: Visualizes the charge layer with FraMED definitions.       %
-%              Outputs a figure to the screen but does not save it to a   %
-%              file automatically.                                        %
-%      Author: Annelisa Esparza                                           %
-%     Contact: annelisa.esparza@my.erau.edu                               %
-%  Added Date: April 29, 2022                                             %
-% Last Update: June 2025 - Updated to properly order the legend labeling. %
+%  File Name: plottingLayerDefs.m                                         %
+%    Purpose: Visualizes the charge layer with FraMED definitions.        %
+%             Outputs a figure to the screen but does not save it to a    %
+%             file automatically.                                         %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: April 29, 2022                                              %
+%    Updates:    June 2025 - Updated to properly order the legend         %
+%                            labeling.                                    %
+%             October 2025 - Integrated the checkMagnitude.m function.    %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center,spatialFactor)

@@ -1,6 +1,22 @@
-% main file
-% Plot all figures and store them as .eps
-% NB: Videos should be store separately
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%  File Name: main.m                                                      %
+%    Purpose: Consolidates important visualization scripts and automates  %
+%             the process of running them for a particular simulation.    %
+%             Will output figures to the 'Figures' directory within an    %
+%             appropriately named subdirectory based on the object and    %
+%             type of discharge (e.g. '../Figures/Earth/Leader/').        %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: June 27, 2021                                               %
+%    Updates: February 2022 - Added the Plot1D_CloudDistribution script.  %
+%                April 2022 - Added the Plot1D_TreeAndCharges script.     %
+%                March 2024 - Added the Plot1D_RuntimeResults script.     %
+%             December 2024 - Added the Plot1D_CurrentEstimate script.    %
+%             February 2025 - Fully integrated specifySimDetails.m to     %
+%                             automate the file-save naming convention.   %
+%              October 2025 - Added the Plot1D_TreeAndFields script.      %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 clc
 close all
 clearvars

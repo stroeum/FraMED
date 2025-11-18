@@ -1,12 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%  File Name: createCustomColorMap.m                                     %
+%  File Name: createCustomColorMap.m                                      %
 %    Purpose: Creates a custom colormap for scalar or field values, where %
 %             negative values are represented by blue and positive values %
 %             are represented by red.                                     %
 %     Author: Annelisa Esparza                                            %
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: February 22, 2022                                           %
-%    Updates: April 2022 - Updated to account for desired transparency.   %
+%    Updates:    April 2022 - Now accommodates desired transparency.      %
 %             February 2025 - Introduced colormap for field values.       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 

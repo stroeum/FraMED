@@ -1,15 +1,15 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%   File Name: plottingChargeRegions.m                                    %
-%     Purpose: Visualizes the charged cloud structure with custom color   %
-%              map. Outputs a figure to the screen but does not save it   %
-%              to a file automatically. LaTeX-ified April 29, 2022.       %
-%              Changed view angle and several notations on February 20,   %
-%              2024. Automated unit conversion for simulations of non-    %
-%              mesoscale domains on September 25, 2025.                   %
-%      Author: Annelisa Esparza                                           %
-%     Contact: annelisa.esparza@my.erau.edu                               %
-%  Added Date: February 22, 2022                                          %
-% Last Update: September 25, 2025                                         %
+%  File Name: plottingChargeRegions.m                                     %
+%    Purpose: Visualizes the charged cloud structure with custom color    %
+%             map. Outputs a figure to the screen but does not save it    %
+%             to a file automatically. LaTeX-ified April 29, 2022.        %
+%             Changed view angle and several notations on February 20,    %
+%             2024. Automated unit conversion for simulations of non-     %
+%             mesoscale domains on September 25, 2025.                    %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: February 22, 2022                                           %
+%    Updates: October 2025 - Integrated the checkMagnitude.m function.    %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,spatialFactor)

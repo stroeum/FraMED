@@ -8,7 +8,7 @@
 %  Added Date: April 29, 2022                                             %
 %     Updates: February 2025 - Updated to match the options available for %
 %                              the createCustomColorMap function.         %  
-%               October 2025 - Integrates the checkMagnitude function.    %
+%               October 2025 - Integrates the checkMagnitude.m function.  %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -16,7 +16,7 @@
 clearvars -except sims
 figure(1)
 clf
-
+fprintf('\n*** Executing Plot3D_ChargeLayerDefinitions.m script. ***\n');
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos') 
     specifySimDetails;
 end

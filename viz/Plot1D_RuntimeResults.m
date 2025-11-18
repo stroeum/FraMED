@@ -1,3 +1,13 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%  File Name: Plot1D_RuntimeResults.m                                     %
+%    Purpose: Visualizes the number of candidates, maximum candidate      %
+%             overreach percentage, time for link addition, and time for  %
+%             Qminimization based on summary.txt file.                    %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: March 19, 2024                                              %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 clearvars -except sims
 
 %% Check pathway linking:

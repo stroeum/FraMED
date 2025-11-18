@@ -4,10 +4,10 @@
 %             custom colormap. Outputs a figure to the screen but does    %
 %             not save it to a file automatically.                        %
 %     Author: Annelisa Esparza                                            %
-%    Contact: annelisaesparza@my.erau.edu                                 %
+%    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: February 22, 2022                                           %
 %    Updates: February 2024 - Integrated free-space BCs.                  %
-%              October 2025 - Integrated checkMagnitude function and      %
+%              October 2025 - Integrated checkMagnitude.m function and    %
 %                             tin-can BCs.                                %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 

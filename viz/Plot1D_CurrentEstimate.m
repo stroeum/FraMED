@@ -1,3 +1,23 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%  File Name: Plot1D_CurrentEstimate.m                                    %
+%    Purpose: Approximates the current at the tip with the assumption of  %
+%             a known, constant propagation speed defined by whether the  %
+%             discharge is a streamer or leader. Outputs to the screen    %
+%             relevant values and associated statistics. Creates the      %
+%             following plots:                                            %
+%             (1a) a highlight of the longest path and                    %
+%             (1b) initiation-to-ground path for CGs,                     %
+%             (2)  current estimation over the course of the discharge,   %
+%             (3)  the currents w.r.t. altitude, and                      %
+%             (4)  the timescale of the propagation.                      %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: December 3, 2024                                            %
+%    Updates:    June 2025 - Introduced ability to distinguish between    %
+%                            negative and positive propagation.           %
+%             October 2025 - Integrated checkMagnitude.m function.        %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 close all
 clearvars -except sims
 

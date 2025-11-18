@@ -1,3 +1,24 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%  File Name: specifySimDetails.m                                         %
+%    Purpose: Prompts user to define the object simulated, but otherwise  %
+%             automatically determines the type of discharge simulated    %
+%             based on files in the 'results' directory. Resulting 'sims' %
+%             structure then informs the output directory for any figures %
+%             as well as certain aspects of the figures (e.g. any         %
+%             grounding regions based on boundary conditions, figure      %
+%             titles, propagation speeds, etc).                           %
+%     Author: Annelisa Esparza                                            %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: December 1, 2024                                            %
+%    Updates: February 2025 - Automated the definition of leader/streamer %
+%                             discharge types.                            %
+%                 June 2025 - Integrated the automated read-in of         %
+%                             simulation conditions following the         % 
+%                             introduction of output txt files from the   %
+%                             C++ repository.                             %
+%              October 2025 - Expanded the boundary condition options.    %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 if ~exist('sims','var') || (exist('sims','var') && ~isfield(sims,'objectName'))
     prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
     sims.objectName = input(prompt1,'s');

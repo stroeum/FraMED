@@ -4,10 +4,14 @@
 %             Saves the initial and final structure. Can be turned into a %
 %             video that tracks the propagation.                          %
 %     Author: Annelisa Esparza                                            %
-%    Contact: annelisaesparza@my.erau.edu                                 %
-% Added Date: February 22, 2022                                           %
-%    Updates: October 2025 - Integrated checkMagnitude function and       %
-%                            tin-can BCs.                                 %
+%    Contact: annelisa.esparza@my.erau.edu                                %
+% Added Date: April 27, 2022                                              %
+%    Updates:  November 2022 - Updated to account for complex charge      %
+%                              density distributions.                     %
+%              December 2024 - Integrated specifySimDetails.m function.   %
+%             September 2025 - Renamed (formerly LightningVisual.m).      %
+%               October 2025 - Integrated checkMagnitude.m function and   %
+%                              tin-can BCs.                               %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 close all
