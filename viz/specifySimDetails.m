@@ -17,8 +17,10 @@
 %                             introduction of output txt files from the   %
 %                             C++ repository.                             %
 %              October 2025 - Expanded the boundary condition options.    %
+%             November 2025 - Included propagation speed definitions.     %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
+% Inquires the simulation object (determines naming convention):
 if ~exist('sims','var') || (exist('sims','var') && ~isfield(sims,'objectName'))
     prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
     sims.objectName = input(prompt1,'s');
@@ -36,7 +38,7 @@ else
     end
 end
 
-% Consolidate the definitions for the associated propagation speeds:
+% Consolidates the definitions for the associated propagation speeds:
 if strcmp(sims.objectType, 'Leader')
     sims.vprop.pos = 4.4*(10^5); % propagation speed for positive leaders,   ~440 km/s,    Thomson1985, doi:10.1029/JD090iD05p08136
     sims.vprop.neg = 4.4*(10^5); % propagation speed for negative leaders,   ~440 km/s,    Thomson1985, doi:10.1029/JD090iD05p08136
