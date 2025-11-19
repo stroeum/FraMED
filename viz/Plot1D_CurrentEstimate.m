@@ -76,33 +76,18 @@ vprop.streamer.pos = 3.0*(10^7); % propagation speed for positive streamers, ~30
 vprop.streamer.neg = 3.0*(10^7); % propagation speed for negative streamers, ~30,000 km/s, Pasko2012,   doi:10.1007/s11214-011-9813-9
 
 % Calculates instantaneous timescale on a per-link basis:
-tau.leader.pos   = polarity.pos.*EstablishedLinks(:,7)./vprop.leader.pos;
-tau.leader.neg   = polarity.neg.*EstablishedLinks(:,7)./vprop.leader.neg;
-tau.streamer.pos = polarity.pos.*EstablishedLinks(:,7)./vprop.streamer.pos;
-tau.streamer.neg = polarity.neg.*EstablishedLinks(:,7)./vprop.streamer.neg;
+tau.pos  = polarity.pos.*EstablishedLinks(:,7)./sims.vprop.pos;
+tau.neg  = polarity.neg.*EstablishedLinks(:,7)./sims.vprop.neg;
+tau.case = tau.pos + tau.neg;
 
 % Calculates the current (units of Amps):
-current.leader.pos   = polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.pos);
-current.leader.neg   = polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.leader.neg);
-current.streamer.pos = polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.pos);
-current.streamer.neg = polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./vprop.streamer.neg);
+current.pos  = polarity.pos.*chargeTransported./(EstablishedLinks(:,7)./sims.vprop.pos);
+current.neg  = polarity.neg.*chargeTransported./(EstablishedLinks(:,7)./sims.vprop.neg);
+current.case = current.pos + current.neg;
 
-% Assigns the correct values for the system:
-if strcmp(sims.objectType,'Streamer')
-    vprop.case.pos = vprop.streamer.pos;
-    vprop.case.neg = vprop.streamer.neg; 
-    tau.case       = tau.streamer.pos + tau.streamer.neg;
-    current.case   = current.streamer.pos + current.streamer.neg;
-    current.pos    = nonzeros(current.streamer.pos);
-    current.neg    = nonzeros(current.streamer.neg);
-elseif strcmp(sims.objectType,'Leader')
-    vprop.case.pos = vprop.leader.pos;
-    vprop.case.neg = vprop.leader.neg;
-    tau.case       = tau.leader.pos + tau.leader.neg;
-    current.case   = current.leader.pos + current.leader.neg;
-    current.pos    = nonzeros(current.leader.pos);
-    current.neg    = nonzeros(current.leader.neg);
-end
+% Reduces sets of polarity-isolated current values to nonzero values:
+current.pos = nonzeros(current.pos);
+current.neg = nonzeros(current.neg);
 
 %% Identifies total branch lengths to predict lower limit of timescale:
 % Determines various path branches and distances along each branch:
@@ -149,7 +134,7 @@ end
 close(statusBar);
 [links.maxdistance, maxindex] = max(links.pathdistance);
 links.timescale.max = sum(tau.case);
-links.timescale.min = links.maxdistance/(polarity.neg(maxindex)*vprop.case.neg + polarity.pos(maxindex)*vprop.case.pos);
+links.timescale.min = links.maxdistance/(polarity.neg(maxindex)*sims.vprop.neg + polarity.pos(maxindex)*sims.vprop.pos);
 
 % Highlights longest path (or path to ground, if applicable):
 [longestpath.start, longestpath.end] = string2link(links.path(maxindex),links.initiate);
@@ -179,8 +164,8 @@ currentFactor    = checkMagnitude(current.case(:));
 minCurrentFactor = checkMagnitude(current.min.val);
 
 % Output to the screen the results:
-fprintf(strcat("\n\t",sims.objectType," (positive) propagation speed approximated as ",num2str(vprop.case.pos/1000,'%.0f')," km/s."))
-fprintf(strcat("\n\t",sims.objectType," (negative) propagation speed approximated as ",num2str(vprop.case.neg/1000,'%.0f')," km/s."))
+fprintf(strcat("\n\t",sims.objectType," (positive) propagation speed approximated as ",num2str(sims.vprop.pos/1000,'%.0f')," km/s."))
+fprintf(strcat("\n\t",sims.objectType," (negative) propagation speed approximated as ",num2str(sims.vprop.neg/1000,'%.0f')," km/s."))
 fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(temporalFactor.Number*links.timescale.min,'%.1f')," - ",num2str(temporalFactor.Number*links.timescale.max,'%.1f')," ",temporalFactor.Unit,"s."))
 fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*spatialFactor.Number,'%.1f')," ",spatialFactor.Unit,"m from the initiation point."))
 fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
@@ -189,7 +174,7 @@ fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.partial.val,5),"\t"
 fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.max.val,5),"\t",currentFactor.Unit,"A\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
 fprintf(strcat("\n\t\t",num2str(minCurrentFactor.Number*current.min.val,5),"\t",minCurrentFactor.Unit,"A\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
 if links.end(end,3)==0
-    fprintf(strcat("\t\t",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/(polarity.neg(end)*vprop.case.neg + polarity.pos(end)*vprop.case.pos)),5),"\tkA\t(initiation-to-ground path)\n"))
+    fprintf(strcat("\t\t",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/(polarity.neg(end)*sims.vprop.neg + polarity.pos(end)*sims.vprop.pos)),5),"\tkA\t(initiation-to-ground path)\n"))
 end
 
 %% Plot of instantaneous current values:
@@ -249,10 +234,9 @@ grid off; hold off;
 set(gcf,'Position',[0,0,1200,800]);
 exportgraphics(gcf,strcat(sims.pathPNGs,'/CurrentHeight_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);  
 
-%%
-clf %nexttile
-hold on
-box on
+%% Plot of link-addition timescales wrt step number:
+clf
+hold on; box on;
 scatter(links.steps,temporalFactor.Number*tau.case,25,'ko','filled','MarkerFaceAlpha',0.5,'DisplayName',strcat("Propagation Timescale: $$\Delta t_n = \frac{\Delta l_n}{v_\mathrm{prop}}$$"))% where $$v_\mathrm{prop}=$$ ",num2str(testVelocity/1000)," km/s"))
 yline(mean(temporalFactor.Number*tau.case),'--k',strcat(num2str(mean(temporalFactor.Number*tau.case),'%.2f')," ",temporalFactor.LaTeX,"s"),'LineWidth',1,'DisplayName',strcat("Mean Timescale: $$\bar{\Delta t}=\frac{1}{N} \sum^N_{n=1}{\Delta t_n}$$"),'Interpreter','latex','FontSize',12)
 xlim([0,links.steps(end)])

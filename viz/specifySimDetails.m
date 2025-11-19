@@ -24,6 +24,7 @@ if ~exist('sims','var') || (exist('sims','var') && ~isfield(sims,'objectName'))
     sims.objectName = input(prompt1,'s');
 end
 
+% Determines whether the simulation is for a leader or streamer:
 if exist('../results/Type_Discharge.txt','file')
     sims.objectType = string(textscan(fopen('../results/Type_Discharge.txt'),'%s'));
 else
@@ -33,6 +34,15 @@ else
         fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
         sims.objectType = input(prompt2,'s');
     end
+end
+
+% Consolidate the definitions for the associated propagation speeds:
+if strcmp(sims.objectType, 'Leader')
+    sims.vprop.pos = 4.4*(10^5); % propagation speed for positive leaders,   ~440 km/s,    Thomson1985, doi:10.1029/JD090iD05p08136
+    sims.vprop.neg = 4.4*(10^5); % propagation speed for negative leaders,   ~440 km/s,    Thomson1985, doi:10.1029/JD090iD05p08136
+elseif strcmp(sims.objectType, 'Streamer')
+    sims.vprop.pos = 3.0*(10^7); % propagation speed for positive streamers, ~30,000 km/s, Pasko2012,   doi:10.1007/s11214-011-9813-9
+    sims.vprop.neg = 3.0*(10^7); % propagation speed for negative streamers, ~30,000 km/s, Pasko2012,   doi:10.1007/s11214-011-9813-9
 end
 
 % Specifies the boundary conditions for the simulation:
