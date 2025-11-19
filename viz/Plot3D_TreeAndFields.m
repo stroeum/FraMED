@@ -37,8 +37,15 @@ is.singleImages   = 'N'; % Would you like to export single images for all of the
 is.setExtracts    = []; % Would you like to export for any explicit steps? 
 
 %% Fully-automated onwards:
+% Determines and defines simulation conditions:
 if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
     specifySimDetails;
+end
+% Determines if the simulation has terminated:
+if isfield(sims,'disType')
+    resultingDischarge = strcat(sims.disType," ");
+else
+    resultingDischarge = '';
 end
 
 % Load data files
@@ -232,7 +239,7 @@ for ii=0:is.finalStep
         y1 = Links.ID(1,2)*d.y*spatialFactor.Number;
         z1 = ((Links.ID(1,3)*d.z)*spatialFactor.Number)+(gnd.alt*spatialFactor.Number);
         scatter3(x1,y1,z1,initiationMarker,'k','filled');
-        titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
+        titleformat = title(strcat(resultingDischarge,sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
         hold off
 
         % Determines the 2D electric field values for the step:
@@ -555,7 +562,7 @@ for ii=0:is.finalStep
     % Formatting title to reflect step value:
     nexttile(2)
     delete(titleformat);
-    titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName," after ", int2str(ii) ," step(s)"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
+    titleformat = title(strcat(resultingDischarge,sims.objectType," on ",sims.objectName," after ", int2str(ii) ," step(s)"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
     box off
     if strcmp(is.singleImages,'Y') || ismember(ii,is.setExtracts)
         exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Step-',num2str(ii),'_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
@@ -582,7 +589,7 @@ end
 
 % Exports the final graphic:
 delete(titleformat);
-titleformat = title(strcat(sims.disType," ",sims.objectType," on ",sims.objectName,": Final Results"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
+titleformat = title(strcat(resultingDischarge,sims.objectType," on ",sims.objectName,": Final Results"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
 exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',viewType,'_Final_',sims.objectName,'_',sims.objectType,'.png'),'Resolution',300);
 
 %% Functions:
