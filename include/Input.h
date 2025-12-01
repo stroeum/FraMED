@@ -115,8 +115,8 @@ public:
 	static	ListCharge				ChargeCfg;										// Table with all parameters of the charge configuation
 
 	/* SAM variables. */
-	static ListInt					NumberOfCandidates;								// Number of candidates in current link addition step.
-	static ListDouble				MaximumCandidateOverreach;						// The greatest amount that a candidate exceeded the electric field
+	static 	ListInt					NumberOfCandidates;								// Number of candidates in current link addition step.
+	static 	ListDouble				MaximumCandidateOverreach;						// The greatest amount that a candidate exceeded the electric field
 																					//  propagation threshold.
 
 	static	CriticalFields			Ec;												// Initiation, propagation of positive and negative channels
