@@ -18,24 +18,15 @@
 %                             C++ repository.                             %
 %              October 2025 - Expanded the boundary condition options.    %
 %             November 2025 - Included propagation speed definitions.     %
+%             December 2025 - Integrated recurrent domain information.    %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-% Inquires the simulation object (determines naming convention):
-if ~exist('sims','var') || (exist('sims','var') && ~isfield(sims,'objectName'))
-    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
-    sims.objectName = input(prompt1,'s');
-end
-
 % Determines whether the simulation is for a leader or streamer:
-if exist('../results/Type_Discharge.txt','file')
+if exist('../results/Type_Discharge.txt','file') && exist('../results/Type_BC.txt','file')
     sims.objectType = string(textscan(fopen('../results/Type_Discharge.txt'),'%s'));
+    sims.BCtype     = string(textscan(fopen('../results/Type_BC.txt'),'%s'));
 else
-    prompt2 = "\nWhat type of discharge is this? (Leader / Streamer)\n-->";
-    sims.objectType = input(prompt2,'s');
-    while ~strcmp(sims.objectType,'Streamer') && ~strcmp(sims.objectType,'Leader')
-        fprintf('\n\tNot an acceptable input. Please enter Streamer or Leader.\n');
-        sims.objectType = input(prompt2,'s');
-    end
+    error('Simulation is undefined. Ensure there are results to pull from.');
 end
 
 % Consolidates the definitions for the associated propagation speeds:
@@ -47,32 +38,65 @@ elseif strcmp(sims.objectType, 'Streamer')
     sims.vprop.neg = 3.0*(10^7); % propagation speed for negative streamers, ~30,000 km/s, Pasko2012,   doi:10.1007/s11214-011-9813-9
 end
 
-% Specifies the boundary conditions for the simulation:
-if exist('../results/Type_Discharge.txt','file')
-    sims.BCtype = string(textscan(fopen('../results/Type_BC.txt'),'%s'));
-else        
-    prompt_BCtype = '\nIs the domain in free space (FS), is z = 0 grounded (G), are the top and bottom of the domain grounded (G_G), or are all sides of the domain grounded (TIN_CAN)?\n-->';
-    sims.BCtype = input(prompt_BCtype,'s');                    
-    while ~strcmp(sims.BCtype,'FS') && ~strcmp(sims.BCtype,'G') && ~strcmp(sims.BCtype,'TIN_CAN') && ~strcmp(sims.BCtype,'G_G')
-        fprintf('\n\tNot an acceptable input. Please enter FS (for free space) or G (for grounded).\n');
-        sims.BCtype = input(prompt_BCtype,'s');
+% Preloads and stores attributes regarding the domain:
+if exist('../results/dxyz.dat','file') && exist('../results/Nxyz.dat','file') 
+    load('../results/Nxyz.dat');
+    load('../results/dxyz.dat');
+    if exist('../results/z_gnd.dat','file')
+        sims.domain.gnd = load('../results/z_gnd.dat');
+    else
+        sims.domain.gnd = 0;
     end
+    sims.domain.Nx = Nxyz(1);
+    sims.domain.Ny = Nxyz(2);
+    sims.domain.Nz = Nxyz(3);
+    sims.domain.dx = dxyz(1);
+    sims.domain.dy = dxyz(2);
+    sims.domain.dz = dxyz(3);
+    clear Nxyz dxyz
+    sims.domain.minx = 0;
+    sims.domain.maxx = (sims.domain.Nx-1)*sims.domain.dx;
+    sims.domain.miny = 0;
+    sims.domain.maxy = (sims.domain.Ny-1)*sims.domain.dy;
+    sims.domain.minz = 0;
+    sims.domain.maxz = ((sims.domain.Nz-1)*sims.domain.dz)+sims.domain.gnd;
+
+    % Determines the spatial factor for the domain:
+    sims.spatialFactor = checkMagnitude([(0:sims.domain.dy:sims.domain.maxx)'; (0:sims.domain.dy:sims.domain.maxy)'; (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)']);
+
+    % Assigns plot height and width based on domain:
+    sims.plotWidth = 600;
+    sims.plotHeight = round((sims.domain.Nz/max([sims.domain.Nx sims.domain.Ny]))*5)*80;
+else
+    error('Simulation domain is undefined. Ensure there are results to pull from.');
 end
 
+% Specifies the status of the discharge:
 if exist('../results/Type_Result.txt','file')
     sims.disType = string(textscan(fopen('../results/Type_Result.txt'),'%s'));
+else
+    sims.disType = "Ongoing";
+end
+
+% Inquires the simulation object (determines naming convention):
+if ~exist('sims','var') || (exist('sims','var') && ~isfield(sims,'objectName'))
+    prompt1 = "\nWhat is the planetary body that the simulation is focused on? (No quotation marks needed for string input)\n-->";
+    sims.objectName = input(prompt1,'s');
 end
 
 % Settings to ensure proper directory referencing:
-sims.pathPNGs = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/PNGs');
+baseDirectory = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/',sims.disType);
+copyfile('../src/main.cpp',baseDirectory);
+fprintf(strcat("\nVisualizations for this simulation will be stored within the following directory --> ",baseDirectory,"\n\n"));
+sims.pathPNGs = strcat(baseDirectory,'/PNGs');
 if ~exist(sims.pathPNGs,'dir')
     mkdir(sims.pathPNGs);
 end
-sims.pathVideos = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/Videos');
+sims.pathVideos = strcat(baseDirectory,'/Videos');
 if ~exist(sims.pathVideos,'dir')
     mkdir(sims.pathVideos);
 end
-sims.pathEPSs = strcat('../Figures/',sims.objectName,'/',sims.objectType,'/EPSs');
+sims.pathEPSs = strcat(baseDirectory,'/EPSs');
 if ~exist(sims.pathEPSs,'dir')
     mkdir(sims.pathEPSs);
 end
