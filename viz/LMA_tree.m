@@ -1,10 +1,10 @@
 % LMA trees %
 for ii=1:Nb.Links
 %     pause
-    alt_hist = LMA_alt_hist(alt_hist,ii);
+    alt_hist = LMA_alt_hist(alt_hist,ii,sims);
 
     % Current link type %
-    if(Links.data(ii,6)*d.z >= Init.z) % Upper point
+    if(Links.data(ii,6)*sims.domain.dz >= Init.z) % Upper point
         tmp.type = 'Upper';
     else % Lower point
         tmp.type = 'Lower';
@@ -25,7 +25,7 @@ for ii=1:Nb.Links
 
     if strcmp(Links.Type,tmp.type) || strcmp(Links.Type,'Both')
         subplot(h.tz.fig);
-        plot(ii,(Links.data(ii,6)*d.z+z_gnd),'s-','LineWidth',Links.Line.Width,'MarkerSize',floor(Links.MarkerSize/7),'MarkerEdgeColor',tmp.color,'MarkerFaceColor',tmp.color);
+        plot(ii,sims.spatialFactor.Number*(Links.data(ii,6)*sims.domain.dz+sims.domain.gnd),'s-','LineWidth',Links.Line.Width,'MarkerSize',floor(Links.MarkerSize/7),'MarkerEdgeColor',tmp.color,'MarkerFaceColor',tmp.color);
 
         subplot(h.nz.fig);
         reset(subplot(h.nz.fig))
@@ -55,19 +55,19 @@ for ii=1:Nb.Links
                 plot(alt_hist.lower,z,'Color',Links.Color(3,:));
             end
         end
-        LMA_ground(h,'nz')
+        LMA_ground(h,'nz',sims)
         LMA_labels(h,'nz')
         LMA_axes(h,'nz')
         text(alt_hist.max,FocusArea.z(2),h.nz.note.string,'FontName',Font.Name,'Fontsize',Font.Size.Labels,'VerticalAlignment','Top','HorizontalAlignment','Right')
 
         sf1 = subplot(h.xz.fig);
-        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],'Color',tmp.color,'LineWidth',Links.Line.Width);   
+        plot(sims.spatialFactor.Number*[Links.data(ii,1)*sims.domain.dx, Links.data(ii,4)*sims.domain.dx],sims.spatialFactor.Number*[Links.data(ii,3)*sims.domain.dz+sims.domain.gnd, Links.data(ii,6)*sims.domain.dz+sims.domain.gnd],'Color',tmp.color,'LineWidth',Links.Line.Width);   
         
         sf2 = subplot(h.yz.fig);
-        plot([Links.data(ii,3)*d.z+z_gnd, Links.data(ii,6)*d.z+z_gnd],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color,'LineWidth',Links.Line.Width);
+        plot(sims.spatialFactor.Number*[(Links.data(ii,3)*sims.domain.dz)+sims.domain.gnd, (Links.data(ii,6)*sims.domain.dz)+sims.domain.gnd],sims.spatialFactor.Number*[Links.data(ii,2)*sims.domain.dy, Links.data(ii,5)*sims.domain.dy],'Color',tmp.color,'LineWidth',Links.Line.Width);
 
         sf3 = subplot(h.xy.fig);
-        plot([Links.data(ii,1)*d.x, Links.data(ii,4)*d.x],[Links.data(ii,2)*d.y, Links.data(ii,5)*d.y],'Color',tmp.color,'LineWidth',Links.Line.Width);
+        plot(sims.spatialFactor.Number*[Links.data(ii,1)*sims.domain.dx, Links.data(ii,4)*sims.domain.dx],sims.spatialFactor.Number*[Links.data(ii,2)*sims.domain.dy, Links.data(ii,5)*sims.domain.dy],'Color',tmp.color,'LineWidth',Links.Line.Width);
     end
     clear tmp
 

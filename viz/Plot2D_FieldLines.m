@@ -1,12 +1,10 @@
 function [] = Plot2D_FieldLines(num,sims)
     fprintf('\n*** Executing Plot2D_FieldLines.m function. ***\n');
-    if ~exist('sims','var') || ~isfield(sims,'pathPNGs') 
+    if ~exist('sims','var') 
         specifySimDetails;
     end 
 
     cd ../results
-    dxyz         = load('dxyz.dat');
-    Nxyz         = load('Nxyz.dat');
     
     if ~exist('num','var') || num=='~'
         Ex2D         = load('Ex2d.dat');
@@ -20,22 +18,8 @@ function [] = Plot2D_FieldLines(num,sims)
         phi2D        = load(['phi2D',num2str(num),'.dat']);
     end
     
-    z_gnd        = load('z_gnd.dat');
     ChargeLayers = load('ChargeLayers.dat');
     cd ../viz
-    dx = dxyz(1);            % _m
-    dy = dxyz(2);            % _m
-    dz = dxyz(3);            % _m
-    
-    Nx = Nxyz(1);
-    Ny = Nxyz(2);
-    Nz = Nxyz(3);
-    
-    Lx = (Nx-1)*dx;         % _m
-    Ly = (Ny-1)*dy;         % _m
-    Lz = (Nz-1)*dz;         % _m
-    
-    clear dxyz Nxyz
     
     fprintf('\tData loaded\n')
     
@@ -46,42 +30,39 @@ function [] = Plot2D_FieldLines(num,sims)
     ChargeLayersLineWidth  = 1;
     
     %% Derive data for plotting
-    x        = (0:Nx-1)'*dx;
-    y        = (0:Ny-1)'*dy;
-    z        = ((0:Nz-1)'*dz+z_gnd);
+    x        = (0:sims.domain.dx:sims.domain.maxx)';
+    y        = (0:sims.domain.dy:sims.domain.maxy)';
+    z        = (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)';
     [y,z1]    = meshgrid(y,z);
     [x,z2]    = meshgrid(x,z);
     
-    % Determine the magnitude of the values:
-    spatialFactor = checkMagnitude(z(:));
-
     %% Plot
     figure;
     hold on
     %set(gcf,'Units','inches','OuterPosition', [10 10 20 30]/3)
-    axis([spatialFactor.Number*min(y(:)) spatialFactor.Number*max(y(:)) spatialFactor.Number*min(z1(:)) spatialFactor.Number*max(z1(:))]);
-    streamslice(spatialFactor.Number*y,spatialFactor.Number*z1,Ey2D,Ez2D,10,'arrows');
+    axis([sims.spatialFactor.Number*min(y(:)) sims.spatialFactor.Number*max(y(:)) sims.spatialFactor.Number*min(z1(:)) sims.spatialFactor.Number*max(z1(:))]);
+    streamslice(sims.spatialFactor.Number*y,sims.spatialFactor.Number*z1,Ey2D,Ez2D,10,'arrows');
     % quiver(y,z,Ey2D',Ez2D');
     set(findobj('Type','line'),'Color','k')
-    plot([spatialFactor.Number*min(y(:)) spatialFactor.Number*max(y(:))], [z_gnd z_gnd]*spatialFactor.Number,'k');
+    plot([sims.spatialFactor.Number*min(y(:)) sims.spatialFactor.Number*max(y(:))], [sims.domain.gnd sims.domain.gnd]*sims.spatialFactor.Number,'k');
     for ii=1:NbChargeLayers
         if ChargeLayers(ii,1)>0
             tempColor = 'r'; % positive charge region
         else
             tempColor = 'b'; % negative charge region
         end
-        rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*spatialFactor.Number,(z_gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*spatialFactor.Number,2*ChargeLayers(ii,6)*spatialFactor.Number,ChargeLayers(ii,7)*spatialFactor.Number],...
+        rectangle('Position',[(ChargeLayers(ii,3)-2*ChargeLayers(ii,6)/2)*sims.spatialFactor.Number,(sims.domain.gnd+ChargeLayers(ii,4)-ChargeLayers(ii,7)/2)*sims.spatialFactor.Number,2*ChargeLayers(ii,6)*sims.spatialFactor.Number,ChargeLayers(ii,7)*sims.spatialFactor.Number],...
             'Curvature',[0,0],...
             'LineWidth',ChargeLayersLineWidth,'LineStyle',ChargeLayersLineStyle,'EdgeColor',tempColor);
-    %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*spatialFactor.Number,(z_gnd+ChargeLayers(ii,4))*spatialFactor.Number,...
+    %     text((ChargeLayers(ii,3)+ChargeLayers(ii,6))*sims.spatialFactor.Number,(sims.domain.gnd+ChargeLayers(ii,4))*sims.spatialFactor.Number,...
     %         ['\leftarrow',num2str(ChargeLayers(ii,1),3),' C'],...
     %         'HorizontalAlignment','left','BackgroundColor','w',...
     %         'FontSize',10,'Color',Color(ii))
     end
     
     hold off
-    xlabel(strcat('$y$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
-    ylabel(strcat('$z$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
+    xlabel(strcat('$y$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
+    ylabel(strcat('$z$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16);
     set(gca,'FontSize',10,'TickLabelInterpreter','latex');
     %title(strcat('Field Lines on ',sims.objectName),'Interpreter','latex','FontSize',18);
         

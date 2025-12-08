@@ -24,8 +24,8 @@ rho.tot           = load('rho.dat');                                       %_nC/
 rho.amb           = load('rhoAmb.dat');                                    %_nC/m^3
 
 %% Convert to 3D
-rho.amb           = ConvertTo3d(rho.amb,Nxyz);
-rho.tot           = ConvertTo3d(rho.tot,Nxyz);
+rho.amb           = convertTo3d(rho.amb,sims);
+rho.tot           = convertTo3d(rho.tot,sims);
 rho.cha           = rho.tot-rho.amb;
 
 %% Derive main parameters

@@ -5,10 +5,10 @@ if strcmp(Figure.Output,'Movie')
     Movie(Nb.Points+1) = getframe(h.fig);
 end
 
-alt_hist = LMA_alt_hist(alt_hist,0);
+alt_hist = LMA_alt_hist(alt_hist,0,sims);
 
 subplot(h.tz.fig);
-hold on; plot(0,(Links.data(1,3)*d.z+z_gnd),'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
+hold on; plot(0,((Links.data(1,3)*sims.domain.dz)+sims.domain.gnd)*sims.spatialFactor.Number,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
 
 subplot(h.nz.fig);
 reset(subplot(h.nz.fig));
@@ -40,18 +40,18 @@ elseif strcmp(Links.Type,'Lower')
 end
 h.nz.note.string = [int2str(1),' pts'];
 text(alt_hist.max,FocusArea.z(2),h.nz.note.string,'FontName',Font.Name,'Fontsize',Font.Size.Labels,'VerticalAlignment','Top','HorizontalAlignment','Right')
-LMA_ground(h,'nz')
+LMA_ground(h,'nz',sims)
 LMA_labels(h,'nz')
 LMA_axes(h,'nz')
 
 subplot(h.xz.fig);
-hold on; plot(Links.data(1,1)*d.x,(Links.data(1,3)*d.z+z_gnd),'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
+hold on; plot(Links.data(1,1)*sims.domain.dx*sims.spatialFactor.Number,(Links.data(1,3)*sims.domain.dz+sims.domain.gnd)*sims.spatialFactor.Number,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
 
 subplot(h.xy.fig);
-hold on; plot(Links.data(1,1)*d.x,Links.data(1,2)*d.y,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
+hold on; plot(Links.data(1,1)*sims.domain.dx*sims.spatialFactor.Number,Links.data(1,2)*sims.domain.dy*sims.spatialFactor.Number,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
 
 subplot(h.yz.fig);
-hold on; plot((Links.data(1,3)*d.z+z_gnd),Links.data(1,2)*d.y,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
+hold on; plot((Links.data(1,3)*sims.domain.dz+sims.domain.gnd)*sims.spatialFactor.Number,Links.data(1,2)*sims.domain.dy*sims.spatialFactor.Number,'x-','LineWidth',Links.Line.Width,'MarkerSize',Links.MarkerSize,'MarkerEdgeColor',Links.Color(1,:),'MarkerFaceColor',Links.Color(1,:));
 
 if strcmp(Figure.Output,'Movie')
     Movie(2) = getframe(h.fig);

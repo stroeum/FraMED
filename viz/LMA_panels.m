@@ -1,11 +1,11 @@
 % Subplot dimensioning
 if (FocusArea.x(1) == 0 && FocusArea.x(2) == 0 && FocusArea.y(1) == 0 && FocusArea.y(2) == 0 && FocusArea.z(1) == 0 && FocusArea.z(2) == 0)
     FocusArea.x(1) = 0;
-    FocusArea.x(2) = L.x;
+    FocusArea.x(2) = (sims.domain.Nx-1)*sims.domain.dx*sims.spatialFactor.Number;
     FocusArea.y(1) = 0;
-    FocusArea.y(2) = L.y;
-    FocusArea.z(1) = z_gnd;
-    FocusArea.z(2) = L.z+z_gnd;
+    FocusArea.y(2) = (sims.domain.Ny-1)*sims.domain.dy*sims.spatialFactor.Number;
+    FocusArea.z(1) = sims.domain.gnd*sims.spatialFactor.Number;
+    FocusArea.z(2) = ((sims.domain.Nz-1)*sims.domain.dz+sims.domain.gnd)*sims.spatialFactor.Number;
 end
 
 % Subplots dimensions %%

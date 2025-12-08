@@ -11,7 +11,7 @@
 clearvars -except sims
 
 %% Check pathway linking:
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+if ~exist('sims','var')
     specifySimDetails;
 end
 cd ../results

@@ -2,7 +2,7 @@ close all
 clearvars -except sims
 beep  off
 
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs')
+if ~exist('sims','var')
     specifySimDetails;
 end 
 fprintf('\n*** Executing Plot2D_Fields3x3.m script. ***\n');
@@ -15,50 +15,32 @@ EzBF        = load('EnumBF.dat');
 ExAF3D      = load('Ex3d.dat');
 EyAF3D      = load('Ey3d.dat');
 EzAF3D      = load('Ez3d.dat');
-dxyz        = load('dxyz.dat');
-Nxyz        = load('Nxyz.dat');
-z_gnd       = load('z_gnd.dat');
 
 %% Derive main sims
-Nx = Nxyz(1);
-Ny = Nxyz(2);
-Nz = Nxyz(3);
-
-dx = dxyz(1);           % _m
-dy = dxyz(2);           % _m
-dz = dxyz(3);           % _m
-
-Lx = (Nx-1)*dx;         % _m
-Ly = (Ny-1)*dy;         % _m
-Lz = (Nz-1)*dz;         % _m
-
-x = (0:Nx-1)'*dx;       % _m
-y = (0:Ny-1)'*dy;       % _m
-z = (0:Nz-1)'*dz+z_gnd; % _m
-clear dxyz
+x        = (0:sims.domain.dx:sims.domain.maxx)';
+y        = (0:sims.domain.dy:sims.domain.maxy)';
+z        = (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)';
 cd ../viz/
 
 % Determine the magnitude of the values:
-spatialFactor = checkMagnitude(z(:));
 fieldFactor = checkMagnitude([EzBF(:); ExAF3D(:); EyAF3D(:); EzAF3D(:); EthPositive(:); EthNegative(:)]);
 maxfieldLim = 1.1*fieldFactor.Number*max([max(max(abs(EzAF3D))) -min(EzBF) max(EzBF) -min(EthNegative) max(EthPositive)]);
 
 %% Convert
-ExAF3D  = ConvertTo3d(ExAF3D,Nxyz);
-EyAF3D  = ConvertTo3d(EyAF3D,Nxyz);
-EzAF3D  = ConvertTo3d(EzAF3D,Nxyz);
-clear Nxyz
+ExAF3D  = convertTo3d(ExAF3D,sims);
+EyAF3D  = convertTo3d(EyAF3D,sims);
+EzAF3D  = convertTo3d(EzAF3D,sims);
 
-EzAF(Nz)= 0;
-ExAF(Nz)= 0;
-EyAF(Nz)= 0;
+EzAF(sims.domain.Nz)= 0;
+ExAF(sims.domain.Nz)= 0;
+EyAF(sims.domain.Nz)= 0;
 
 %% Plot
 close all
 
 
-ii = [floor((Nx+1)*1/4) (Nx+1)*2/4 ceil((Nx+1)*3/4)];
-jj = [floor((Ny+1)*1/4) (Ny+1)*2/4 ceil((Ny+1)*3/4)];
+ii = [floor((sims.domain.Nx+1)*1/4) (sims.domain.Nx+1)*2/4 ceil((sims.domain.Nx+1)*3/4)];
+jj = [floor((sims.domain.Ny+1)*1/4) (sims.domain.Ny+1)*2/4 ceil((sims.domain.Ny+1)*3/4)];
 
 pp = 1;
 for nn=1:3
@@ -74,22 +56,22 @@ for nn=1:3
         else
             subplot(3,3,pp)
         end
-        for kk=1:Nz
+        for kk=1:sims.domain.Nz
             ExAF(kk) = ExAF3D(ii(mm),jj(nn),kk);
             EyAF(kk) = EyAF3D(ii(mm),jj(nn),kk);
             EzAF(kk) = EzAF3D(ii(mm),jj(nn),kk);
         end
-        plot(fieldFactor.Number*EthPositive,spatialFactor.Number*z,'g--',fieldFactor.Number*EthNegative,spatialFactor.Number*z,'g--',fieldFactor.Number*EzBF,spatialFactor.Number*z,'b', fieldFactor.Number*EzAF,spatialFactor.Number*z,'r')
-        axis([-maxfieldLim maxfieldLim spatialFactor.Number*min(z) spatialFactor.Number*max(z)])
+        plot(fieldFactor.Number*EthPositive,sims.spatialFactor.Number*z,'g--',fieldFactor.Number*EthNegative,sims.spatialFactor.Number*z,'g--',fieldFactor.Number*EzBF,sims.spatialFactor.Number*z,'b', fieldFactor.Number*EzAF,sims.spatialFactor.Number*z,'r')
+        axis([-maxfieldLim maxfieldLim sims.spatialFactor.Number*min(z) sims.spatialFactor.Number*max(z)])
         set(gca,'XMinorTick','on','YMinorTick','on')
         grid on
         if pp<=3
             xlabel(strcat('Ez (',fieldFactor.Unit,'V/m)'),'FontSize',12);
         end
         if pp==1 || pp==4 || pp==7
-            ylabel(strcat('z (',spatialFactor.Unit,'m)'),'FontSize',12);
+            ylabel(strcat('z (',sims.spatialFactor.Unit,'m)'),'FontSize',12);
         end
-        title(strcat("x = ",num2str(spatialFactor.Number*x(ii(mm)))," ",spatialFactor.Unit,"m; y = ",num2str(spatialFactor.Number*y(jj(nn)))," ",spatialFactor.Unit,'m'),'Fontsize',12)
+        title(strcat("x = ",num2str(sims.spatialFactor.Number*x(ii(mm)))," ",sims.spatialFactor.Unit,"m; y = ",num2str(sims.spatialFactor.Number*y(jj(nn)))," ",sims.spatialFactor.Unit,'m'),'Fontsize',12)
 
         pp = pp+1;
     end

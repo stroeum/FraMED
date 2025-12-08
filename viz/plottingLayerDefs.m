@@ -6,12 +6,14 @@
 %     Author: Annelisa Esparza                                            %
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: April 29, 2022                                              %
-%    Updates:    June 2025 - Updated to properly order the legend         %
-%                            labeling.                                    %
-%             October 2025 - Integrated the checkMagnitude.m function.    %
+%    Updates:     June 2025 - Updated to properly order the legend        %
+%                             labeling.                                   %
+%              October 2025 - Integrated the checkMagnitude.m function.   %
+%             December 2025 - Integrated the updates to the               %
+%                             specifySimDetails.m function.               %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center,spatialFactor)
+function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h,Q,center,sims)
     % Checks the scale for the charge density (taking into account the values are stored as nC/m3):
     densityFactor = checkMagnitude((10^(-9)*rhoDataOG.data(:)));
     densityFactor.Number = densityFactor.Number*(10^(-9));
@@ -100,10 +102,10 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
             if included == 1
                 if uniqueRhos(location)>0
                     p1 = patch(isosurface(Xval,Yval,Zval,-1*rhoData.data,-uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',spatialFactor.LaTeX,'m)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',sims.spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',sims.spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',sims.spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',sims.spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',sims.spatialFactor.LaTeX,'m)' newline]);
                 else
                     p1 = patch(isosurface(Xval,Yval,Zval,rhoData.data,uniqueRhos(location)));
-                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',spatialFactor.LaTeX,'m)' newline]);
+                    set(p1,'FaceColor',colorVertices(location,:),'EdgeAlpha',0,'FaceAlpha',alphaValue,'HandleVisibility','on','DisplayName',[newline 'Radius: $R$ = ',num2str(R(location)),' ',sims.spatialFactor.LaTeX,'m' newline 'Height: $h$ = ',num2str(h(location)),' ',sims.spatialFactor.LaTeX,'m' newline 'Charge: $Q$ = ',num2str(Q(location)),' ',chargeFactor.LaTeX,'C' newline 'Center: (',num2str(center(location,1)),' ',sims.spatialFactor.LaTeX,'m, ',num2str(center(location,2)),' ',sims.spatialFactor.LaTeX,'m, ',num2str(center(location,3)),' ',sims.spatialFactor.LaTeX,'m)' newline]);
                 end
                 isonormals(Xval,Yval,Zval,rhoData.data,p1);
                 drawnow
@@ -132,15 +134,4 @@ function plottingLayerDefs(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,R,h
     [~,h_legend]=legend('Location','north','Box','off','FontSize',fontSize,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
-    ax = gca;
-    ax.TickLabelInterpreter = 'latex';
-    ax.FontSize = 20;
-    xlabel(strcat('$x$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
-    ylabel(strcat('$y$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
-    zlabel(strcat('$z$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',24);
-    grid on
-    view(-45,5)
-    if length(trueUniqueRhos)<=3
-        %pause
-    end
 end
