@@ -14,7 +14,8 @@
 %             December 2024 - Added the Plot1D_CurrentEstimate script.    %
 %             February 2025 - Fully integrated specifySimDetails.m to     %
 %                             automate the file-save naming convention.   %
-%              October 2025 - Added the Plot1D_TreeAndFields script.      %
+%              October 2025 - Added the Plot3D_TreeAndFields script.      %
+%             December 2025 - Added the Plot3D_TreeAndCurrents script.    %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 clc
@@ -75,6 +76,10 @@ exportgraphics(gcf,strcat(sims.pathEPSs,'/CloudDistribution.eps'),'BackgroundCol
 %% Lightning visualization
 Plot3D_TreeAndCharges;
 exportgraphics(gcf,strcat(sims.pathEPSs,'/LightningVisual.eps'),'BackgroundColor','white');
+
+%% Lightning with current through the links
+Plot3D_TreeAndCurrents;
+exportgraphics(gcf,strcat(sims.pathEPSs,'/LightningCurrents.eps'),'BackgroundColor','white');
 
 %% Lightning alongside electric field
 Plot3D_TreeAndFields;
