@@ -9,6 +9,9 @@
 %     Updates: February 2025 - Updated to match the options available for %
 %                              the createCustomColorMap function.         %  
 %               October 2025 - Integrates the checkMagnitude.m function.  %
+%              December 2025 - Integrated the changes made to the         %
+%                              specifySimDetails.m function and the newly %
+%                              introduced setUpAxes.m function.           %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Initiate
@@ -17,80 +20,44 @@ clearvars -except sims
 figure(1)
 clf
 fprintf('\n*** Executing Plot3D_ChargeLayerDefinitions.m script. ***\n');
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos') 
+if ~exist('sims','var')
     specifySimDetails;
 end
 
 %% Load data files
 cd ../results
-load('dxyz.dat',             '-ascii');
-load('Nxyz.dat',             '-ascii');
 rho.data = load('rhoAmb.dat','-ascii');
-gnd.alt  = load('z_gnd.dat', '-ascii');
 load('ChargeLayers.dat',     '-ascii');
 cd ../viz
 
-%% Derive main parameters
-N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
-d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
-L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
+rho.data = convertTo3d(rho.data,sims); % _nC/_m^3
 
-rho.data = ConvertTo3d(rho.data,Nxyz); % _nC/_m^3
-
-clear Nxyz
-clear dxyz
 clear InitPoint
 
-% Determines the appropriate magnitude for the units:
-spatialFactor = checkMagnitude([((0:(N.x-1))*d.x) ((0:(N.y-1))*d.y) ((0:(N.z-1))*d.z)]);
-
 Q = ChargeLayers(:,1);
-R = ChargeLayers(:,5)*spatialFactor.Number;
-h = ChargeLayers(:,7)*spatialFactor.Number;
-center = ChargeLayers(:,2:4)*spatialFactor.Number;
+R = ChargeLayers(:,5)*sims.spatialFactor.Number;
+h = ChargeLayers(:,7)*sims.spatialFactor.Number;
+center = ChargeLayers(:,2:4)*sims.spatialFactor.Number;
 
 % Linear spaces for the three position dimensions:
-x = ((0:(N.x-1))*d.x)*spatialFactor.Number;
-y = ((0:(N.y-1))*d.y)*spatialFactor.Number;
-z = ((0:(N.z-1))*d.z + gnd.alt)*spatialFactor.Number;
+x = (0:sims.domain.dx:sims.domain.maxx)'*sims.spatialFactor.Number;
+y = (0:sims.domain.dy:sims.domain.maxy)'*sims.spatialFactor.Number;
+z = (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)'*sims.spatialFactor.Number;
 
 [X,Y,Z] = meshgrid(x,y,z);
 rho.max = max(max(max(rho.data)));
 rho.min = min(min(min(rho.data)));
 
 %% Plotting figure:
-% Map ColorScale
-gnd.color = [.75 .75 .75]; % light gray for neutral charges
 % Draw the tree
 figure(1);
-set(gcf,'Position',[0,0,1000,1000]);
+set(gcf,'Position',[0,0,1.5*sims.plotWidth,1.5*sims.plotHeight]);
 hold on;
 
-% Sets bounds for the axes (comment out if clouds get cut off):
-%axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number) % Slight crop
-axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number)                     % Full span 
-if isfield(sims,'disType')
-    title(strcat("Charge Layer Distribution (",sims.disType," ",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
-else
-    title(strcat("Charge Layer Distribution (",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
-end
-% Calls the new function that automatically recognizes charge regions:
-plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R,h,Q,center,spatialFactor);
-
-% Represents the neutrally charged (grounded) surface:
-if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-    P.x = [L.x 0 0 L.x]*spatialFactor.Number;
-    P.y = [L.y L.y 0 0]*spatialFactor.Number;
-    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*spatialFactor.Number;
-    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'DisplayName',strcat("Ground"));
-    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
-        if strcmp(sims.BCtype,'TIN_CAN')
-            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-        end
-    end
-end
+% Calls the function that automatically recognizes charge regions:
+plottingLayerDefs('scalar',0.4,rho,X,Y,Z,R,h,Q,center,sims);
+setUpAxes(sims,'xyz');
 legend
+title(strcat("Charge Layer Distribution (",sims.disType," ",sims.objectType," on ",sims.objectName,")"),'Interpreter','latex','FontSize',28);
 exportgraphics(gcf,strcat(sims.pathPNGs,'/ChargeLayerDefs_',sims.objectName,'_',sims.objectType,'.png'),'BackgroundColor','white','Resolution',300);
 

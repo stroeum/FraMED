@@ -12,6 +12,9 @@
 %             September 2025 - Renamed (formerly LightningVisual.m).      %
 %               October 2025 - Integrated checkMagnitude.m function and   %
 %                              tin-can BCs.                               %
+%              December 2025 - Integrated the changes made to the         %
+%                              specifySimDetails.m function and the newly %
+%                              introduced setUpAxes.m function.           %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 close all
@@ -24,19 +27,16 @@ is.highResolution = 'N'; % Would you like to save the final image as a very high
 is.monoChrome     = 'N'; % Would you like the plot to be monochrome? (Y / N)
 
 %% Fully-automated onwards:
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+if ~exist('sims','var')
     specifySimDetails;
 end 
 
 cd ../results
 
 % Load data files
-load('dxyz.dat',             '-ascii');
-load('Nxyz.dat',             '-ascii');
 load('InitPoint.dat',        '-ascii');
 rho.data  = load('rhoAmb.dat',           '-ascii');
 Links.ID  = load('EstablishedLinks.dat', '-ascii');
-gnd.alt   = load('z_gnd.dat',            '-ascii');
 stepsaves = abs(load('step3d.dat',       '-ascii'));
 polarity  = load('TransportedRhoEnd.dat','-ascii');
 
@@ -46,59 +46,17 @@ if isempty(Links.ID)
     return
 else
     fprintf('\n*** Executing Plot3D_TreeAndCharges.m script. ***\n');
-    % Assigns plot height and width based on domain:
-    if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
-        sims.plotWidth = 600;
-        sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*5)*80;
-    end
-    % User-Based Settings:
-    if ~exist('is','var') || ~isfield(is,'monoChrome')
-        prompt_monoChrome = '\nWould you like the lightning links to be plotted in black (Y) or red/blue depending on the polarity of the associated charge movement (N)?\n-->';
-        is.monoChrome = input(prompt_monoChrome,'s');                    
-        while ~strcmp(is.monoChrome,'Y') && ~strcmp(is.monoChrome,'N')
-            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-            is.monoChrome = input(prompt_monoChrome,'s');
-        end
-    end
-    if ~exist('is','var') || ~isfield(is,'Rec')
-        prompt_Rec = '\nWould you like to record the lightning propagation as a movie? (Y / N)\n-->';
-        is.Rec = input(prompt_Rec,'s');                    
-        while ~strcmp(is.Rec,'Y') && ~strcmp(is.Rec,'N')
-            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-            is.Rec = input(prompt_Rec,'s');
-        end
-    end
-    if ~exist('is','var') || ~isfield(is,'updateRho')
-        prompt_updateRho = '\nWould you like to update the charge distribution coloring for every saved step? (Y / N)\n-->';
-        is.updateRho = input(prompt_updateRho,'s');                    
-        while ~strcmp(is.updateRho,'Y') && ~strcmp(is.updateRho,'N')
-            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-            is.updateRho = input(prompt_updateRho,'s');
-        end
-    end
-    if ~exist('is','var') || ~isfield(is,'highResolution')
-        prompt_highResolution = '\nWould you like to save the final image as a very high resolution image? (Y / N)\nWARNING: Only recommended for preparing posters.\n-->';
-        is.highResolution = input(prompt_highResolution,'s');                    
-        while ~strcmp(is.highResolution,'Y') && ~strcmp(is.highResolution,'N')
-            fprintf('\n\tNot an acceptable input. Please enter Y (for yes) or N (for no).\n');
-            is.highResolution = input(prompt_highResolution,'s');
-        end
-    end
 end
 
 % Derive main parameters (number of nodes, spacings, and domain size):
-N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
-d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
-L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
-
 S.x = InitPoint(1);   % _m
 S.y = InitPoint(2);   % _m
 S.z = InitPoint(3);   % _m
 S.R = InitPoint(4);   % _m
 
-S.i = round(S.x/d.x);
-S.j = round(S.y/d.y);
-S.k = round(S.z/d.z);
+S.i = round(S.x/sims.domain.dx);
+S.j = round(S.y/sims.domain.dy);
+S.k = round(S.z/sims.domain.dz);
 
 Links.Nb = size(Links.ID);
 Links.Nb = Links.Nb(1);
@@ -107,15 +65,12 @@ clear dxyz
 clear InitPoint
 cd ../viz
 
-rho.data = ConvertTo3d(rho.data,Nxyz); % _C/_m^3
-
-% Determines the appropriate magnitude for the units:
-spatialFactor = checkMagnitude([((0:(N.x-1))*d.x) ((0:(N.y-1))*d.y) ((0:(N.z-1))*d.z)]);
+rho.data = convertTo3d(rho.data,sims); % _C/_m^3
 
 % Linear spaces for the three position dimensions:
-x = ((0:(N.x-1))*d.x)*spatialFactor.Number;
-y = ((0:(N.y-1))*d.y)*spatialFactor.Number;
-z = ((0:(N.z-1))*d.z + gnd.alt)*spatialFactor.Number;
+x = (0:sims.domain.dx:sims.domain.maxx)'*sims.spatialFactor.Number;
+y = (0:sims.domain.dy:sims.domain.maxy)'*sims.spatialFactor.Number;
+z = (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)'*sims.spatialFactor.Number;
 
 
 [X,Y,Z]=meshgrid(x,y,z);
@@ -123,7 +78,6 @@ rho.max = max(max(max(rho.data)));
 rho.min = min(min(min(rho.data)));
 
 % Map ColorScale
-gnd.color = [.75 .75 .75];
 color     = zeros(Links.Nb,3);
 linestyle = repelem("-",Links.Nb);
 if strcmp(is.monoChrome,'N')
@@ -152,51 +106,25 @@ if (strcmp(is.Rec,'Y') == 1)
     Movie.Quality = 100;
     open(Movie);
 end
+
 % Draw the tree
 figure(1);
 set(gcf,'Position',[0,0,1.2*sims.plotWidth,1.2*sims.plotHeight]);
 set(gcf,'Resize','off')
 hold on;
-grid on;
-
-% Sets bounds for the axes (comment out if clouds get cut off):
-axis([L.x*1/5 L.x*4/5 L.y*1/5 L.y*4/5 gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number) % Slight crop
-%axis([0 L.x 0 L.y gnd.alt 2/2*(L.z+gnd.alt)]*spatialFactor.Number)                     % Full span 
 
 % Plots the cloud structure with the defined function below:
-axis equal
-xlim([0 max(x)]);
-ylim([0 max(y)]);
-%zlim([25 70]); % to crop the altitude range for visualization
-zlim([0 max(z)]);
+setUpAxes(sims,'xyz')
 set(legend,'Position',[0.225 0.7 .5 .0375],'box','off')
-%set(legend,'location','southoutside','box','on')
 set(gcf,'Resize','off')
-
-% Represents the neutrally charged (grounded) surface:
-if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-    P.x = [L.x 0 0 L.x]*spatialFactor.Number;
-    P.y = [L.y L.y 0 0]*spatialFactor.Number;
-    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*spatialFactor.Number;
-    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
-    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
-        if strcmp(sims.BCtype,'TIN_CAN')
-            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-        end
-    end
-end
 
 % Initialize distance traveled for lightning links:
 distance = 0;
+
 % For-loop to plot lightning discharge links:
 for ii=0:Links.Nb
-    %     if(rem(ii,10)==0)
-    %         %         pause;
-    %     end
     if ii == 0
-        plottingChargeRegions('scalar',0.4,rho,X,Y,Z,spatialFactor);
+        plottingChargeRegions('scalar',0.4,rho,X,Y,Z,sims);
     else
         if strcmp(is.updateRho,'Y') == 1
             if mod((ii-1),stepsaves) == 0 || ii == Links.Nb
@@ -207,35 +135,25 @@ for ii=0:Links.Nb
                 else
                     rho.data = load(['../results/rho3d',num2str(ii-1),'.dat'],'-ascii');
                 end
-                rho.data = ConvertTo3d(rho.data,Nxyz); % nC/_m^3
+                rho.data = convertTo3d(rho.data,sims); % nC/_m^3
                 if rho.max < max(max(max(rho.data))) || rho.max > 10*max(max(max(rho.data)))
                     rho.max = max(max(max(rho.data)));
                 end
                 if abs(rho.min) < abs(min(min(min(rho.data)))) || abs(rho.min) > 10*abs(min(min(min(rho.data))))
                     rho.min = min(min(min(rho.data)));
                 end
-                plottingChargeRegions('scalar',0.4,rho,X,Y,Z,spatialFactor);
-                if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-                    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
-                    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-                        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                        if strcmp(sims.BCtype,'TIN_CAN')
-                            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                        end
-                    end
-                end
+                plottingChargeRegions('scalar',0.4,rho,X,Y,Z,sims);
             end
         end    
         % Defining initial position of lightning link (m)
-        x1 = Links.ID(ii,1)*d.x;
-        y1 = Links.ID(ii,2)*d.y;
-        z1 = Links.ID(ii,3)*d.z+gnd.alt; 
+        x1 = Links.ID(ii,1)*sims.domain.dx;
+        y1 = Links.ID(ii,2)*sims.domain.dy;
+        z1 = Links.ID(ii,3)*sims.domain.dz+sims.domain.gnd; 
     
         % Defining final position of lightning link (m)
-        x2 = Links.ID(ii,4)*d.x;
-        y2 = Links.ID(ii,5)*d.y;
-        z2 = Links.ID(ii,6)*d.z+gnd.alt;
+        x2 = Links.ID(ii,4)*sims.domain.dx;
+        y2 = Links.ID(ii,5)*sims.domain.dy;
+        z2 = Links.ID(ii,6)*sims.domain.dz+sims.domain.gnd;
     
         % Keeps track of initiation height and min/max propagation height:
         if ii == 1
@@ -261,24 +179,11 @@ for ii=0:Links.Nb
         
         % Plotting initiation point:
         if ii == 1
-            scatter3(x1*spatialFactor.Number,y1*spatialFactor.Number,z1*spatialFactor.Number,100,'filled','MarkerFaceColor','k','HandleVisibility','off','LineWidth',2);
+            scatter3(x1*sims.spatialFactor.Number,y1*sims.spatialFactor.Number,z1*sims.spatialFactor.Number,100,'filled','MarkerFaceColor','k','HandleVisibility','off','LineWidth',2);
         end
 
         % Plotting link:
-        plot3([x1, x2]*spatialFactor.Number,[y1, y2]*spatialFactor.Number,[z1, z2]*spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
-        
-        % Formatting axes:
-        % set(gcf,'Position',[0,0,sims.plotWidth,sims.plotHeight]);
-        % set(gcf,'Resize','off')
-        % %axis equal
-        %{
-        xticks([0 5 10 15 20]);
-        xticklabels({'0','5','10','12'});
-        yticks([0 4 8 12]);
-        yticklabels({'0','4','8','12'});
-        zticks([46 50 54 58 62 66 70]);
-        zticklabels({'46','50','54','58','62','66','70'});
-        %}
+        plot3([x1, x2]*sims.spatialFactor.Number,[y1, y2]*sims.spatialFactor.Number,[z1, z2]*sims.spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
     end
     box on
     title(strcat(sims.objectType," discharge after ", int2str(ii) ," step(s)"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
@@ -292,11 +197,10 @@ for ii=0:Links.Nb
 end
 
 % Outputs general information about the discharge's propagation:
-fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters (',num2str((minHeight-initHeight)*spatialFactor.Number,'%+.2f')," ",spatialFactor.Prefix,'meters)\n'));
-fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters\n'));
-fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters (',num2str((maxHeight-initHeight)*spatialFactor.Number,'%+.2f')," ",spatialFactor.Prefix,'meters)\n'));
-fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters\n'));
-%camlight; lighting gouraud
+fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters (',num2str((minHeight-initHeight)*sims.spatialFactor.Number,'%+.2f')," ",sims.spatialFactor.Prefix,'meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters\n'));
+fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters (',num2str((maxHeight-initHeight)*sims.spatialFactor.Number,'%+.2f')," ",sims.spatialFactor.Prefix,'meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters\n'));
 
 hold off;
 %title('(b)','Interpreter','latex','FontSize',32,'Units','normalized');

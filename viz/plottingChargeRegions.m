@@ -9,10 +9,13 @@
 %     Author: Annelisa Esparza                                            %
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: February 22, 2022                                           %
-%    Updates: October 2025 - Integrated the checkMagnitude.m function.    %
+%    Updates: October 2025  - Integrated the checkMagnitude.m function.   %
+%             December 2025 - Integrated the changes made to the          %
+%                             specifySimDetails.m function and the newly  %
+%                             introduced setUpAxes.m function.            %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,spatialFactor)
+function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval,sims)
     % Checks the scale for the charge density (taking into account the values are stored as nC/m3):
     densityFactor = checkMagnitude((10^(-9)*rhoDataOG.data(:)));
     densityFactor.Number = (densityFactor.Number)*(10^(-9));
@@ -138,14 +141,7 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     [~,h_legend]=legend('Location','north','Box','off','FontSize',18,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
-    ax = gca;
-    ax.TickLabelInterpreter = 'latex';
-    ax.FontSize = 20;
-    xlabel(strcat('$x$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','left');
-    ylabel(strcat('$y$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',22,'HorizontalAlignment','right');
-    zlabel(strcat('$z$-position (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',24);
-    grid on
-    view(-45,5)
+    setUpAxes(sims,'xyz');
     if length(trueUniqueRhos)<=3
         pause
     end

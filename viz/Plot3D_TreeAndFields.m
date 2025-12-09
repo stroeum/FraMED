@@ -14,6 +14,9 @@
 %                             and charge density overlays.                % 
 %              October 2025 - Integrated the checkMagnitude.m function    %
 %                             for plot formatting and axes labeling.      %
+%             December 2025 - Integrated the changes made to the          %
+%                             specifySimDetails.m function and the newly  %
+%                             introduced setUpAxes.m function.            %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 clearvars -except sims
@@ -38,7 +41,7 @@ is.setExtracts    = []; % Would you like to export for any explicit steps?
 
 %% Fully-automated onwards:
 % Determines and defines simulation conditions:
-if ~exist('sims','var') || ~isfield(sims,'pathPNGs') || ~isfield(sims,'pathVideos')
+if ~exist('sims','var')
     specifySimDetails;
 end
 % Determines if the simulation has terminated:
@@ -50,11 +53,8 @@ end
 
 % Load data files
 cd ../results
-load('dxyz.dat',             '-ascii');
-load('Nxyz.dat',             '-ascii');
 load('MaximumEfield.dat',    '-ascii');
 Links.ID  = load('EstablishedLinks.dat', '-ascii');
-gnd.alt   = load('z_gnd.dat',            '-ascii');
 stepsaves = abs(load('step3d.dat',       '-ascii'));
 polarity  = load('TransportedRhoEnd.dat','-ascii');
 cd ../viz
@@ -66,17 +66,11 @@ else
     fprintf('\n*** Executing Plot3D_TreeAndFields.m script. ***\n');
 end
 
-% Derive main parameters (number of nodes, spacings, and domain size):
-N.x = Nxyz(1);        N.y = Nxyz(2);        N.z = Nxyz(3);
-d.x = dxyz(1);        d.y = dxyz(2);        d.z = dxyz(3);      % in meters
-L.x = (N.x-1)*d.x;    L.y = (N.y-1)*d.y;    L.z = (N.z-1)*d.z;  % in meters
-
 % Initialize domain spaces for plotting:
 fieldFactor = checkMagnitude(MaximumEfield);
-spatialFactor = checkMagnitude([((0:(N.x-1))*d.x) ((0:(N.y-1))*d.y) ((0:(N.z-1))*d.z)]);
-x = ((0:(N.x-1))*d.x)*spatialFactor.Number;
-y = ((0:(N.y-1))*d.y)*spatialFactor.Number;
-z = ((0:(N.z-1))*d.z + gnd.alt)*spatialFactor.Number;
+x = (0:sims.domain.dx:sims.domain.maxx)'*sims.spatialFactor.Number;
+y = (0:sims.domain.dy:sims.domain.maxy)'*sims.spatialFactor.Number;
+z = (sims.domain.gnd:sims.domain.dz:sims.domain.maxz)'*sims.spatialFactor.Number;
 [X,Y,Z] = meshgrid(x,y,z);
 if strcmp(is.horizontal,'N')
     [vals.y,vals.z1] = meshgrid(y,z);
@@ -87,14 +81,7 @@ end
 
 is.finalStep = size(Links.ID,1);
 
-% Assigns plot height and width based on domain:
-if ~isfield(sims,'plotWidth') || ~isfield(sims,'plotHeight')
-    sims.plotWidth = 800;
-    sims.plotHeight = round((Nxyz(3)/max(Nxyz(1:2)))*7)*80;
-end
-
 % Map ColorScale
-gnd.color = [.75 .75 .75];
 color     = zeros(is.finalStep,3);
 linestyle = repelem("-",is.finalStep);
 if strcmp(is.monoChrome,'N')
@@ -122,7 +109,7 @@ elseif strcmp(is.zoomedIn,'N')
     viewType = 'FullScale';
 end
 if strcmp(is.horizontal,'Y')
-    planeType = strcat('Horizontal-',num2str(floor(min(is.altitudes)*spatialFactor.Number)),spatialFactor.Unit,'m-',num2str(floor(max(is.altitudes)*spatialFactor.Number)),spatialFactor.Unit,'m');
+    planeType = strcat('Horizontal-',num2str(floor(min(is.altitudes)*sims.spatialFactor.Number)),sims.spatialFactor.Unit,'m-',num2str(floor(max(is.altitudes)*sims.spatialFactor.Number)),sims.spatialFactor.Unit,'m');
 elseif strcmp(is.horizontal,'N')
     planeType = 'Vertical';
 end
@@ -154,27 +141,25 @@ if strcmp(is.horizontal,'Y')
     box on
     nexttile([2 2])
     hold on;
-    set(gcf,'Position',[0,0,is.resFactor*4*round((1.8*sims.plotWidth)/3),is.resFactor*4*round((1.3*sims.plotHeight)/3)],'Color','White');
+    set(gcf,'Position',[0,0,is.resFactor*4*round((sims.plotWidth)/1.95),is.resFactor*4*round((sims.plotHeight)/2.6)],'Color','White');
 elseif strcmp(is.horizontal,'N')
     figure(2); clf;
     tiledlayout(1,3,"TileSpacing","tight","Padding","tight")
     nexttile(2)
     hold on;
-    set(gcf,'Position',[0,0,is.resFactor*4*round((2.1*sims.plotWidth)/3),is.resFactor*4*round((sims.plotHeight)/3)],'Color','White');
+    set(gcf,'Position',[0,0,is.resFactor*4*round((sims.plotWidth)/1.45),is.resFactor*4*round((sims.plotHeight)/3)],'Color','White');
 end
 set(gcf,'Resize','off');
-grid on;
-axis equal
+
+% Represents the neutrally charged (grounded) surface, if relevant:
+setUpAxes(sims,'3d');
 if strcmp(is.zoomedIn,'Y')
-    xlim(spatialFactor.Number*is.zoomedX);
-    ylim(spatialFactor.Number*is.zoomedY);
-    zlim(spatialFactor.Number*is.zoomedZ);
-    arrowDensity = 2*round(10*(max(z)/(spatialFactor.Number*(is.zoomedZ(2)-is.zoomedZ(1)))));
-    initiationMarker = 20*round(max(z)/(spatialFactor.Number*(is.zoomedZ(2)-is.zoomedZ(1))));
+    xlim(sims.spatialFactor.Number*is.zoomedX);
+    ylim(sims.spatialFactor.Number*is.zoomedY);
+    zlim(sims.spatialFactor.Number*is.zoomedZ);
+    arrowDensity = 2*round(10*(max(z)/(sims.spatialFactor.Number*(is.zoomedZ(2)-is.zoomedZ(1)))));
+    initiationMarker = 20*round(max(z)/(sims.spatialFactor.Number*(is.zoomedZ(2)-is.zoomedZ(1))));
 else
-    xlim([0 max(x)]);
-    ylim([0 max(y)]);
-    zlim([0 max(z)]);
     arrowDensity = 10;
     if strcmp(is.horizontal,'N')
         initiationMarker = 20*is.resFactor;
@@ -182,21 +167,6 @@ else
     elseif strcmp(is.horizontal,'Y')
         initiationMarker = 30*is.resFactor;
         arrowDensity = 7*is.resFactor;
-    end
-end
-
-% Represents the neutrally charged (grounded) surface, if relevant:
-if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-    P.x = [L.x 0 0 L.x]*spatialFactor.Number;
-    P.y = [L.y L.y 0 0]*spatialFactor.Number;
-    P.z = [gnd.alt gnd.alt gnd.alt gnd.alt]*spatialFactor.Number;
-    patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
-    if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-        patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off');
-        if strcmp(sims.BCtype,'TIN_CAN')
-            patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-            patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-        end
     end
 end
 hold off
@@ -207,7 +177,7 @@ box on
 distance = 0;
 
 % Converts altitudes to respective indices:  
-is.altitudes = ((is.altitudes./d.z)+1); 
+is.altitudes = ((is.altitudes./sims.domain.dz)+1); 
 
 % For-loop to plot lightning discharge links and field lines:
 for ii=0:is.finalStep
@@ -221,29 +191,20 @@ for ii=0:is.finalStep
             customTransparency = 0.04;
             scalar.data = load('../results/phiAmb.dat','-ascii');
         end
-        scalar.data = ConvertTo3d(scalar.data,Nxyz); % nC/_m^3 or V
+        scalar.data = convertTo3d(scalar.data,sims); % nC/_m^3 or V
         scalar.max = max(max(max(scalar.data)));
         scalar.min = min(min(min(scalar.data)));
-        if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-            patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
-            if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-                patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off');
-                if strcmp(sims.BCtype,'TIN_CAN')
-                    patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                    patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                end 
-            end
-        end
-        scalarValueUpdate('scalar',customTransparency,scalar,X,Y,Z,is,spatialFactor);
-        x1 = Links.ID(1,1)*d.x*spatialFactor.Number;
-        y1 = Links.ID(1,2)*d.y*spatialFactor.Number;
-        z1 = ((Links.ID(1,3)*d.z)*spatialFactor.Number)+(gnd.alt*spatialFactor.Number);
+        setUpAxes(sims,'3d');
+        scalarValueUpdate('scalar',customTransparency,scalar,X,Y,Z,is,sims);
+        x1 = Links.ID(1,1)*sims.domain.dx*sims.spatialFactor.Number;
+        y1 = Links.ID(1,2)*sims.domain.dy*sims.spatialFactor.Number;
+        z1 = ((Links.ID(1,3)*sims.domain.dz)*sims.spatialFactor.Number)+(sims.domain.gnd*sims.spatialFactor.Number);
         scatter3(x1,y1,z1,initiationMarker,'k','filled');
         titleformat = title(strcat(resultingDischarge,sims.objectType," on ",sims.objectName,": Ambient Conditions"),'FontSize',is.resFactor*20,'FontWeight','bold','Interpreter','latex');
         hold off
 
         % Determines the 2D electric field values for the step:
-        E = consolidateEfield((ii-1),is,Nxyz);
+        E = consolidateEfield((ii-1),is,sims);
         
         % Plots the electric field lines and ensures proper formatting for the first planar extract:
         nexttile(1)
@@ -283,13 +244,13 @@ for ii=0:is.finalStep
             p1.mag = surf(vals.y,vals.z1,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p1.dir = streamslice(vals.y,vals.z1,E.y2D,E.z2Dy,arrowDensity,'arrows');
             set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
-            xlabel(strcat('$y$ (',spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            ylabel(strcat('$z$ (',spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            title(strcat("Vertical Electric Fields at $x$ = ",num2str(round((L.y*spatialFactor.Number)/2))," ",spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
+            xlabel(strcat('$y$ (',sims.spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel(strcat('$z$ (',sims.spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Vertical Electric Fields at $x$ = ",num2str(round(((sims.domain.dy*(sims.domain.Ny-1))*sims.spatialFactor.Number)/2))," ",sims.spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y') 
-                set(gca,'XDir','reverse','XLim',spatialFactor.Number*is.zoomedY,'YLim',spatialFactor.Number*is.zoomedZ);
+                set(gca,'XDir','reverse','XLim',sims.spatialFactor.Number*is.zoomedY,'YLim',sims.spatialFactor.Number*is.zoomedZ);
             else
                 set(gca,'XDir','reverse','XLim',[min(vals.y(:)) max(vals.y(:))],'YLim',[min(vals.z1(:)) max(vals.z1(:))]);
             end
@@ -299,13 +260,13 @@ for ii=0:is.finalStep
             p1.mag = surf(vals.x,vals.y,-1+zeros(size(vals.x)),customColorData,'EdgeColor','none','FaceColor','interp','FaceAlpha',1);
             p1.dir = streamslice(vals.x,vals.y,E.x2Dmax,E.y2Dmax,arrowDensity,'arrows');
             set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
-            xlabel(strcat('$x$ (',spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            ylabel(strcat('$y$ (',spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(max(is.altitudes)))," ",spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
+            xlabel(strcat('$x$ (',sims.spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel(strcat('$y$ (',sims.spatialFactor.Unit,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(max(is.altitudes)))," ",sims.spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
-                set(gca,'XLim',spatialFactor.Number*is.zoomedX,'YLim',spatialFactor.Number*is.zoomedY);
+                set(gca,'XLim',sims.spatialFactor.Number*is.zoomedX,'YLim',sims.spatialFactor.Number*is.zoomedY);
             else
                 set(gca,'XLim',[min(vals.x(:)) max(vals.x(:))],'YLim',[min(vals.y(:)) max(vals.y(:))]);
             end
@@ -355,13 +316,13 @@ for ii=0:is.finalStep
             p2.dir = streamslice(vals.x,vals.z2,E.x2D,E.z2Dx,arrowDensity,'arrows');
             set(findobj('Type','line'),'Color',[0 0 0 0.5],'LineWidth',0.25);
             set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
-            xlabel(strcat('$x$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            ylabel(strcat('$z$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            title(strcat("Vertical Electric Fields at $y$ = ",num2str(round((L.x*spatialFactor.Number)/2))," ",spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
+            xlabel(strcat('$x$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel(strcat('$z$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Vertical Electric Fields at $y$ = ",num2str(round(((sims.domain.dx*(sims.domain.Nx-1))*sims.spatialFactor.Number)/2))," ",sims.spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
-                set(gca,'XLim',spatialFactor.Number*is.zoomedX,'YLim',spatialFactor.Number*is.zoomedZ);
+                set(gca,'XLim',sims.spatialFactor.Number*is.zoomedX,'YLim',sims.spatialFactor.Number*is.zoomedZ);
             else
                 set(gca,'XLim',[min(vals.x(:)) max(vals.x(:))],'YLim',[min(vals.z2(:)) max(vals.z2(:))]);
             end
@@ -374,13 +335,13 @@ for ii=0:is.finalStep
             p2.dir = streamslice(vals.x,vals.y,E.x2Dmin,E.y2Dmin,arrowDensity,'arrows');
             set(findobj('Type','line'),'Color',[0 0 0 0.5],'LineWidth',0.25);
             set(gca,'FontSize',is.resFactor*10,'TickLabelInterpreter','latex');
-            xlabel(strcat('$x$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            ylabel(strcat('$y$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
-            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(min(is.altitudes)))," ",spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
+            xlabel(strcat('$x$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            ylabel(strcat('$y$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',is.resFactor*16);
+            title(strcat("Horizontal Electric Fields at $z$ = ",num2str(z(min(is.altitudes)))," ",sims.spatialFactor.LaTeX,"m"),'Interpreter','latex','FontSize',is.resFactor*20);
             axis xy
             axis image
             if strcmp(is.zoomedIn,'Y')
-                set(gca,'XLim',spatialFactor.Number*is.zoomedX,'YLim',spatialFactor.Number*is.zoomedY);                 
+                set(gca,'XLim',sims.spatialFactor.Number*is.zoomedX,'YLim',sims.spatialFactor.Number*is.zoomedY);                 
             else
                 set(gca,'XLim',[min(vals.x(:)) max(vals.x(:))],'YLim',[min(vals.y(:)) max(vals.y(:))]);                                          
             end
@@ -393,7 +354,7 @@ for ii=0:is.finalStep
     else % (all step values associated with the simulation)
         % Determines the 2D electric field values for the step:
         if strcmp(is.updateScalar,'Y') && (mod((ii-1),stepsaves) == 0 && (ismember(ii,is.setExtracts) || strcmp(is.Rec,'Y') || ismember(ii-1,stepsaves*floor((is.setExtracts-1)/stepsaves)))) || ii == is.finalStep
-            E = consolidateEfield((ii-1),is,Nxyz);
+            E = consolidateEfield((ii-1),is,sims);
             if strcmp(is.horizontal,'N')
                 % Updates the electric field lines for the first planar extract:
                 nexttile(1)
@@ -495,24 +456,15 @@ for ii=0:is.finalStep
                 end
             end
         
-            scalar.data = ConvertTo3d(scalar.data,Nxyz); % nC/_m^3 or V
+            scalar.data = convertTo3d(scalar.data,sims); % nC/_m^3 or V
             if scalar.max < max(max(max(scalar.data))) || scalar.max > 10*max(max(max(scalar.data)))
                 scalar.max = max(max(max(scalar.data)));
             end
             if abs(scalar.min) < abs(min(min(min(scalar.data)))) || abs(scalar.min) > 10*abs(min(min(min(scalar.data))))
                 scalar.min = min(min(min(scalar.data)));
             end
-            if strcmp(sims.BCtype,'G') || strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-                patch(P.x, P.y, P.z, gnd.alt,'FaceColor',gnd.color,'HandleVisibility','off');
-                if strcmp(sims.BCtype,'G_G') || strcmp(sims.BCtype,'TIN_CAN')
-                    patch(P.x, P.y, [z(end) z(end) z(end) z(end)], [z(end) z(end) z(end) z(end)],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                    if strcmp(sims.BCtype,'TIN_CAN')
-                        patch([L.x L.x L.x L.x]*spatialFactor.Number, [L.y L.y 0 0]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                        patch([L.x L.x 0 0]*spatialFactor.Number, [L.y L.y L.y L.y]*spatialFactor.Number, [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number], [gnd.alt*spatialFactor.Number z(end) z(end) gnd.alt*spatialFactor.Number],'FaceColor',gnd.color,'HandleVisibility','off'); 
-                    end
-                end
-            end
-            scalarValueUpdate('scalar',customTransparency,scalar,X,Y,Z,is,spatialFactor);
+            setUpAxes(sims,'3d');
+            scalarValueUpdate('scalar',customTransparency,scalar,X,Y,Z,is,sims);
             hold off
         end    
           
@@ -521,14 +473,14 @@ for ii=0:is.finalStep
         hold on
     
         % Defining initial position of lightning link (m)
-        x1 = Links.ID(ii,1)*d.x;
-        y1 = Links.ID(ii,2)*d.y;
-        z1 = Links.ID(ii,3)*d.z+gnd.alt; 
+        x1 = Links.ID(ii,1)*sims.domain.dx;
+        y1 = Links.ID(ii,2)*sims.domain.dy;
+        z1 = Links.ID(ii,3)*sims.domain.dz+sims.domain.gnd; 
     
         % Defining final position of lightning link (m)
-        x2 = Links.ID(ii,4)*d.x;
-        y2 = Links.ID(ii,5)*d.y;
-        z2 = Links.ID(ii,6)*d.z+gnd.alt;
+        x2 = Links.ID(ii,4)*sims.domain.dx;
+        y2 = Links.ID(ii,5)*sims.domain.dy;
+        z2 = Links.ID(ii,6)*sims.domain.dz+sims.domain.gnd;
     
         % Keeps track of initiation height and min/max propagation height:
         if ii == 1
@@ -554,9 +506,9 @@ for ii=0:is.finalStep
     
         % Plotting link:
         if strcmp(is.horizontal,'N')
-            plot3([x1, x2]*spatialFactor.Number,[y1, y2]*spatialFactor.Number,[z1, z2]*spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',1.5);
+            plot3([x1, x2]*sims.spatialFactor.Number,[y1, y2]*sims.spatialFactor.Number,[z1, z2]*sims.spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',1.5);
         elseif strcmp(is.horizontal,'Y')
-            plot3([x1, x2]*spatialFactor.Number,[y1, y2]*spatialFactor.Number,[z1, z2]*spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
+            plot3([x1, x2]*sims.spatialFactor.Number,[y1, y2]*sims.spatialFactor.Number,[z1, z2]*sims.spatialFactor.Number,'Color',color(ii,:),'LineStyle',linestyle(ii),'HandleVisibility','off','LineWidth',2);
         end
     end
     % Formatting title to reflect step value:
@@ -574,10 +526,10 @@ for ii=0:is.finalStep
 end
 
 % Outputs general information about the discharge's propagation:
-fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters (',num2str((minHeight-initHeight)*spatialFactor.Number,'%+.2f')," ",spatialFactor.Prefix,'meters)\n'));
-fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters\n'));
-fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters (',num2str((maxHeight-initHeight)*spatialFactor.Number,'%+.2f')," ",spatialFactor.Prefix,'meters)\n'));
-fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance*spatialFactor.Number,'%.2f')," ",spatialFactor.Prefix,'meters\n'));
+fprintf(strcat('\n\t',sims.objectType," reaches minimum of ",num2str(minHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters (',num2str((minHeight-initHeight)*sims.spatialFactor.Number,'%+.2f')," ",sims.spatialFactor.Prefix,'meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," initiated at ",num2str(initHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters\n'));
+fprintf(strcat('\n\t',sims.objectType," reaches maximum of ",num2str(maxHeight*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters (',num2str((maxHeight-initHeight)*sims.spatialFactor.Number,'%+.2f')," ",sims.spatialFactor.Prefix,'meters)\n'));
+fprintf(strcat('\n\t',sims.objectType," has propagated a total of ",num2str(distance*sims.spatialFactor.Number,'%.2f')," ",sims.spatialFactor.Prefix,'meters\n'));
 hold off;
 
 % Finalizes the movie, if relevant:
@@ -594,19 +546,19 @@ exportgraphics(gcf,strcat(sims.pathPNGs,'/Fields_',scalarType,'_',planeType,'_',
 
 %% Functions:
 % Converts 3D electric field data files into respective 2D components:
-function E = consolidateEfield(num,is,Nxyz)
+function E = consolidateEfield(num,is,sims)
     if num == -1 % (ambient case)
-        Ex3D     = ConvertTo3d(load('../results/Ex3dAmb.dat'),Nxyz);
-        Ey3D     = ConvertTo3d(load('../results/Ey3dAmb.dat'),Nxyz);
-        Ez3D     = ConvertTo3d(load('../results/Ez3dAmb.dat'),Nxyz);
+        Ex3D     = convertTo3d(load('../results/Ex3dAmb.dat'),sims);
+        Ey3D     = convertTo3d(load('../results/Ey3dAmb.dat'),sims);
+        Ez3D     = convertTo3d(load('../results/Ez3dAmb.dat'),sims);
     elseif num+1 == is.finalStep % (final result)
-        Ex3D     = ConvertTo3d(load('../results/Ex3d.dat'),Nxyz);
-        Ey3D     = ConvertTo3d(load('../results/Ey3d.dat'),Nxyz);
-        Ez3D     = ConvertTo3d(load('../results/Ez3d.dat'),Nxyz);
+        Ex3D     = convertTo3d(load('../results/Ex3d.dat'),sims);
+        Ey3D     = convertTo3d(load('../results/Ey3d.dat'),sims);
+        Ez3D     = convertTo3d(load('../results/Ez3d.dat'),sims);
     else % (all other steps)
-        Ex3D     = ConvertTo3d(load(['../results/Ex3d',num2str(num),'.dat']),Nxyz);
-        Ey3D     = ConvertTo3d(load(['../results/Ey3d',num2str(num),'.dat']),Nxyz);
-        Ez3D     = ConvertTo3d(load(['../results/Ez3d',num2str(num),'.dat']),Nxyz);
+        Ex3D     = convertTo3d(load(['../results/Ex3d',num2str(num),'.dat']),sims);
+        Ey3D     = convertTo3d(load(['../results/Ey3d',num2str(num),'.dat']),sims);
+        Ez3D     = convertTo3d(load(['../results/Ez3d',num2str(num),'.dat']),sims);
     end
     if strcmp(is.horizontal,'Y')
         E.x2Dmin = permute(Ex3D(:,:,min(is.altitudes)),[2,1,3]);
@@ -616,18 +568,18 @@ function E = consolidateEfield(num,is,Nxyz)
         E.z2Dmin = permute(Ez3D(:,:,min(is.altitudes)),[2,1,3]);
         E.z2Dmax = permute(Ez3D(:,:,max(is.altitudes)),[2,1,3]);
     elseif strcmp(is.horizontal,'N')
-        E.x2D    = permute(Ex3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
-        E.x2Dy   = permute(Ey3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
-        E.y2D    = permute(Ey3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
-        E.y2Dx   = permute(Ex3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
-        E.z2Dx   = permute(Ez3D(:,round((Nxyz(2)-1)/2),:),[3,1,2]);
-        E.z2Dy   = permute(Ez3D(round((Nxyz(1)-1)/2),:,:),[3,2,1]);
+        E.x2D    = permute(Ex3D(:,round((sims.domain.Ny-1)/2),:),[3,1,2]);
+        E.x2Dy   = permute(Ey3D(:,round((sims.domain.Ny-1)/2),:),[3,1,2]);
+        E.y2D    = permute(Ey3D(round((sims.domain.Nx-1)/2),:,:),[3,2,1]);
+        E.y2Dx   = permute(Ex3D(round((sims.domain.Nx-1)/2),:,:),[3,2,1]);
+        E.z2Dx   = permute(Ez3D(:,round((sims.domain.Ny-1)/2),:),[3,1,2]);
+        E.z2Dy   = permute(Ez3D(round((sims.domain.Nx-1)/2),:,:),[3,2,1]);
     end
 end
 
 % Similar functionality to plottingChargeRegions.m file, but expanded for 
 % all scalar quantities plus a custom colorbar placement for a compact form:
-function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zval,is,spatialFactor)
+function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zval,is,sims)
     % Determines the range of the colorbar among other factors:
     if strcmp(is.whichScalar,'C') 
         scalarFactor = checkMagnitude((10^(-9)*scalarvaluesOG.data(:)));
@@ -769,8 +721,8 @@ function scalarValueUpdate(colorbarRange,alphaValue,scalarvaluesOG,Xval,Yval,Zva
     ax = gca;
     ax.TickLabelInterpreter = 'latex';
     ax.FontSize = 10*is.resFactor;
-    xlabel(strcat('$x$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','left');
-    ylabel(strcat('$y$ (',spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','right');
+    xlabel(strcat('$x$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','left');
+    ylabel(strcat('$y$ (',sims.spatialFactor.LaTeX,'m)'),'Interpreter','latex','FontSize',16*is.resFactor,'HorizontalAlignment','right');
     grid on
     view(-45,5)
 end
