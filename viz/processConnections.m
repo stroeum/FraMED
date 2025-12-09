@@ -8,7 +8,7 @@
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: December 8, 2025                                            %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-function [links,nodes] = processConnections(EstablishedLinks,tau,polarity,sims)
+function [links,rhos] = processConnections(EstablishedLinks,tau,polarity,sims)
     % Convert from nC/m3 to C:
     conversionFactor  = (10^(-9))*sims.domain.dx*sims.domain.dy*sims.domain.dz;
     
@@ -31,11 +31,11 @@ function [links,nodes] = processConnections(EstablishedLinks,tau,polarity,sims)
     links.total = size(EstablishedLinks,1);
     
     links.connections.num = zeros([links.total,(links.total+1)]);
-    links.connections.nodes = zeros([links.total,1]);
+    links.connections.rhos = zeros([links.total,1]);
     links.connections.deltas = zeros([links.total,(links.total)+1]);
     links.connections.currents = zeros([links.total,(links.total)+1]);
-    nodes.rho.deltas = NaN([links.total,(links.total+1)]);
-    nodes.rho.values = NaN([links.total,(links.total+1)]);
+    rhos.deltas = NaN([links.total,(links.total+1)]);
+    rhos.values = NaN([links.total,(links.total+1)]);
     
     tracker = 1;
     for N = 1:1:links.total
@@ -60,19 +60,20 @@ function [links,nodes] = processConnections(EstablishedLinks,tau,polarity,sims)
             % Track total distance of all links:
             if N == 1
                 links.totaldistance(N) = links.distance(N);
+                links.maxtime(N) = tau.case(N);
             else
                 links.totaldistance(N) = links.totaldistance(N-1)+links.distance(N);
                 links.connections.num(N,1) = links.connections.num(N,1) + 1;
+                links.maxtime(N) = links.maxtime(N-1)+tau.case(N);
             end
-            links.connections.nodes(N) = 0;
+            links.connections.rhos(N) = 0;
             links.mintime(N) = tau.case(N);
-            links.maxtime(N) = tau.case(N);
         % Otherwise, if the start node is not at the initiation point...
         else
             % Determine which path/branch this link is an extension of:
             match = find(ismember(links.end(1:(N-1),:),links.start(N,:),'row'));
             links.connections.num(N,match+1) = links.connections.num(N,match+1) + 1;
-            links.connections.nodes(N) = match;
+            links.connections.rhos(N) = match;
             % Classify path for this particular link:
             links.path(N) = string(strcat(string(links.path(match)),string(characterizePropagation(links,N))));
             reshape(links.path,[N,1]);
@@ -85,13 +86,13 @@ function [links,nodes] = processConnections(EstablishedLinks,tau,polarity,sims)
         end
         
         % Convert changes in charge density (nC/m3) into current (C/s):
-        nodes.rho.deltas(N,1:N+1) = temp(tracker:tracker+N).*conversionFactor./tau.case(N);
+        rhos.deltas(N,1:N+1) = temp(tracker:tracker+N).*conversionFactor./tau.case(N);
     
         % Convert local charge density array to matrix (nC/m3):
-        nodes.rho.values(N,1:N+1) = temp2(tracker:tracker+N);
+        rhos.values(N,1:N+1) = temp2(tracker:tracker+N);
         tracker = tracker+N+1;
     end
-    nodes.rho.intensity = abs(nodes.rho.values)./max(max(abs(nodes.rho.values)));
+    rhos.intensity = abs(rhos.values)./max(max(abs(rhos.values)));
     close(statusBar);
     [links.maxdistance, links.maxindex] = max(links.pathdistance);
     links.timescale.max = sum(tau.case);

@@ -28,10 +28,10 @@ if ~exist('sims','var')
 end
 
 % Read-in data for simulation and process the current at the tip:
-[current, polarity, tau, links, nodes] = processTipCurrent(sims);
+[current, polarity, tau, links, rhos] = processTipCurrent(sims);
 
 % Calculate the current through all links at all steps: 
-[links, nodes] = processCurrents(links,nodes);
+[links, rhos] = processCurrents(links,rhos);
 
 % Determine the scale:
 temporalFactor    = checkMagnitude([links.timescale.min; links.timescale.max]);
@@ -51,7 +51,7 @@ fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.partial.val,5),"\t"
 fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.max.val,5),"\t",currentFactor.Unit,"A\t(maximum, link ",num2str(links.steps(current.max.index)),")"));
 fprintf(strcat("\n\t\t",num2str(minCurrentFactor.Number*current.min.val,5),"\t",minCurrentFactor.Unit,"A\t(minimum, link ",num2str(links.steps(current.min.index)),")\n"));
 if links.end(end,3)==0
-    fprintf(strcat("\t\t",num2str(0.001*chargeTransported(end)./(links.pathdistance(end)/(polarity.neg(end)*sims.vprop.neg + polarity.pos(end)*sims.vprop.pos)),5),"\tkA\t(initiation-to-ground path)\n"))
+    fprintf(strcat("\t\t",num2str(sims.spatialFactor.Number*chargeTransported(end)./(links.pathdistance(end)/(polarity.neg(end)*sims.vprop.neg + polarity.pos(end)*sims.vprop.pos)),5),"\t",sims.spatialFactor.Unit,"A\t(initiation-to-ground path)\n"))
 end
 
 %% Plotting the current density:
@@ -109,11 +109,11 @@ for ii = 1:1:links.total
     for N = 1:1:ii
         % Plotting initiation point:
         if N == 1
-            if nodes.rho.values(ii,N)<0
+            if rhos.values(ii,N)<0
                 colorVector = [0 0 1];
-            elseif nodes.rho.values(ii,N)>0
+            elseif rhos.values(ii,N)>0
                 colorVector = [1 0 0];
-            elseif nodes.rho.values(ii,N)==0
+            elseif rhos.values(ii,N)==0
                 colorVector = [1 1 1];
             end
             % Ensures that a frame for the initiation point (step 0) is captured:
@@ -134,39 +134,39 @@ for ii = 1:1:links.total
                 end
                 hold off
             end
-            scatter3(x1(N)*sims.spatialFactor.Number,y1(N)*sims.spatialFactor.Number,z1(N)*sims.spatialFactor.Number,5+44*(abs(nodes.rho.intensity(ii,N))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
+            scatter3(x1(N)*sims.spatialFactor.Number,y1(N)*sims.spatialFactor.Number,z1(N)*sims.spatialFactor.Number,5+44*(abs(rhos.intensity(ii,N))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
             hold on
             setUpAxes(sims,'xyz',is.backgroundColor);
         end
         % Determines the polarity of the charge density at the node:
-        if nodes.rho.values(ii,N+1)<0
+        if rhos.values(ii,N+1)<0
             colorVector = [0 0 1];
-        elseif nodes.rho.values(ii,N+1)>0
+        elseif rhos.values(ii,N+1)>0
             colorVector = [1 0 0];
-        elseif nodes.rho.values(ii,N+1)==0
+        elseif rhos.values(ii,N+1)==0
             colorVector = [1 1 1];
         end
         % Plots the links, nodes, and highlights the newest node:
         if N == 1 && ii == 1
             plot3([x1(N), x2(N)]*sims.spatialFactor.Number,[y1(N), y2(N)]*sims.spatialFactor.Number,[z1(N), z2(N)]*sims.spatialFactor.Number,'Color',coloring(:),'HandleVisibility','off','LineWidth',1);
-            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(nodes.rho.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
-            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,5+49.9*(abs(nodes.rho.intensity(ii,N+1))),'Marker','o','MarkerEdgeColor',is.textColor,'MarkerFaceColor',colorVector,'DisplayName',strcat("Current at tip: ",num2str(-links.connections.currents(N,N)*currentFactor.Number,'%+.2f')," ",currentFactor.LaTeX,"A"),'LineWidth',1);
+            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(rhos.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
+            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,5+49.9*(abs(rhos.intensity(ii,N+1))),'Marker','o','MarkerEdgeColor',is.textColor,'MarkerFaceColor',colorVector,'DisplayName',strcat("Current at tip: ",num2str(-links.connections.currents(N,N)*currentFactor.Number,'%+.3f')," ",currentFactor.LaTeX,"A"),'LineWidth',0.01+(abs(rhos.intensity(ii,N+1))));
             legend('location','north','box','off','interpreter','latex','TextColor',is.textColor)
         elseif N == ii            
             plot3([x1(N), x2(N)]*sims.spatialFactor.Number,[y1(N), y2(N)]*sims.spatialFactor.Number,[z1(N), z2(N)]*sims.spatialFactor.Number,'Color',coloring(N,:),'HandleVisibility','off','LineWidth',2);%,'LineWidth',1+4.*intensity(N));
-            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(nodes.rho.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
-            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,5+49.9*(abs(nodes.rho.intensity(ii,N+1))),'Marker','o','MarkerEdgeColor',is.textColor,'MarkerFaceColor',colorVector,'DisplayName',strcat("Current at tip: ",num2str(-links.connections.currents(N,N)*currentFactor.Number,'%+.2f')," ",currentFactor.LaTeX,"A"),'LineWidth',1);
+            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(rhos.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
+            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,5+49.9*(abs(rhos.intensity(ii,N+1))),'Marker','o','MarkerEdgeColor',is.textColor,'MarkerFaceColor',colorVector,'DisplayName',strcat("Current at tip: ",num2str(-links.connections.currents(N,N)*currentFactor.Number,'%+.3f')," ",currentFactor.LaTeX,"A"),'LineWidth',0.01+(abs(rhos.intensity(ii,N+1))));
             legend('location','north','box','off','interpreter','latex','TextColor',is.textColor)
         else
             plot3([x1(N), x2(N)]*sims.spatialFactor.Number,[y1(N), y2(N)]*sims.spatialFactor.Number,[z1(N), z2(N)]*sims.spatialFactor.Number,'Color',coloring(N,:),'HandleVisibility','off','LineWidth',1);%,'LineWidth',1+4.*intensity(N));
-            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(nodes.rho.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
+            scatter3(x2(N)*sims.spatialFactor.Number,y2(N)*sims.spatialFactor.Number,z2(N)*sims.spatialFactor.Number,0.1+49.9*(abs(rhos.intensity(ii,N+1))),'filled','MarkerEdgeColor',colorVector,'MarkerFaceColor',colorVector,'HandleVisibility','off');
         end
     end
     % Sets the appropriate title:
     if ii == 1
-        title(strcat("(", sims.objectType,") $n$ = ", int2str(ii) ," step $\rightarrow$ ",num2str(temporalFactor.Number*max(links.mintime(1:ii)),'%.2f')," ",temporalFactor.LaTeX,"s $\leq t_n \leq$ ",num2str(temporalFactor.Number*links.maxtime(ii),'%.2f')," ",temporalFactor.LaTeX,"s"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
+        title(strcat("(", sims.objectType,") $n$ = ", int2str(ii) ," step $\rightarrow$ ",num2str(temporalFactor.Number*max(links.mintime(1:ii)),'%.3f')," ",temporalFactor.LaTeX,"s $\leq t_n \leq$ ",num2str(temporalFactor.Number*links.maxtime(ii),'%.3f')," ",temporalFactor.LaTeX,"s"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
     else
-        title(strcat("(", sims.objectType,") $n$ = ", int2str(ii) ," steps $\rightarrow$ ",num2str(temporalFactor.Number*max(links.mintime(1:ii)),'%.2f')," ",temporalFactor.LaTeX,"s $\leq t_n \leq$ ",num2str(temporalFactor.Number*links.maxtime(ii),'%.2f')," ",temporalFactor.LaTeX,"s"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
+        title(strcat("(", sims.objectType,") $n$ = ", int2str(ii) ," steps $\rightarrow$ ",num2str(temporalFactor.Number*max(links.mintime(1:ii)),'%.3f')," ",temporalFactor.LaTeX,"s $\leq t_n \leq$ ",num2str(temporalFactor.Number*links.maxtime(ii),'%.3f')," ",temporalFactor.LaTeX,"s"),'FontSize',28,'FontWeight','bold','Interpreter','latex');
     end
     % Save the frame if a video is requested:
     if strcmp(is.Rec,'Y')

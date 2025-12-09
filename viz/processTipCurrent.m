@@ -8,7 +8,7 @@
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: December 8, 2025                                            %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-function [current, polarity, tau, links, nodes] = processTipCurrent(sims)
+function [current, polarity, tau, links, rhos] = processTipCurrent(sims)
     cd ../results/
     EstablishedLinks = load('EstablishedLinks.dat', '-ascii');
     TransportedRho = load('TransportedRhoPos.dat','-ascii');
@@ -65,5 +65,5 @@ function [current, polarity, tau, links, nodes] = processTipCurrent(sims)
     current.partial.neg = mean(nonzeros(current.case(1:(end-1)).*polarity.neg(1:(end-1))));
     current.partial.std = std(current.case(1:(end-1)));
 
-    [links,nodes] = processConnections(EstablishedLinks,tau,polarity,sims);
+    [links,rhos] = processConnections(EstablishedLinks,tau,polarity,sims);
 end

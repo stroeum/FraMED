@@ -29,7 +29,7 @@ if ~exist('sims','var')
 end
 
 % Read-in data for simulation and process the current at the tip:
-[current, polarity, tau, links, nodes] = processTipCurrent(sims);
+[current, polarity, tau, links, rhos] = processTipCurrent(sims);
 
 % Determine the scale:
 temporalFactor    = checkMagnitude([links.timescale.min; links.timescale.max]);
