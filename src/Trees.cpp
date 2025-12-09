@@ -209,7 +209,8 @@ void Tree::Grow(FILE * file, bool AddNew)
                 for(int ii=0 ; ii<Var::N.x ; ii++)
 				{
                     _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
-					_rhoBefore[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+					_rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+                	_rhoBefore[ii][jj][kk]  = _rho[ii][jj][kk];
 				}
         if(Var::isEsEnergyCalculated == false && Var::step3d != 0)
             for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
@@ -350,6 +351,7 @@ void Tree::Grow(FILE * file, bool AddNew)
                 _TotalEfieldTmp[kk]	= foo::Eijk((Var::N.x-1)/2,(Var::N.y-1)/2,kk,Var::phi,Var::d,Var::N)[3];
                 _TotalPotentialTmp[kk]	= Var::phi((Var::N.x-1)/2,(Var::N.y-1)/2,kk);
                 if(Var::isEsEnergyCalculated == true && Var::step3d == 0)
+				{
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
 					{
                         _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
@@ -360,23 +362,24 @@ void Tree::Grow(FILE * file, bool AddNew)
 							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						if((ii==_endi) && (jj==_endj) && (kk==_endk))
 							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
-						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
-					}
+					};
+				};
                 if(Var::isEsEnergyCalculated == false && Var::step3d != 0 && _CntLinks%Var::step3d==0)
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
                         _rho[ii][jj][kk] = foo::rhoijk(ii,jj,kk,Var::phi,Var::d,Var::N)*1e+9; //_nC
+						_rhoAfter[ii][jj][kk] = _rho[ii][jj][kk];
                        	if((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])>1e-9)
 							_rhoDiffPos+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];
 						else if ((_rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk])<-1e-9)
 							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						if((ii==_endi) && (jj==_endj) && (kk==_endk))
 							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
-						_rhoBefore[ii][jj][kk] = _rho[ii][jj][kk];
 						nn++;
 						
                     };
                 if(Var::isEsEnergyCalculated == true && Var::step3d != 0)
+				{
                     for(int jj=0 ; jj<Var::N.y ; jj++) for(int ii=0 ; ii<Var::N.x ; ii++)
                     {
                         _EsEnergyTmp += eps0*pow(foo::Eijk(ii,jj,kk,Var::phi,Var::d,Var::N)[0],2)/2*Var::d.x*Var::d.y*Var::d.z;
@@ -392,16 +395,28 @@ void Tree::Grow(FILE * file, bool AddNew)
 							_rhoDiffNeg+= _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
 						if((ii==_endi) && (jj==_endj) && (kk==_endk))
 							_rhoDiffEnd = _rhoAfter[ii][jj][kk] - _rhoBefore[ii][jj][kk];	
-						_rhoBefore[ii][jj][kk] = _rhoAfter[ii][jj][kk];
                     };
-            }
+				};
+            };
+			
+			for(it=Var::EstablishedLinks.begin(); it!=Var::EstablishedLinks.end();it++)
+			{   // Tracks the coordinates of the most recently added end-node
+				if(it==Var::EstablishedLinks.begin()){
+					Var::LocalChanges.push_back(_rhoAfter[it->start.i][it->start.j][it->start.k]-_rhoBefore[it->start.i][it->start.j][it->start.k]);
+					Var::LocalValues.push_back(_rhoAfter[it->start.i][it->start.j][it->start.k]);
+				}
+				Var::LocalChanges.push_back(_rhoAfter[it->end.i][it->end.j][it->end.k]-_rhoBefore[it->end.i][it->end.j][it->end.k]);
+				Var::LocalValues.push_back(_rhoAfter[it->end.i][it->end.j][it->end.k]);
+			};
+			_rhoBefore = _rhoAfter;
+
             if(Var::step3d != 0 && _CntLinks%Var::step3d==0) {
                 Var::rho = foo::Globalrho(Var::phi,Var::d,Var::N);
-                IO::write(_rho    , _strRho3D);
-                //IO::write(Var::rho, _strRho3D);
+                IO::write(_rho    , _strRho3D);   // in nC/m3
+                //IO::write(Var::rho, _strRho3D); // in C/m3
                 IO::write(Var::phi, _strPhi3D);
                 IO::write(Var::Un,  _strUn3D );
-                foo::GlobalE(Var::phi, Var::d, Var::N, _CntLinks); //NB: This also stores all components of Ex,Ey,Ez.
+                foo::GlobalE(Var::phi, Var::d, Var::N, _CntLinks); //NB: This also stores all components of Ex,Ey,Ez.		
             }
             
         };
@@ -423,15 +438,14 @@ void Tree::Grow(FILE * file, bool AddNew)
 			Var::TotalEfield.push_back(_TotalEfieldTmp);
 			Var::TotalPotential.push_back(_TotalPotentialTmp);
 		}
-
-        /* Write interim results after every tenth link is added. */
+		/* Write interim results after every (Var::step3d) links are added. */
         if((_CntLinks % Var::step3d) == 0)
             Tree::StoreData(file);
 		if((Var::curType == PROPAGATING) || (Var::curType != INTRA_CLOUD))
        	 	_CntLinks++;
 		cout<<"ii:\t Channel positive charge: "<<Var::QchannelPlus<<endl;
         cout<<"ii:\t Nb of established links: "<<_CntLinks<<endl;
-    }
+    };
     cout<<"Total Number of links: "<<_CntLinks<<endl;
     _rho_cha			= foo::Globalrho(Var::phi_cha,Var::d,Var::N);
     Var::QchannelPlus	= foo::ChannelChargePositive(_rho_cha,Var::Un,Var::d,Var::N);
@@ -579,6 +593,8 @@ void Tree::StoreData(FILE * file)
 	IO::write(Var::TransportedRhoEnd,		(char*)"TransportedRhoEnd.dat");
 	IO::write(Var::TransportedRhoNeg,		(char*)"TransportedRhoNeg.dat");
 	IO::write(Var::TransportedRhoPos,		(char*)"TransportedRhoPos.dat");
+	IO::write(Var::LocalChanges,			(char*)"NodeDeltaRho.dat");
+	IO::write(Var::LocalValues,				(char*)"NodeRho.dat");
     IO::write(Var::DischargeDipoleMoment,	(char*)"DischargeDipoleMoment.dat");
     
     // Store values of the electrostatic energy in the domain (if calculated) //
@@ -1042,7 +1058,7 @@ bool Tree::AddNewLink(FILE * file, ResGrid _d, SizeGrid _N,
 			{
 				Var::curType = HORIZONTAL;
                 IO::print(file, "ii:\t Discharge reached a side of the domain\n");
-                IO::print(file, "..:\t\t Classifying discharge as \"horizontal\"\n");
+                IO::print(file, "..:\t\t Classifying discharge as horizontal\n");
 			}
 
 			return false;

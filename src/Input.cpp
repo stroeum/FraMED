@@ -82,6 +82,8 @@ ListDouble				Var::CarriedCharge;											// Channel transfer at each stage of
 ListDouble				Var::TransportedRhoEnd;								        // Charge density difference at end-node for each stage of development
 ListDouble				Var::TransportedRhoNeg;								        // Global sum of negative net charge densities at each stage of development
 ListDouble				Var::TransportedRhoPos;								        // Global sum of positive net charge densities at each stage of development
+ListDouble				Var::LocalChanges;											// Values of the charge density changes for all nodes in the set of links for every step
+ListDouble				Var::LocalValues;											// Values of the charge density for all nodes in the set of links for every step
 ListDouble				Var::EsEnergy;												// Electrostatic energy in the simulation domain
 ListLink				Var::EstablishedLinks;										// List of links constituting the discharge tree
 ListVector				Var::BndUpdateErrors;										// List of errors at the boundaries

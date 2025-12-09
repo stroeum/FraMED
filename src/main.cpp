@@ -306,6 +306,8 @@ int main()
         static	ListDouble	PreviousTransportedRhoEnd;
         static	ListDouble	PreviousTransportedRhoNeg;
         static	ListDouble	PreviousTransportedRhoPos;
+        static  ListDouble  PreviousLocalChanges;
+        static  ListDouble  PreviousLocalValues;
         CMatrix2D           PreviousDischargeDipoleMoment;
         Vector              P;
         
@@ -315,6 +317,8 @@ int main()
         IO::read(PreviousTransportedRhoEnd      , (char*)"TransportedRhoEnd.dat"    );
         IO::read(PreviousTransportedRhoNeg      , (char*)"TransportedRhoNeg.dat"    );
         IO::read(PreviousTransportedRhoPos      , (char*)"TransportedRhoPos.dat"    );
+        IO::read(PreviousLocalChanges           , (char*)"NodeDeltaRho.dat"         );
+        IO::read(PreviousLocalValues            , (char*)"NodeRho.dat"              );
         IO::read(PreviousDischargeDipoleMoment  , (char*)"DischargeDipoleMoment.dat");
         
         ListLink::iterator   itLink     = PreviousLinks.begin();
@@ -323,26 +327,35 @@ int main()
         ListDouble::iterator itEnd      = PreviousTransportedRhoEnd.begin();
         ListDouble::iterator itNeg      = PreviousTransportedRhoNeg.begin();
         ListDouble::iterator itPos      = PreviousTransportedRhoPos.begin();
+        ListDouble::iterator itRho      = PreviousLocalValues.begin();
+        ListDouble::iterator itDelta    = PreviousLocalChanges.begin();
         
         int n=0;
-        while (n<LastStep) {
-            Var::EstablishedLinks.push_back(*itLink);
-            itLink++;
-            Var::ChannelPotential.push_back(*itVo);
-            itVo++;
-            Var::CarriedCharge.push_back(*itQ);
-            itQ++;
-            Var::TransportedRhoEnd.push_back(*itEnd);
-            itEnd++;
-            Var::TransportedRhoNeg.push_back(*itNeg);
-            itNeg++;
-            Var::TransportedRhoPos.push_back(*itPos);
-            itPos++;
-            
-            P.x = PreviousDischargeDipoleMoment[n][0];
-            P.y = PreviousDischargeDipoleMoment[n][1];
-            P.z = PreviousDischargeDipoleMoment[n][2];
-            Var::DischargeDipoleMoment.push_back(P);
+        while (n<((LastStep*(LastStep+1))/2)+LastStep) {
+            if (n<LastStep)
+            {
+                Var::EstablishedLinks.push_back(*itLink);
+                itLink++;
+                Var::ChannelPotential.push_back(*itVo);
+                itVo++;
+                Var::CarriedCharge.push_back(*itQ);
+                itQ++;
+                Var::TransportedRhoEnd.push_back(*itEnd);
+                itEnd++;
+                Var::TransportedRhoNeg.push_back(*itNeg);
+                itNeg++;
+                Var::TransportedRhoPos.push_back(*itPos);
+                itPos++;
+                
+                P.x = PreviousDischargeDipoleMoment[n][0];
+                P.y = PreviousDischargeDipoleMoment[n][1];
+                P.z = PreviousDischargeDipoleMoment[n][2];
+                Var::DischargeDipoleMoment.push_back(P);
+            }
+            Var::LocalChanges.push_back(*itDelta);
+            itDelta++;
+            Var::LocalValues.push_back(*itRho);
+            itRho++;
             n++;
         }
         

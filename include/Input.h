@@ -106,6 +106,8 @@ public:
 	static	ListDouble				TransportedRhoEnd;								// Charge density difference at end-node for each stage of development
 	static	ListDouble				TransportedRhoNeg;								// Global sum of negative net charge densities at each stage of development
 	static	ListDouble				TransportedRhoPos;								// Global sum of positive net charge densities at each stage of development
+	static  ListDouble 				LocalChanges;									// Values of the charge density changes for all nodes in the set of links for every step
+	static  ListDouble				LocalValues;									// Values of the charge density for all nodes in the set of links for every step
 	static	ListDouble				EsEnergy;										// Electrostatic energy in the simulation domain
 	static	ListLink				EstablishedLinks;								// List of links constituting the discharge tree
 	static	ListVector				BndUpdateErrors;								// List of errors at the boundaries
