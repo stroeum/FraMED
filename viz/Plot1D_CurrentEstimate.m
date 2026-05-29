@@ -41,8 +41,8 @@ chargeTransported = conversionFactor.*abs(current.polarity(1:links.total));
 % Output to the screen the results:
 fprintf(strcat("\n\t",sims.objectType," (positive) propagation speed approximated as ",num2str(sims.vprop.pos/1000,'%.0f')," km/s."))
 fprintf(strcat("\n\t",sims.objectType," (negative) propagation speed approximated as ",num2str(sims.vprop.neg/1000,'%.0f')," km/s."))
-fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(temporalFactor.Number*links.timescale.min,'%.1f')," - ",num2str(temporalFactor.Number*links.timescale.max,'%.1f')," ",temporalFactor.Unit,"s."))
-fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*sims.spatialFactor.Number,'%.1f')," ",sims.spatialFactor.Unit,"m from the initiation point."))
+fprintf(strcat("\n\tDischarge timescale estimated to be between ",num2str(temporalFactor.Number*links.timescale.min,'%.3f')," - ",num2str(temporalFactor.Number*links.timescale.max,'%.3f')," ",temporalFactor.Unit,"s."))
+fprintf(strcat("\n\tLongest branch traveled ",num2str(links.maxdistance*sims.spatialFactor.Number,'%.3f')," ",sims.spatialFactor.Unit,"m from the initiation point."))
 fprintf(strcat("\n\tAverage currents (based on charge transfer):"));
 fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.avg.val,5),"\t",currentFactor.Unit,"A\t(mean, including all links,  sigma = ",num2str(currentFactor.Number*current.avg.std,5)," ",currentFactor.Unit,"A)"));
 fprintf(strcat("\n\t\t",num2str(currentFactor.Number*current.partial.val,5),"\t",currentFactor.Unit,"A\t(mean, excluding final link, sigma = ",num2str(currentFactor.Number*current.partial.std,5)," ",currentFactor.Unit,"A)"));
@@ -65,20 +65,20 @@ end
 %% Plot of instantaneous current values:
 clf
 hold on; box on;
-scatter(links.steps(current.polarity>0),currentFactor.Number*current.case(current.polarity>0),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity>0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity>0)),3)," ",currentFactor.LaTeX,"A"))
-scatter(links.steps(current.polarity<0),currentFactor.Number*current.case(current.polarity<0),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity<0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity<0)),3)," ",currentFactor.LaTeX,"A"))
-yline(currentFactor.Number*current.max.val,'k:','DisplayName',strcat("Maximum Current: ",num2str(currentFactor.Number*current.max.val,3)," ",currentFactor.LaTeX,"A (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
+scatter(links.steps(current.polarity>0),currentFactor.Number*current.case(current.polarity>0),50,'r.','DisplayName',strcat("($+$) Instantaneous Tip Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity>0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity>0)),3)," ",currentFactor.LaTeX,"A"))
+scatter(links.steps(current.polarity<0),currentFactor.Number*current.case(current.polarity<0),50,'b.','DisplayName',strcat("($-$) Instantaneous Tip Current: ",num2str(currentFactor.Number*mean(current.case(current.polarity<0)),3)," $\pm$ ",num2str(currentFactor.Number*std(current.case(current.polarity<0)),3)," ",currentFactor.LaTeX,"A"))
+yline(currentFactor.Number*current.max.val,'k:','DisplayName',strcat("Maximum Tip Current: ",num2str(currentFactor.Number*current.max.val,3)," ",currentFactor.LaTeX,"A (link ",num2str(links.steps(current.max.index)),")"),'LineWidth',2);
 if links.end(end,3)==0
-    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(currentFactor.Number*current.partial.val,3)," $\pm$ ",num2str(currentFactor.Number*current.partial.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
+    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Tip Current: ",num2str(currentFactor.Number*current.partial.val,3)," $\pm$ ",num2str(currentFactor.Number*current.partial.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
 else
-    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Current: ",num2str(currentFactor.Number*current.avg.val,3)," $\pm$ ",num2str(currentFactor.Number*current.avg.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
+    yline(currentFactor.Number*current.avg.val,'k--','DisplayName',strcat("Average Tip Current: ",num2str(currentFactor.Number*current.avg.val,3)," $\pm$ ",num2str(currentFactor.Number*current.avg.std,3)," ",currentFactor.LaTeX,"A"),'LineWidth',2);
 end
-yline(currentFactor.Number*current.min.val,'k-','DisplayName',strcat("Minimum Current: ",num2str(minCurrentFactor.Number*current.min.val,3)," ",minCurrentFactor.LaTeX,"A (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
+yline(currentFactor.Number*current.min.val,'k-','DisplayName',strcat("Minimum Tip Current: ",num2str(minCurrentFactor.Number*current.min.val,3)," ",minCurrentFactor.LaTeX,"A (link ",num2str(links.steps(current.min.index)),")"),'LineWidth',2);
 xlim([0,links.steps(end)]);
 legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
-title(strcat("Current Estimate for ",sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
+title(strcat("Tip Current Estimate for ",sims.disType," ", sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
 xlabel('Propagation Link $l$','FontSize',20,'Interpreter','latex');
 ylabel(strcat('Current $I$ (',currentFactor.LaTeX,'A)'),'FontSize',20,'Interpreter','latex');
 grid off; hold off;
@@ -93,14 +93,14 @@ y.pos = sims.spatialFactor.Number*links.height(current.polarity>0);
 x.neg = currentFactor.Number*current.case(current.polarity<0);
 y.neg = sims.spatialFactor.Number*links.height(current.polarity<0);
 if y.pos(end) == 0
-    scatter(x.pos(1:(end-1)),y.pos(1:(end-1)),50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos(1:(end-1))),3)," $\pm$ ",num2str(std(x.pos(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
+    scatter(x.pos(1:(end-1)),y.pos(1:(end-1)),50,'r.','DisplayName',strcat("($+$) Instantaneous Tip Current: ",num2str(mean(x.pos(1:(end-1))),3)," $\pm$ ",num2str(std(x.pos(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
 else
-    scatter(x.pos,y.pos,50,'r.','DisplayName',strcat("($+$) Instantaneous Current: ",num2str(mean(x.pos),3)," $\pm$ ",num2str(std(x.pos),3)," ",currentFactor.LaTeX,"A"));
+    scatter(x.pos,y.pos,50,'r.','DisplayName',strcat("($+$) Instantaneous Tip Current: ",num2str(mean(x.pos),3)," $\pm$ ",num2str(std(x.pos),3)," ",currentFactor.LaTeX,"A"));
 end
 if y.neg(end) == 0
-    scatter(x.neg(1:(end-1)),y.neg(1:(end-1)),50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg(1:(end-1))),3)," $\pm$ ",num2str(std(x.neg(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
+    scatter(x.neg(1:(end-1)),y.neg(1:(end-1)),50,'b.','DisplayName',strcat("($-$) Instantaneous Tip Current: ",num2str(mean(x.neg(1:(end-1))),3)," $\pm$ ",num2str(std(x.neg(1:(end-1))),3)," ",currentFactor.LaTeX,"A"));
 else
-    scatter(x.neg,y.neg,50,'b.','DisplayName',strcat("($-$) Instantaneous Current: ",num2str(mean(x.neg),3)," $\pm$ ",num2str(std(x.neg),3)," ",currentFactor.LaTeX,"A"));
+    scatter(x.neg,y.neg,50,'b.','DisplayName',strcat("($-$) Instantaneous Tip Current: ",num2str(mean(x.neg),3)," $\pm$ ",num2str(std(x.neg),3)," ",currentFactor.LaTeX,"A"));
 end
 yline(sims.spatialFactor.Number*links.start(1,3)*sims.domain.dz,'k:','DisplayName',strcat("Initiation Height: ",num2str(sims.spatialFactor.Number*links.start(1,3)*sims.domain.dz,3)," ",sims.spatialFactor.LaTeX,"m"),'LineWidth',1);
 if y.pos(end) == 0 || y.neg(end)==0
@@ -112,7 +112,7 @@ ylim([0 sims.spatialFactor.Number*(max(links.height)+(sims.domain.dz))]);
 legend('Interpreter','latex','FontSize',16,'location','best','box','off')
 set(gca,'FontSize',16);
 set(gca,'XMinorTick','on','YMinorTick','on','Tickdir','out','TickLabelInterpreter','latex')
-title(strcat("Current Estimate for ",sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
+title(strcat("Tip Current Estimate for ",sims.disType," ", sims.objectType," Discharge on ",sims.objectName),'Interpreter','latex','FontSize',28);
 xlabel(strcat('Current $I$ (',currentFactor.LaTeX,'A)'),'FontSize',20,'Interpreter','latex');
 ylabel(strcat('Altitude of End Node (',sims.spatialFactor.LaTeX,'m)'),'FontSize',20,'Interpreter','latex');
 grid off; hold off;
