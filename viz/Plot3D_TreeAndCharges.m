@@ -95,7 +95,7 @@ end
 
 % Set movie recording
 if (strcmp(is.Rec,'Y') == 1)
-    Movie = VideoWriter(strcat(sims.pathVideos,'/',sims.objectName,'_',sims.objectType,'Video'),'MPEG-4');
+    Movie = VideoWriter(strcat(sims.pathVideos,'/TreeAndCharges_',sims.objectName,'_',sims.objectType),'MPEG-4');
     if Links.Nb <= 60
         Movie.FrameRate = 2;
     elseif Links.Nb > 60 && Links.Nb <= 1000
