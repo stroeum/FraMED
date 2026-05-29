@@ -134,14 +134,18 @@ function plottingChargeRegions(colorbarRange,alphaValue,rhoDataOG,Xval,Yval,Zval
     c = colorbar;
     c.Label.String = strcat('Charge Density (',densityFactor.LaTeX,'C/m$^3$)');
     c.Label.Interpreter = 'latex';
-    c.Label.FontSize = 24;
+    c.Label.FontSize = (1+(isfield(sims,'highRes') && strcmp(sims.highRes,'Y')))*20;
     c.TickLabelInterpreter = 'latex';
     
     % Adds the legend to the plot:
-    [~,h_legend]=legend('Location','north','Box','off','FontSize',18,'Interpreter','latex');
+    [~,h_legend]=legend('Location','north','Box','off','FontSize',(1+(isfield(sims,'highRes') && strcmp(sims.highRes,'Y')))*18,'Interpreter','latex');
     PatchInLegend = findobj(h_legend,'type','patch');
     set(PatchInLegend(:),'FaceAlpha',((1-alphaValue)*alphaValue)+alphaValue);
-    setUpAxes(sims,'xyz');
+    if isfield(sims,'highRes') && strcmp(sims.highRes,'Y')
+        setUpAxes(sims,'xyz_hires');
+    else
+        setUpAxes(sims,'xyz');
+    end
     if length(trueUniqueRhos)<=3
         pause
     end
