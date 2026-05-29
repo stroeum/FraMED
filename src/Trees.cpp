@@ -335,9 +335,9 @@ void Tree::Grow(FILE * file, bool AddNew)
             _EsEnergyTmp = 0;
             if(Var::step3d != 0 && _CntLinks%Var::step3d==0)
             {
-                sprintf(_strRho3D,"rho3d%d.dat", _CntLinks);
-                sprintf(_strPhi3D,"phi3d%d.dat", _CntLinks);
-                sprintf(_strUn3D ,"Un3d%d.dat" , _CntLinks);
+                snprintf(_strRho3D,sizeof(_strRho3D),"rho3d%d.dat", _CntLinks);
+                snprintf(_strPhi3D,sizeof(_strPhi3D),"phi3d%d.dat", _CntLinks);
+                snprintf(_strUn3D,sizeof(_strUn3D),"Un3d%d.dat" , _CntLinks);
                 nn          = 0;
             }
 			for(it=Var::EstablishedLinks.begin(); it!=Var::EstablishedLinks.end();it++)

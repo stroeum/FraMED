@@ -246,11 +246,11 @@ int main()
         int LastStep = 0;
         char filename[200];
         FILE * fp;
-        sprintf(filename,"phi3d%d.dat",LastStep);
+        snprintf(filename,sizeof(filename),"phi3d%d.dat",LastStep);
         while((fp=IO::openFile(filename,"r")))
         {
             LastStep += Var::step3d;
-            sprintf(filename,"phi3d%d.dat",LastStep);
+            snprintf(filename,sizeof(filename),"phi3d%d.dat",LastStep);
             fclose(fp);
         }
         LastStep -= Var::step3d; // This removes the last iteration count from the while loop
@@ -277,21 +277,21 @@ int main()
         Var::InitiationPoint.init((int)round(Var::InitX/Var::d.x), (int)round(Var::InitY/Var::d.y),(int)round(Var::InitZ/Var::d.z));
         IO::print(file, "ii: Discharge initiated at: [" + to_string(Var::InitX/1e3) + " " + to_string(Var::InitY/1e3) + " " + to_string(Var::InitZ/1e3) + "] km; Radius of init. region: " + to_string(Var::InitR/1e3) + "km\n");
         
-        sprintf(filename,"phi3d%d.dat",0);
+        snprintf(filename,sizeof(filename),"phi3d%d.dat",0);
         IO::print(file, "..: Initializing ambient electric potential matrix (phi<<"+(string)filename+").\n");
         IO::read(Var::phi_amb,filename);
         
-        sprintf(filename,"phi3d%d.dat",LastStep);
+        snprintf(filename,sizeof(filename),"phi3d%d.dat",LastStep);
         IO::print(file, "..: Initializing  electric potential matrix (phi<<"+(string)filename+").\n");
         IO::read(Var::phi,filename);
         
         Var::phi_cha = Var::phi - Var::phi_amb;
         
-        sprintf(filename,"Un3d%d.dat",LastStep);
+        snprintf(filename,sizeof(filename),"Un3d%d.dat",LastStep);
         IO::print(file, "..: Initializing map of fixed potential points (Un<<"+(string)filename+")\n");
         IO::read(Var::Un,filename);
         
-        sprintf(filename,"rho3d%d.dat",LastStep);
+        snprintf(filename,sizeof(filename),"rho3d%d.dat",LastStep);
         IO::print(file, "..: Initializing electric charge density matrix (rho<<"+(string)filename+")\n");
         Var::C.reset(Var::d,Var::N);
         IO::read(Var::rho,filename);
