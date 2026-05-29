@@ -25,6 +25,9 @@ void    InitMatrices(SizeGrid);
 /**************************************************************************************/
 int main()
 {
+    // Define the file prefix for the desired model coupling:
+    char    modelFiles[100]     = "atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_";
+
     /******************************************************************************/
     /* Initialisation & Preparation of Summary file								  */
     /******************************************************************************/
@@ -63,6 +66,7 @@ int main()
      * of the current simulation run.
      */
     
+    char modifiedModelFiles[100];
     char logName[200];
     IO::setPathName((char*)"results");
     IO::getPathName(logName);
@@ -133,10 +137,9 @@ int main()
 
         /* FOLLOWING SECTION READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */ /**/
         cout<<"ii: Reading in files from atmos-models directory..."<<endl;
-
-        ListDouble alt=IO::read((char*)("atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_z.dat" ));
+        ListDouble alt=IO::read(strcat(strcpy(modifiedModelFiles,modelFiles),"z.dat"));
         IO::print(file, "..: altitude successfully read\n");
-        ListDouble ng =IO::read((char*)("atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_ng.dat"));
+        ListDouble ng =IO::read(strcat(strcpy(modifiedModelFiles,modelFiles),"ng.dat"));
         IO::print(file, "..: density successfully read\n");
         IO::print(file, "..: Reading ground altitude (z_gnd)\n");
         ListDouble::iterator alt_tracker = alt.begin();
@@ -147,7 +150,7 @@ int main()
         /* IF READING IN PREDETERMINED GRID SIZES */ /**/
         CMatrix1D M;
         IO::print(file, "..: Reading grid size (N).\n");
-        IO::read(M,(char*)"../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Nxyz.dat");
+        IO::read(M,strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Nxyz.dat"));
         Var::N.x = M[0];
         Var::N.y = M[1];
         Var::N.z = M[2];
@@ -155,7 +158,7 @@ int main()
         InitMatrices(Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::N.x) + ", " + to_string(Var::N.y) + ", " + to_string(Var::N.z) + "]\n");
         IO::print(file, "..: Reading grid resolution (d)\n");
-        IO::read(M,(char*)"../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Dxyz.dat");
+        IO::read(M,strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Dxyz.dat"));
         Var::L.init((Var::N.x-1)*M[0],(Var::N.y-1)*M[1],(Var::N.z-1)*M[2]);
         Var::d.init(Var::L,Var::N);
         IO::print(file, "ii:\t Discretized lengths  : [" + to_string(Var::d.x) + " m, " + to_string(Var::d.y) + " m, " + to_string(Var::d.z) + " m]\n");
@@ -178,19 +181,19 @@ int main()
         */ /* END OF IF ASSIGNING GRID SIZES (EXCLUDING ALTITUDE READ-IN) */
 
         IO::print(file, "..: Reading critical fields (Ec,Eth+,Eth-,Vd+,Vd-)\n");
-        IO::read(Var::Ec.initiation,	(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_E_initiation_Vm.dat"));
+        IO::read(Var::Ec.initiation,	strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"E_initiation_Vm.dat"));
         IO::print(file, "..: initiation threshold successfully read\n");
-        IO::read(Var::Ec.positive,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_positive_Vm.dat"));
+        IO::read(Var::Ec.positive,		strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Eth_positive_Vm.dat"));
         IO::print(file, "..: positive propagation threshold successfully read\n");
-        IO::read(Var::Ec.negative,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_negative_Vm.dat"));
+        IO::read(Var::Ec.negative,		strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Eth_negative_Vm.dat"));
         IO::print(file, "..: negative propagation threshold successfully read\n");
         /**/ /* END OF SECTION THAT READS IN RESPECTIVE VALUES FROM DEFINED FILENAMES */
 
         // Checks whether the channel is equipotential and assigns the appropriate voltage drops:
         if(Var::isVoltageDropped){
-            IO::read(Var::Vd.positive,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_positive_Vm.dat"));
+            IO::read(Var::Vd.positive,		strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Eth_positive_Vm.dat"));
             IO::print(file, "..: positive voltage drop successfully read\n");
-            IO::read(Var::Vd.negative,		(char*)("../atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_Eth_negative_Vm.dat"));
+            IO::read(Var::Vd.negative,		strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"Eth_negative_Vm.dat"));
             IO::print(file, "..: negative voltage drop successfully read\n");// Assigned voltage drop for streamer runs
         }else{
             Var::Vd.init(0.e+5,-0.e+5, Var::z_gnd,Var::d,Var::N,1,alt,ng); // No voltage drop for leader runs
@@ -476,7 +479,7 @@ int main()
             IO::print(file, "++: Finished setting potential!\n");
         } else if(Var::LoadingType == FROM_FILE) {
             IO::print(file, "..: Loading charge layers\n");
-            Var::C.init((char*)"atmos-models/examples/Earth_NegativeCG/leader-N41-D500m_rhoAmb.dat",Var::N);
+            Var::C.init(strcat(strcat(strcpy(modifiedModelFiles,"../"),modelFiles),"rhoAmb.dat"),Var::N);
             Var::ChargeCfg.push_back(Var::C);
             Var::phiNum.init(Var::N.z);                                                    // _V    Total electric potential on a vertical axis in the center of simulation domain
             Var::EzNum.init(Var::N.z);
