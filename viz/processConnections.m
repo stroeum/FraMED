@@ -31,7 +31,7 @@ function [links,rhos] = processConnections(EstablishedLinks,tau,polarity,sims)
     links.total = size(EstablishedLinks,1);
     
     links.connections.num = zeros([links.total,(links.total+1)]);
-    links.connections.rhos = zeros([links.total,1]);
+    links.connections.nodes = zeros([links.total,1]);
     links.connections.deltas = zeros([links.total,(links.total)+1]);
     links.connections.currents = zeros([links.total,(links.total)+1]);
     rhos.deltas = NaN([links.total,(links.total+1)]);
@@ -66,14 +66,14 @@ function [links,rhos] = processConnections(EstablishedLinks,tau,polarity,sims)
                 links.connections.num(N,1) = links.connections.num(N,1) + 1;
                 links.maxtime(N) = links.maxtime(N-1)+tau.case(N);
             end
-            links.connections.rhos(N) = 0;
+            links.connections.nodes(N) = 0;
             links.mintime(N) = tau.case(N);
         % Otherwise, if the start node is not at the initiation point...
         else
             % Determine which path/branch this link is an extension of:
             match = find(ismember(links.end(1:(N-1),:),links.start(N,:),'row'));
             links.connections.num(N,match+1) = links.connections.num(N,match+1) + 1;
-            links.connections.rhos(N) = match;
+            links.connections.nodes(N) = match;
             % Classify path for this particular link:
             links.path(N) = string(strcat(string(links.path(match)),string(characterizePropagation(links,N))));
             reshape(links.path,[N,1]);
@@ -87,7 +87,7 @@ function [links,rhos] = processConnections(EstablishedLinks,tau,polarity,sims)
         
         % Convert changes in charge density (nC/m3) into current (C/s):
         rhos.deltas(N,1:N+1) = temp(tracker:tracker+N).*conversionFactor./tau.case(N);
-    
+        
         % Convert local charge density array to matrix (nC/m3):
         rhos.values(N,1:N+1) = temp2(tracker:tracker+N);
         tracker = tracker+N+1;

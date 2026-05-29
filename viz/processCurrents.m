@@ -6,43 +6,63 @@
 %    Contact: annelisa.esparza@my.erau.edu                                %
 % Added Date: December 8, 2025                                            %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 function [links,rhos] = processCurrents(links,rhos)
-    for N = 1:1:links.total
+    links.direction = NaN([links.total,links.total]);
+    for ll = 1:1:links.total
         % Processes and calculates the current through each link at the respective location:
-        endingNode = N + 1;
-        startingNode = links.connections.rhos(N) + 1;
-        while links.connections.num(N,startingNode) + links.connections.num(N,endingNode) > 2
-            [values,indices]=sort(links.connections.num(N,1:N));
+        endingNode = ll + 1;
+        startingNode = links.connections.nodes(ll) + 1;
+        % While there are nodes 
+        while links.connections.num(ll,startingNode) + links.connections.num(ll,endingNode) > 2
+            % Sort the number of connections from low to high:
+            [values,indices]=sort(links.connections.num(ll,1:ll));
+            % Isolate those that have only one connection:
             focus = indices(values==1);
             for ii = 1:1:length(focus)
-                if (links.connections.num(N,startingNode) > 1)
+                if (links.connections.num(ll,startingNode) > 1)
                     singleNode = focus(ii);
-                    if singleNode > 1 && links.connections.num(N,links.connections.rhos(singleNode-1)+1)>=1
-                        connectedNode = links.connections.rhos(singleNode-1)+1;
+                    if singleNode > 1 && links.connections.num(ll,links.connections.nodes(singleNode-1)+1)>1
+                        connectedNode = links.connections.nodes(singleNode-1)+1;
                     else
-                        [tempvals,tempind] = sort(links.connections.rhos(1:N)');
+                        [tempvals,tempind] = sort(links.connections.nodes(1:ll)');
                         subfocus = tempind(tempvals==(singleNode-1));
                         for jj = 1:1:length(subfocus)
-                            if links.connections.num(N,subfocus(jj)+1)>=1
+                            if links.connections.num(ll,subfocus(jj)+1)>=1
                                 connectedNode = subfocus(jj)+1;
                             end
                         end
                     end
-                    links.connections.deltas(N,singleNode) = links.connections.deltas(N,singleNode) + rhos.deltas(N,singleNode);
-                    links.connections.deltas(N,connectedNode) = links.connections.deltas(N,connectedNode) + links.connections.deltas(N,singleNode);
-                    links.connections.num(N,singleNode) = links.connections.num(N,singleNode) - 1;
-                    links.connections.num(N,connectedNode) = links.connections.num(N,connectedNode) - 1;
-    
-                    if links.connections.num(N,singleNode) == 0
-                        links.connections.currents(N,(max([singleNode; connectedNode])-1)) = links.connections.deltas(N,singleNode);
+                    links.connections.deltas(ll,singleNode) = links.connections.deltas(ll,singleNode) + rhos.deltas(ll,singleNode);
+                    links.connections.deltas(ll,connectedNode) = links.connections.deltas(ll,connectedNode) + links.connections.deltas(ll,singleNode);
+                    links.connections.num(ll,singleNode) = links.connections.num(ll,singleNode) - 1;
+                    links.connections.num(ll,connectedNode) = links.connections.num(ll,connectedNode) - 1;
+                    
+                    if links.connections.num(ll,singleNode) == 0
+                        if singleNode>1 && connectedNode == (links.connections.nodes(singleNode-1)+1)
+                            links.direction(ll,singleNode-1) = -1;
+                        elseif singleNode>1 && singleNode == (links.connections.nodes(connectedNode-1)+1)
+                            links.direction(ll,connectedNode-1) = 1;
+                        elseif singleNode == 1 && singleNode ~= (links.connections.nodes(connectedNode-1)+1)
+                            links.direction(ll,connectedNode-1) = -1;
+                        elseif singleNode == 1 && singleNode == (links.connections.nodes(connectedNode-1)+1)
+                            links.direction(ll,connectedNode-1) = 1;
+                        else
+                            links.direction(ll,singleNode-1) = 1;
+                        end
+                        links.connections.currents(ll,(max([singleNode; connectedNode])-1)) = links.connections.deltas(ll,singleNode);
                     end
                 end
             end
         end
-        links.connections.deltas(N,startingNode) = links.connections.deltas(N,startingNode) + rhos.deltas(N,startingNode);
-        links.connections.deltas(N,endingNode) = links.connections.deltas(N,startingNode) + rhos.deltas(N,endingNode);
-        links.connections.num(N,startingNode) = links.connections.num(N,startingNode) - 1;
-        links.connections.num(N,endingNode) = links.connections.num(N,endingNode) - 1;
-        links.connections.currents(N,N) = links.connections.deltas(N,startingNode);
+        if startingNode>1 && singleNode == (links.connections.nodes(startingNode-1)+1)
+            links.direction(ll,startingNode-1) = 1;
+        end
+        links.direction(ll,endingNode-1) = 1;
+        links.connections.deltas(ll,startingNode) = links.connections.deltas(ll,startingNode) + rhos.deltas(ll,startingNode);
+        links.connections.deltas(ll,endingNode) = links.connections.deltas(ll,startingNode) + rhos.deltas(ll,endingNode);
+        links.connections.num(ll,startingNode) = links.connections.num(ll,startingNode) - 1;
+        links.connections.num(ll,endingNode) = links.connections.num(ll,endingNode) - 1;
+        links.connections.currents(ll,ll) = links.connections.deltas(ll,startingNode);
     end
 end
