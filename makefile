@@ -13,6 +13,9 @@ ODIR = build
 RDIR = results
 SDIR = src
 VDIR = viz
+HDF5_DIR     := /opt/homebrew
+HDF5_INC     := -I$(HDF5_DIR)/include
+HDF5_LIB_DIR := -L$(HDF5_DIR)/lib
 
 # Setup files & libs
 DEPS = $(wildcard $(IDIR)/*.h)
@@ -34,13 +37,20 @@ PROCS   = $(shell echo $(NODES)*$(PPN) | bc)
 MEMORY  = 8gb
 JOBID   = $(shell cat $(BDIR)/JOB.ID | tail -n+2)
 
+HDF5_DIR     := /opt/homebrew
+HDF5_INC     := -I$(HDF5_DIR)/include
+HDF5_LIB_DIR := -L$(HDF5_DIR)/lib
+
+# 3. HDF5 Libraries to link (Order matters: C++ wrapper depends on the C library)
+HDF5_LIBS    := -lhdf5_cpp -lhdf5
+
 # Compile
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
 	mkdir -p $(ODIR)	
-	$(CXX) -c -o $@ $< $(CXXFLAGS) 
+	$(CXX) $(CXXFLAGS) $(HDF5_INC) -c $< -o $@   
 
 $(EXE): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $^  $(LIBS) $(HDF5_LIB_DIR) $(HDF5_LIBS)
 
 # Run
 run:

@@ -205,11 +205,26 @@ grams.pathOutput = [grams.objectName,'/',grams.objectType,'-N',num2str(size(newv
 %grams.pathOutput = strcat(grams.pathOutput,'_half');
 save([grams.pathOutput,'_z.dat'],'newvals_z','-ascii');
 
+filename = strcat(grams.objectName,"/input.h5");
+if exist(filename, 'file')
+    delete(filename);
+end
+h5create(filename,"/Planet",1,'Datatype', 'string');
+h5write(filename, '/Planet', string(grams.objectName));
+
+h5create(filename,"/Type",1,'Datatype', 'string');
+h5write(filename, '/Type', string(grams.objectType));
+
+h5create(filename,"/z",numel(newvals_z),'Datatype', 'double');
+h5write(filename, '/z', newvals_z);
+
 % Converts & saves particle density (ng), if the file exists:
 if exist(strcat(grams.objectName,'/',grams.objectName,'_ng.dat'),"file") 
     grams.ng = load(strcat(grams.objectName,'/',grams.objectName,'_ng.dat'));
     newvals_ng = interp1(grams.z,grams.ng,newvals_z,'spline');
     save([grams.pathOutput,'_ng.dat'],'newvals_ng','-ascii');
+    h5create(filename,"/ng",numel(newvals_ng),'Datatype', 'double');
+    h5write(filename, '/ng',newvals_ng);
 else
     fprintf(strcat("\tParticle density file not found for ",grams.objectName,".\n"));
 end
@@ -219,6 +234,8 @@ if exist(strcat(grams.objectName,'/',grams.objectName,'_Eth_positive_Vm.dat'),"f
     grams.Ethpos = pospropfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_Eth_positive_Vm.dat'));
     newvals_Ethpos = interp1(grams.z,grams.Ethpos,newvals_z,'spline');
     save([grams.pathOutput,'_Eth_positive_Vm.dat'],'newvals_Ethpos','-ascii');
+    h5create(filename,"/E/th/positive",numel(newvals_Ethpos),'Datatype', 'double');
+    h5write(filename, '/E/th/positive',newvals_Ethpos);
 else
     fprintf(strcat("\tPositive propagation threshold file not found for ",grams.objectName,".\n"));
 end
@@ -228,6 +245,8 @@ if exist(strcat(grams.objectName,'/',grams.objectName,'_Eth_negative_Vm.dat'),"f
     grams.Ethneg = negpropfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_Eth_negative_Vm.dat'));
     newvals_Ethneg = interp1(grams.z,grams.Ethneg,newvals_z,'spline');
     save([grams.pathOutput,'_Eth_negative_Vm.dat'],'newvals_Ethneg','-ascii');
+    h5create(filename,"/E/th/negative",numel(newvals_Ethneg),'Datatype', 'double');
+    h5write(filename, '/E/th/negative',newvals_Ethneg);
 else
     fprintf(strcat("\tNegative propagation threshold file not found for ",grams.objectName,".\n"));
 end
@@ -237,6 +256,8 @@ if exist(strcat(grams.objectName,'/',grams.objectName,'_E_initiation_Vm.dat'),"f
     grams.Einit = initfactor.*load(strcat(grams.objectName,'/',grams.objectName,'_E_initiation_Vm.dat'));
     newvals_Einit = interp1(grams.z,grams.Einit,newvals_z,'spline');
     save([grams.pathOutput,'_E_initiation_Vm.dat'],'newvals_Einit','-ascii');
+    h5create(filename,"/E/initiation",numel(newvals_Einit),'Datatype', 'double');
+    h5write(filename, '/E/initiation',newvals_Einit);
 else
     fprintf(strcat("\tInitiation threshold file not found for ",grams.objectName,".\n"));
 end
@@ -246,6 +267,8 @@ if exist(strcat(grams.objectName,'/',grams.objectName,'_Tg.dat'),"file")
     grams.Tg = load(strcat(grams.objectName,'/',grams.objectName,'_Tg.dat'));
     newvals_Tg = interp1(grams.z,grams.Tg,newvals_z,'spline');
     save([grams.pathOutput,'_Tg.dat'],'newvals_Tg','-ascii');
+    h5create(filename,"/Tg",numel(newvals_Tg),'Datatype', 'double');
+    h5write(filename, '/Tg',newvals_Tg);
 else
     fprintf(strcat("\tTemperature file not found for ",grams.objectName,".\n"));
 end
@@ -255,6 +278,8 @@ if exist(strcat(grams.objectName,'/',grams.objectName,'_Ek.dat'),"file")
     grams.Ek = load(strcat(grams.objectName,'/',grams.objectName,'_Ek.dat'));
     newvals_Ek = interp1(grams.z,grams.Ek,newvals_z,'spline');
     save([grams.pathOutput,'_Ek.dat'],'newvals_Ek','-ascii');
+    h5create(filename,"/E/k",numel(newvals_Ek),'Datatype', 'double');
+    h5write(filename, '/E/k',newvals_Ek);
 else
     fprintf(strcat("\tReduced electric field file not found for ",grams.objectName,".\n"));
 end
@@ -305,13 +330,22 @@ if strcmp(answer.domdef,'Y')
 
     % Outputs the path and prefix for the output files:
     fprintf(strcat("\n\tPath and prefix of associated files: ",grams.pathOutput,"_\n"));
-
+    h5create(filename,"/Path",1,'Datatype', 'string');
+    h5write(filename, '/Path', string(grams.pathOutput));
+    
     % Exports grid size and spacings:
     save([grams.pathOutput,'_Nxyz.dat'],'newvals_N','-ascii');
+    h5create(filename,"/Nxyz",numel(newvals_N),'Datatype', 'double');
+    h5write(filename, '/Nxyz',newvals_N);
     save([grams.pathOutput,'_Dxyz.dat'],'newvals_D','-ascii');
+    h5create(filename,"/Dxyz",numel(newvals_N),'Datatype', 'double');
+    h5write(filename, '/Dxyz',newvals_D);
+
 else
     % Outputs the path and prefix for the output files:
     fprintf(strcat("\n\tPath and prefix of associated files: ",grams.pathOutput,"_\n"));
+    h5create(filename,"/Path",1,'Datatype', 'string');
+    h5write(filename, '/Path', string(grams.pathOutput));
 end
 
 % Determines appropriate unit naming convention based on magnitude:
