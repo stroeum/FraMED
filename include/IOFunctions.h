@@ -7,7 +7,7 @@
 #define IOFUNCTIONS_H
 #include "Input.h"
 #include <sstream>
-
+#include "H5Cpp.h"
 class IO
 {
 public:
@@ -32,7 +32,9 @@ public:
     static void read(CMatrix2D &,                       char *);
     static SizeGrid read(CMatrix3D &,                   char *);
 
-    /* SAM function.  Identical to 'write(ListDouble&, char*)', except
+    static void readH5(CMatrix1D & M, const string & fname, const string & dataset_name);
+
+	/* SAM function.  Identical to 'write(ListDouble&, char*)', except
 	 * writes a list of ints.
 	 */
 	static void write(ListInt&,							char *);

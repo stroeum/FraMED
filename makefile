@@ -47,7 +47,7 @@ HDF5_LIBS    := -lhdf5_cpp -lhdf5
 # Compile
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
 	mkdir -p $(ODIR)	
-	$(CXX) $(CXXFLAGS) $(HDF5_INC) -c $< -o $@   
+	$(CXX) $(CXXFLAGS) $(HDF5_LIB_DIR) $(HDF5_INC) -c $< -o $@   
 
 $(EXE): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^  $(LIBS) $(HDF5_LIB_DIR) $(HDF5_LIBS)

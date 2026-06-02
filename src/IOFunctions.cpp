@@ -249,6 +249,29 @@ void IO::read(CMatrix1D & M, char * ffile)
     fclose(fp);
 }
 
+void IO::readH5(CMatrix1D & M, const string & fname, const string & dataset_name)
+{
+	try {
+		H5::H5File file(fname, H5F_ACC_RDONLY);
+		H5::DataSet dataset = file.openDataSet(dataset_name);
+		H5::DataSpace dataspace = dataset.getSpace();
+		
+		int rank = dataspace.getSimpleExtentNdims();
+		if (rank != 1) {
+			cerr << "Error: Expected a 1D dataset for CMatrix1D, got rank: " << rank << endl;
+			return;
+		}
+		
+		hsize_t dims[1];
+		dataspace.getSimpleExtentDims(dims, NULL);
+		hsize_t vector_length = dims[0];
+		
+		M.init(vector_length);
+		dataset.read(&M[0], H5::PredType::NATIVE_DOUBLE);
+	} catch (H5::Exception& e) {
+		cerr << "HDF5 Error: " << e.getCDetailMsg() << endl;
+	}
+}
 /**************************************************************************************/
 
 /* SAM functions: The structure of the 'IO::write' functions has been changed.
